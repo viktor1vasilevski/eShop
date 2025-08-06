@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Subcategory> Subcategories => Set<Subcategory>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<User> Users => Set<User>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
