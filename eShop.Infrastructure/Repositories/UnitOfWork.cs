@@ -29,7 +29,7 @@ namespace eShop.Infrastructure.Repositories
 
         public IRepositoryBase<TEntity> GetRepository<TEntity>() where TEntity : class
         {
-            return new BaseRepository<TEntity>(_context);
+            return new RepositoryBasey<TEntity>(_context);
         }
 
         public void RevertChanges()
