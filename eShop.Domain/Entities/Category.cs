@@ -5,4 +5,6 @@ namespace eShop.Domain.Entities;
 public class Category : AuditableBaseEntity
 {
     public string Name { get; set; }
+
+    public virtual ICollection<Subcategory>? Subcategories { get; set; }
 }
