@@ -8,6 +8,8 @@ namespace eShop.AdminAPI.Controllers
     [ApiController]
     public class AuthController(IAuthService _authService) : BaseController
     {
+
+
         [HttpPost("admin/login")]
         public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {

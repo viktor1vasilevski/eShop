@@ -1,6 +1,6 @@
 using eShop.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
+using eShop.Infrastructure.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +19,29 @@ builder.Services.AddCors(policy => policy.AddPolicy("MyPolicy", builder =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddIoCService();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        var password = builder.Configuration["SeedAdmin:Password"];
+        AppDbContextSeed.SeedAdminUser(dbContext, password);
+
+        //AppDbContextSeed.SeedUncategorizedCategory(dbContext);
+        //AppDbContextSeed.SeedUncategorizedSubcategory(dbContext);
+        AppDbContextSeed.SeedTestUser(dbContext);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error during data seeding");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
