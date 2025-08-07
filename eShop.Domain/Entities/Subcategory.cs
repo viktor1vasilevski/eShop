@@ -29,4 +29,13 @@ public class Subcategory : AuditableBaseEntity
         };
     }
 
+    public void Update(Guid categoryId, string name)
+    {
+        DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+
+        CategoryId = categoryId;
+        Name = name;
+    }
+
 }
