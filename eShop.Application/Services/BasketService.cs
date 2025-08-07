@@ -24,19 +24,16 @@ namespace eShop.Application.Services
         {
             var baskets = await _basketRepository.GetAsync(
                 filter: b => b.UserId == userId,
-                include: b => b.Include(x => x.Items).ThenInclude(i => i.Product)
-            );
+                include: b => b.Include(x => x.Items).ThenInclude(i => i.Product));
 
             var basket = baskets.FirstOrDefault();
 
             if (basket is null)
-            {
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
-                    Message = "No basket found for the user."
+                    Message = BasketConstants.BASKET_NOT_FOUND_FOR_USER
                 };
-            }
 
             var basketDto = new BasketDTO
             {
@@ -54,7 +51,6 @@ namespace eShop.Application.Services
             return new ApiResponse<BasketDTO>
             {
                 NotificationType = NotificationType.Success,
-                Message = "Basket retrieved successfully.",
                 Data = basketDto
             };
         }
@@ -102,44 +98,34 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int newQuantity)
         {
-            // Load the basket with items and products
-            var baskets = await _basketRepository.GetAsync(
+            var query = await _basketRepository.GetAsync(
                 filter: b => b.UserId == userId,
                 include: b => b.Include(x => x.Items).ThenInclude(i => i.Product)
             );
 
-            var basket = baskets.FirstOrDefault();
-            if (basket == null)
-            {
+            var basket = query.FirstOrDefault();
+            if (basket is null)
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
-                    Message = "Basket not found."
+                    Message = BasketConstants.BASKET_NOT_FOUND
                 };
-            }
 
             var item = basket.Items.FirstOrDefault(i => i.ProductId == productId);
-            if (item == null)
-            {
+            if (item is null)
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
-                    Message = "Item not found in basket."
+                    Message = BasketConstants.BASKET_ITEM_NOT_FOUND
                 };
-            }
 
-            // Validate quantity bounds
             int validQuantity = Math.Max(1, Math.Min(newQuantity, item.Product?.UnitQuantity ?? int.MaxValue));
 
             item.Quantity = validQuantity;
 
-            // Update the basket item directly
             await _basketItemRepository.UpdateAsync(item);
-
-            // Save changes once
             await _uow.SaveChangesAsync();
 
-            // Prepare DTO for response
             var basketDto = new BasketDTO
             {
                 Items = basket.Items.Select(i => new BasketItemDTO
@@ -156,7 +142,6 @@ namespace eShop.Application.Services
             return new ApiResponse<BasketDTO>
             {
                 NotificationType = NotificationType.Success,
-                Message = "Item quantity updated.",
                 Data = basketDto
             };
         }
