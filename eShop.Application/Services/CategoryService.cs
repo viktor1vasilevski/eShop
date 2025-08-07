@@ -192,54 +192,6 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-    public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
-    {
-        var uncategorizedCategoryId = _categoryRepository
-            .Get(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME)
-            .Select(x => x.Id)
-            .FirstOrDefault();
-
-        var uncategorizedSubcategoryId = _subcategoryRepository
-            .Get(x => x.Name == SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && x.CategoryId == uncategorizedCategoryId)
-            .Select(x => x.Id)
-            .FirstOrDefault();
-
-        // Fetch all categories with subcategories and their products
-        var categories = _categoryRepository.Get(
-            filter: x => x.Id != uncategorizedCategoryId,
-            include: x => x.Include(c => c.Subcategories)
-                           .ThenInclude(sc => sc.Products)
-        );
-
-        var categoriesDto = categories
-            .Select(c => new CategoryWithSubcategoriesDTO
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Subcategories = c.Subcategories
-                    .Where(sc =>
-                        !string.Equals(sc.Name, SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME, StringComparison.OrdinalIgnoreCase) &&
-                        sc.Id != uncategorizedSubcategoryId &&
-                        sc.Products != null &&
-                        sc.Products.Any()
-            )
-                    .Select(sc => new SelectSubcategoryListItemDTO
-                    {
-                        Id = sc.Id,
-                        Name = sc.Name
-                    })
-                    .ToList()
-            })
-            .Where(c => c.Subcategories.Any()) // Only keep categories that have valid subcategories
-            .ToList();
-
-        return new ApiResponse<List<CategoryWithSubcategoriesDTO>>
-        {
-            Data = categoriesDto
-        };
-    }
-
-
 
     private bool HasRelatedEntities(Category category)
     {
@@ -265,7 +217,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-    public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenuOptimized()
+    public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
     {
 
         var result = _categoryRepository

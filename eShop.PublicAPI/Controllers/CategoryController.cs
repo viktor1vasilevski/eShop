@@ -9,11 +9,9 @@ namespace eShop.PublicAPI.Controllers
     {
 
         [HttpGet("CategoriesWithSubcategoriesForMenu")]
-        public IActionResult GetCategoriesDropdownList()
+        public IActionResult GetCategoriesWithSubcategories()
         {
-            var response = _categoryService.GetCategoriesWithSubcategoriesForMenuOptimized();
-            var gfdsf = _categoryService.GetCategoriesWithSubcategoriesForMenu();
-
+            var response = _categoryService.GetCategoriesWithSubcategoriesForMenu();
             return HandleResponse(response);
         }
     }

@@ -14,5 +14,4 @@ public interface ICategoryService
 
     ApiResponse<List<SelectCategoryListItemDTO>> GetCategoriesDropdownList();
     ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu();
-    ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenuOptimized();
 }
