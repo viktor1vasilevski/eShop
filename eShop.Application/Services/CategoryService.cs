@@ -220,7 +220,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                         sc.Id != uncategorizedSubcategoryId &&
                         sc.Products != null &&
                         sc.Products.Any()
-                    )
+            )
                     .Select(sc => new SelectSubcategoryListItemDTO
                     {
                         Id = sc.Id,
@@ -260,6 +260,42 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         {
             NotificationType = NotificationType.Success,
             Data = new CategoryDTO { Id = category.Id, Name = category.Name }
+        };
+    }
+
+    public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenuOptimized()
+    {
+
+        var result = _categoryRepository
+            .GetAsQueryable(
+                filter: c => c.Name != "UNCATEGORIZED"
+            )
+            .Select(c => new
+            {
+                Category = c,
+                ValidSubcategories = c.Subcategories
+                    .Where(sc => sc.Name != "UNCATEGORIZED" && sc.Products.Any())
+                    .Select(sc => new { sc.Id, sc.Name })
+                    .ToList()
+            })
+            .Where(x => x.ValidSubcategories.Any())
+            .Select(x => new CategoryWithSubcategoriesDTO
+            {
+                Id = x.Category.Id,
+                Name = x.Category.Name,
+                Subcategories = x.ValidSubcategories
+                    .Select(sc => new SelectSubcategoryListItemDTO
+                    {
+                        Id = sc.Id,
+                        Name = sc.Name
+                    })
+                    .ToList()
+            })
+            .ToList();
+
+        return new ApiResponse<List<CategoryWithSubcategoriesDTO>>
+        {
+            Data = result
         };
     }
 }
