@@ -1,6 +1,7 @@
 ﻿using eShop.Application.Constants;
 using eShop.Application.DTOs.Auth;
 using eShop.Application.Enums;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Auth;
 using eShop.Application.Responses;
@@ -8,10 +9,6 @@ using eShop.Domain.Entities;
 using eShop.Domain.Enums;
 using eShop.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace eShop.Application.Services;
 
@@ -33,7 +30,7 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration) :
                 NotificationType = NotificationType.Unauthorized
             };
 
-        var token = GenerateJwtToken(user);
+        var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
         return new ApiResponse<LoginDTO>
         {
@@ -48,27 +45,5 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration) :
                 Role = user.Role
             }
         };
-    }
-
-    private string GenerateJwtToken(User user)
-    {
-        var secretKey = _configuration["JwtSettings:Secret"] ?? "AlternativeSecretKeyOfAtLeast32Characters!";
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-            new Claim(ClaimTypes.Name, user.Username)
-        };
-
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.Now.AddDays(22),
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
