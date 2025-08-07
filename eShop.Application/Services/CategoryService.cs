@@ -148,7 +148,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
     public ApiResponse<CategoryDetailsDTO> DeleteCategory(Guid id)
     {
         var category = _categoryRepository.GetAsQueryable(
-                         filter: x => x.Id == id && x.Name != "UNCATEGORIZED",
+                         filter: x => x.Id == id && x.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME,
                          include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)
                          ).FirstOrDefault();
 
@@ -195,12 +195,12 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
     public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
     {
         var uncategorizedCategoryId = _categoryRepository
-            .Get(x => x.Name == "UNCATEGORIZED")
+            .Get(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME)
             .Select(x => x.Id)
             .FirstOrDefault();
 
         var uncategorizedSubcategoryId = _subcategoryRepository
-            .Get(x => x.Name == "UNCATEGORIZED" && x.CategoryId == uncategorizedCategoryId)
+            .Get(x => x.Name == SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && x.CategoryId == uncategorizedCategoryId)
             .Select(x => x.Id)
             .FirstOrDefault();
 
@@ -218,7 +218,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 Name = c.Name,
                 Subcategories = c.Subcategories
                     .Where(sc =>
-                        !string.Equals(sc.Name, "UNCATEGORIZED", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(sc.Name, SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME, StringComparison.OrdinalIgnoreCase) &&
                         sc.Id != uncategorizedSubcategoryId &&
                         sc.Products != null &&
                         sc.Products.Any()
@@ -270,13 +270,13 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         var result = _categoryRepository
             .GetAsQueryable(
-                filter: c => c.Name != "UNCATEGORIZED"
+                filter: c => c.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME
             )
             .Select(c => new
             {
                 Category = c,
                 ValidSubcategories = c.Subcategories
-                    .Where(sc => sc.Name != "UNCATEGORIZED" && sc.Products.Any())
+                    .Where(sc => sc.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && sc.Products.Any())
                     .Select(sc => new { sc.Id, sc.Name })
                     .ToList()
             })

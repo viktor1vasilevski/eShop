@@ -66,7 +66,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     public ApiResponse<SubcategoryDTO> DeleteSubcategory(Guid id)
     {
         var subcategory = _subcategoryRepository.GetAsQueryable(
-                        filter: x => x.Id == id && x.Name != "UNCATEGORIZED",
+                        filter: x => x.Id == id && x.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME,
                         include: x => x.Include(x => x.Products)).FirstOrDefault();
 
         if (subcategory is null)
@@ -215,12 +215,12 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     public ApiResponse<List<SelectSubcategoryListItemDTO>> GetSubcategoriesWithCategoriesDropdownList()
     {
         var uncategorizedCategoryId = _categoryRepository
-                        .Get(x => x.Name == "UNCATEGORIZED")
+                        .Get(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME)
                         .Select(x => x.Id)
                         .FirstOrDefault();
 
         var uncategorizedSubcategoryId = _subcategoryRepository
-            .Get(x => x.Name == "UNCATEGORIZED" && x.CategoryId == uncategorizedCategoryId)
+            .Get(x => x.Name == SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && x.CategoryId == uncategorizedCategoryId)
             .Select(x => x.Id)
             .FirstOrDefault();
 
