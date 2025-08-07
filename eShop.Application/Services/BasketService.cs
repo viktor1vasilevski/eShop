@@ -1,6 +1,7 @@
 ﻿using eShop.Application.Constants;
 using eShop.Application.DTOs.Basket;
 using eShop.Application.Enums;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Basket;
 using eShop.Application.Responses;
@@ -26,7 +27,7 @@ namespace eShop.Application.Services
                 include: b => b.Include(x => x.Items).ThenInclude(i => i.Product)
             );
 
-        var basket = baskets.FirstOrDefault();
+            var basket = baskets.FirstOrDefault();
 
             if (basket is null)
             {
@@ -35,19 +36,6 @@ namespace eShop.Application.Services
                     NotificationType = NotificationType.NotFound,
                     Message = "No basket found for the user."
                 };
-            }
-
-            string? BuildImageDataUrl(byte[]? bytes, string? imageType)
-            {
-                if (bytes == null || bytes.Length == 0 || string.IsNullOrWhiteSpace(imageType))
-                    return null;
-
-                // Normalize mime type (e.g., "jpeg" -> "image/jpeg")
-                var lower = imageType.Trim().ToLowerInvariant();
-                string mime = lower.StartsWith("image/") ? lower : $"image/{lower}";
-
-                var base64 = Convert.ToBase64String(bytes);
-                return $"data:{mime};base64,{base64}";
             }
 
             var basketDto = new BasketDTO
@@ -59,7 +47,7 @@ namespace eShop.Application.Services
                     Quantity = i.Quantity,
                     Price = i.Product?.UnitPrice ?? 0,
                     UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    ImageDataUrl = BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
+                    ImageDataUrl = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
                 }).ToList()
             };
 
@@ -161,7 +149,7 @@ namespace eShop.Application.Services
                     Quantity = i.Quantity,
                     Price = i.Product?.UnitPrice ?? 0,
                     UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    ImageDataUrl = BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
+                    ImageDataUrl = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
                 }).ToList()
             };
 
@@ -171,18 +159,6 @@ namespace eShop.Application.Services
                 Message = "Item quantity updated.",
                 Data = basketDto
             };
-        }
-
-        private string? BuildImageDataUrl(byte[]? bytes, string? imageType)
-        {
-            if (bytes == null || bytes.Length == 0 || string.IsNullOrWhiteSpace(imageType))
-                return null;
-
-            var lower = imageType.Trim().ToLowerInvariant();
-            string mime = lower.StartsWith("image/") ? lower : $"image/{lower}";
-
-            var base64 = Convert.ToBase64String(bytes);
-            return $"data:{mime};base64,{base64}";
         }
     }
 }
