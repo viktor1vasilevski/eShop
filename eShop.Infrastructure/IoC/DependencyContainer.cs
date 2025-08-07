@@ -16,7 +16,8 @@ public static class DependencyContainer
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISubcategoryService, SubcategoryService>();
         services.AddScoped<IProductService, ProductService>();
-
+        services.AddScoped<IBasketService, BasketService>();
+        services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 
         return services;
     }
