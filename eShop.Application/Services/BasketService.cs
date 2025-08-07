@@ -1,10 +1,12 @@
-﻿using eShop.Application.DTOs.Basket;
+﻿using eShop.Application.Constants;
+using eShop.Application.DTOs.Basket;
 using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Basket;
 using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Interfaces;
+using eShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services
@@ -24,7 +26,7 @@ namespace eShop.Application.Services
                 include: b => b.Include(x => x.Items).ThenInclude(i => i.Product)
             );
 
-            var basket = baskets.FirstOrDefault();
+        var basket = baskets.FirstOrDefault();
 
             if (basket is null)
             {
@@ -75,13 +77,13 @@ namespace eShop.Application.Services
             if (!userExists)
                 return new ApiResponse<BasketDTO>
                 {
-                    Message = "User not found",
+                    Message = UserConstants.USER_NOT_FOUND,
                     NotificationType = NotificationType.NotFound
                 };
 
-            var basket = _basketRepository
-                .Get(x => x.UserId == userId, include: x => x.Include(b => b.Items).ThenInclude(x => x.Product))
-                .FirstOrDefault();
+            var basket = _basketRepository.Get(
+                filter: x => x.UserId == userId, 
+                include: x => x.Include(b => b.Items)).FirstOrDefault();
 
             if (basket is null)
             {
@@ -89,53 +91,26 @@ namespace eShop.Application.Services
                 await _basketRepository.InsertAsync(basket);
             }
 
-            // Extract product IDs from the request
             var productIds = request.Select(r => r.ProductId).Distinct().ToList();
-
-            // Fetch all products in one go to avoid N+1
-            var products = await _productRepository
-                .GetAsync(x => productIds.Contains(x.Id));
-
-            // Build dictionary for fast lookup
+            var products = await _productRepository.GetAsync(x => productIds.Contains(x.Id));
             var productsDict = products.ToDictionary(p => p.Id, p => p);
 
-            foreach (var req in request)
-            {
-                if (!productsDict.TryGetValue(req.ProductId, out var product))
-                {
-                    // Product not found - you could log, throw, or skip
-                    continue;
-                }
+            var mergeItems = request
+                .Where(r => productsDict.ContainsKey(r.ProductId))
+                .Select(r => new BasketMergeItem(productsDict[r.ProductId], r.Quantity))
+                .ToList();
 
-                var existingItem = basket.Items.FirstOrDefault(i => i.ProductId == req.ProductId);
-
-                int currentQuantity = existingItem?.Quantity ?? 0;
-                int requestedQuantity = req.Quantity;
-                int totalQuantity = currentQuantity + requestedQuantity;
-
-                // Cap quantity at product.UnitQuantity (stock)
-                int finalQuantity = Math.Min(totalQuantity, product.UnitQuantity);
-
-                if (existingItem != null)
-                {
-                    existingItem.Quantity = finalQuantity;
-                    await _basketItemRepository.UpdateAsync(existingItem);
-                }
-                else
-                {
-                    var newItem = BasketItem.CreateNew(basket.Id, req.ProductId, finalQuantity);
-                    await _basketItemRepository.InsertAsync(newItem);
-                }
-            }
+            basket.MergeItems(mergeItems);
 
             await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {
-                Message = "Basket successfully merged",
+                Message = BasketConstants.BASKET_MERGED,
                 NotificationType = NotificationType.Success
             };
         }
+
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int newQuantity)
         {

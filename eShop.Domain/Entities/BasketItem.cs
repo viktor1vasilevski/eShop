@@ -31,4 +31,13 @@ public class BasketItem : AuditableBaseEntity
             Quantity = quantity
         };
     }
+
+    public void UpdateQuantity(int newQuantity)
+    {
+        if (newQuantity <= 0)
+            throw new DomainException("Quantity must be greater than zero.");
+
+        Quantity = newQuantity;
+    }
+
 }
