@@ -33,8 +33,8 @@ using (var scope = app.Services.CreateScope())
         var password = builder.Configuration["SeedAdmin:Password"];
         AppDbContextSeed.SeedAdminUser(dbContext, password);
 
-        //AppDbContextSeed.SeedUncategorizedCategory(dbContext);
-        //AppDbContextSeed.SeedUncategorizedSubcategory(dbContext);
+        AppDbContextSeed.SeedUncategorizedCategory(dbContext);
+        AppDbContextSeed.SeedUncategorizedSubcategory(dbContext);
         AppDbContextSeed.SeedTestUser(dbContext);
     }
     catch (Exception ex)

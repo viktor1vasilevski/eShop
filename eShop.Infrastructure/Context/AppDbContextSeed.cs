@@ -46,31 +46,31 @@ public static class AppDbContextSeed
         context.SaveChanges();
     }
 
-    //public static void SeedUncategorizedCategory(AppDbContext context)
-    //{
-    //    context.Database.Migrate();
+    public static void SeedUncategorizedCategory(AppDbContext context)
+    {
+        context.Database.Migrate();
 
-    //    if (context.Categories.Any(x => x.Name == "UNCATEGORIZED"))
-    //        return;
+        if (context.Categories.Any(x => x.Name == "UNCATEGORIZED"))
+            return;
 
-    //    var uncategorizedCategory = new Category("UNCATEGORIZED");
+        var uncategorizedCategory = Category.CreateNew("UNCATEGORIZED");
 
-    //    context.Categories.Add(uncategorizedCategory);
-    //    context.SaveChanges();
-    //}
+        context.Categories.Add(uncategorizedCategory);
+        context.SaveChanges();
+    }
 
-    //public static void SeedUncategorizedSubcategory(AppDbContext context)
-    //{
-    //    context.Database.Migrate();
+    public static void SeedUncategorizedSubcategory(AppDbContext context)
+    {
+        context.Database.Migrate();
 
-    //    if (context.Subcategories.Any(x => x.Name == "UNCATEGORIZED"))
-    //        return;
+        if (context.Subcategories.Any(x => x.Name == "UNCATEGORIZED"))
+            return;
 
-    //    var category = context.Categories.Where(x => x.Name == "UNCATEGORIZED").First();
+        var category = context.Categories.Where(x => x.Name == "UNCATEGORIZED").First();
 
-    //    var uncategorizedSubcategory = new Subcategory(category.Id, "UNCATEGORIZED");
+        var uncategorizedSubcategory = Subcategory.CreateNew(category.Id, "UNCATEGORIZED");
 
-    //    context.Subcategories.Add(uncategorizedSubcategory);
-    //    context.SaveChanges();
-    //}
+        context.Subcategories.Add(uncategorizedSubcategory);
+        context.SaveChanges();
+    }
 }
