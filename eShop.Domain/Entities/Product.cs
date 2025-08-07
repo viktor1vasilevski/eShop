@@ -15,6 +15,7 @@ public class Product : AuditableBaseEntity
 
     public Guid SubcategoryId { get; private set; }
     public virtual Subcategory? Subcategory { get; set; }
+    public ICollection<BasketItem> BasketItems { get; set; } = [];
 
     protected Product() { }
 

@@ -15,6 +15,8 @@ public class User : AuditableBaseEntity
     public string PasswordHash { get; private set; } = string.Empty;
     public string SaltKey { get; private set; } = string.Empty;
 
+    public virtual Basket? Basket { get; set; }
+
     private User() { }
 
     public static User CreateNew(string firstName, string lastName, string username, string email, string password, Role role)

@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     public DbSet<Subcategory> Subcategories => Set<Subcategory>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<Basket> Baskets => Set<Basket>();
+    public DbSet<BasketItem> BasketItems => Set<BasketItem>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -60,24 +62,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
             .HasForeignKey(u => u.SubcategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        //modelBuilder.Entity<User>()
-        //    .HasOne(u => u.Basket)
-        //    .WithOne(b => b.User)
-        //    .HasForeignKey<Basket>(b => b.UserId)
-        //    .IsRequired()
-        //    .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Basket)
+            .WithOne(b => b.User)
+            .HasForeignKey<Basket>(b => b.UserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
-        //modelBuilder.Entity<Basket>()
-        //    .HasMany(b => b.Items)
-        //    .WithOne(i => i.Basket)
-        //    .HasForeignKey(i => i.BasketId)
-        //    .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Basket>()
+            .HasMany(b => b.Items)
+            .WithOne(i => i.Basket)
+            .HasForeignKey(i => i.BasketId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        //modelBuilder.Entity<BasketItem>()
-        //    .HasOne(i => i.Product)
-        //    .WithMany(p => p.BasketItems)
-        //    .HasForeignKey(i => i.ProductId)
-        //    .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<BasketItem>()
+            .HasOne(i => i.Product)
+            .WithMany(p => p.BasketItems)
+            .HasForeignKey(i => i.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         base.OnModelCreating(modelBuilder);
     }
