@@ -22,40 +22,42 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public ApiResponse<List<CategoryDetailsDTO>> GetCategories(CategoryRequest request)
     {
-        var categories = _categoryRepository.GetAsQueryableWhereIf(
-                        filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
+        var query = _categoryRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
 
+        var totalCount = query.Count();
+
+        var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
             if (request.SortDirection.ToLower() == "asc")
             {
-                categories = request.SortBy.ToLower() switch
+                sortedQuery = request.SortBy.ToLower() switch
                 {
-                    "created" => categories.OrderBy(x => x.Created),
-                    "lastmodified" => categories.OrderBy(x => x.LastModified),
-                    _ => categories.OrderBy(x => x.Created)
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
+                    _ => sortedQuery.OrderBy(x => x.Created)
                 };
             }
             else if (request.SortDirection.ToLower() == "desc")
             {
-                categories = request.SortBy.ToLower() switch
+                sortedQuery = request.SortBy.ToLower() switch
                 {
-                    "created" => categories.OrderByDescending(x => x.Created),
-                    "lastmodified" => categories.OrderByDescending(x => x.LastModified),
-                    _ => categories.OrderByDescending(x => x.Created)
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
                 };
             }
         }
 
-        var totalCount = categories.Count();
 
         if (request.Skip.HasValue)
-            categories = categories.Skip(request.Skip.Value);
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
 
         if (request.Take.HasValue)
-            categories = categories.Take(request.Take.Value);
+            sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var categoriesDTO = categories.Select(x => new CategoryDetailsDTO
+        var categoriesDTO = sortedQuery.Select(x => new CategoryDetailsDTO
         {
             Id = x.Id,
             Name = x.Name,

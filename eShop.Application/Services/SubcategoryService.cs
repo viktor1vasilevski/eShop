@@ -142,43 +142,43 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
     public ApiResponse<List<SubcategoryDetailsDTO>> GetSubcategories(SubcategoryRequest request)
     {
-        var subcategories = _subcategoryRepository.GetAsQueryableWhereIf(x =>
-                        x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.CategoryId == request.CategoryId)
-                         .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
-                        null,
-                        x => x.Include(x => x.Category));
+        var query = _subcategoryRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.CategoryId == request.CategoryId)
+                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+            include: x => x.Include(x => x.Category));
 
+        var totalCount = query.Count();
+
+        var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
             if (request.SortDirection.ToLower() == "asc")
             {
-                subcategories = request.SortBy.ToLower() switch
+                sortedQuery = request.SortBy.ToLower() switch
                 {
-                    "created" => subcategories.OrderBy(x => x.Created),
-                    "lastmodified" => subcategories.OrderBy(x => x.LastModified),
-                    _ => subcategories.OrderBy(x => x.Created)
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
+                    _ => sortedQuery.OrderBy(x => x.Created)
                 };
             }
             else if (request.SortDirection.ToLower() == "desc")
             {
-                subcategories = request.SortBy.ToLower() switch
+                sortedQuery = request.SortBy.ToLower() switch
                 {
-                    "created" => subcategories.OrderByDescending(x => x.Created),
-                    "lastmodified" => subcategories.OrderByDescending(x => x.LastModified),
-                    _ => subcategories.OrderByDescending(x => x.Created)
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
                 };
             }
         }
 
-        var totalCount = subcategories.Count();
-
         if (request.Skip.HasValue)
-            subcategories = subcategories.Skip(request.Skip.Value);
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
 
         if (request.Take.HasValue)
-            subcategories = subcategories.Take(request.Take.Value);
+            sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var subcategoriesDTO = subcategories.Select(x => new SubcategoryDetailsDTO
+        var subcategoriesDTO = sortedQuery.Select(x => new SubcategoryDetailsDTO
         {
             Id = x.Id,
             Name = x.Name,

@@ -126,49 +126,49 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
     public ApiResponse<List<ProductDetailsDTO>> GetProducts(ProductRequest request)
     {
-        var products = _productRepository.GetAsQueryableWhereIf(x =>
-                x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.Subcategory.Category.Id == request.CategoryId)
-                 .WhereIf(!String.IsNullOrEmpty(request.SubcategoryId.ToString()), x => x.Subcategory.Id == request.SubcategoryId)
-                 .WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
-                 .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
-                null,
-                x => x.Include(x => x.Subcategory).ThenInclude(sc => sc.Category));
+        var query = _productRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.Subcategory.Category.Id == request.CategoryId)
+                          .WhereIf(!String.IsNullOrEmpty(request.SubcategoryId.ToString()), x => x.Subcategory.Id == request.SubcategoryId)
+                          .WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
+                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+            include: x => x.Include(x => x.Subcategory).ThenInclude(sc => sc.Category));
 
+        var totalCount = query.Count();
+
+        var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
             if (request.SortDirection.ToLower() == "asc")
             {
-                products = request.SortBy.ToLower() switch
+                sortedQuery = request.SortBy.ToLower() switch
                 {
-                    "created" => products.OrderBy(x => x.Created),
-                    "lastmodified" => products.OrderBy(x => x.LastModified),
-                    "unitprice" => products.OrderBy(x => x.UnitPrice),
-                    "unitquantity" => products.OrderBy(x => x.UnitQuantity),
-                    _ => products.OrderBy(x => x.Created)
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
+                    "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
+                    "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
+                    _ => sortedQuery.OrderBy(x => x.Created)
                 };
             }
             else if (request.SortDirection.ToLower() == "desc")
             {
-                products = request.SortBy.ToLower() switch
+                sortedQuery = request.SortBy.ToLower() switch
                 {
-                    "created" => products.OrderByDescending(x => x.Created),
-                    "lastmodified" => products.OrderByDescending(x => x.LastModified),
-                    "unitprice" => products.OrderByDescending(x => x.UnitPrice),
-                    "unitquantity" => products.OrderByDescending(x => x.UnitQuantity),
-                    _ => products.OrderByDescending(x => x.Created)
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
+                    "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
+                    "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
                 };
             }
         }
 
-        var totalCount = products.Count();
-
         if (request.Skip.HasValue)
-            products = products.Skip(request.Skip.Value);
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
 
         if (request.Take.HasValue)
-            products = products.Take(request.Take.Value);
+            sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var productsDTO = products.Select(x => new ProductDetailsDTO
+        var productsDTO = sortedQuery.Select(x => new ProductDetailsDTO
         {
             Id = x.Id,
             Name = x.Name,
