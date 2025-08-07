@@ -1,6 +1,7 @@
+using eShop.AdminAPI.Extension;
 using eShop.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
 using eShop.Infrastructure.IoC;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddCors(policy => policy.AddPolicy("MyPolicy", builder =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddIoCService();
 

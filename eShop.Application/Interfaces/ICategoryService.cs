@@ -6,5 +6,12 @@ namespace eShop.Application.Interfaces;
 
 public interface ICategoryService
 {
-    ApiResponse<List<CategoryDTO>> GetCategories(CategoryRequest request);
+    ApiResponse<List<CategoryDetailsDTO>> GetCategories(CategoryRequest request);
+    ApiResponse<CategoryDetailsDTO> CreateCategory(CreateUpdateCategoryRequest request);
+    ApiResponse<CategoryDetailsDTO> UpdateCategory(Guid id, CreateUpdateCategoryRequest request);
+    ApiResponse<CategoryDetailsDTO> DeleteCategory(Guid id);
+    ApiResponse<CategoryDTO> GetCategoryById(Guid id);
+
+    ApiResponse<List<SelectCategoryListItemDTO>> GetCategoriesDropdownList();
+    ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu();
 }
