@@ -101,7 +101,7 @@ namespace eShop.Application.Services
         {
             var userQuery = await _userRepository.GetAsync(
                 filter: x => x.Id == userId,
-                include: x => x.Include(x => x.Basket).ThenInclude(x => x.Items));
+                include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items).ThenInclude(i => i.Product));
 
             var user = userQuery.FirstOrDefault();
             if (user is null)
@@ -119,30 +119,66 @@ namespace eShop.Application.Services
                     Message = "Product not found"
                 };
 
-
-
-            if(user.Basket is null)
+            if (user.Basket is null)
             {
                 var basket = Basket.CreateNew(userId);
-                await _basketRepository.InsertAsync(basket);
-
                 basket.AddOrUpdateItem(product, newQuantity);
-                await _basketItemRepository.InsertAsync(basket.Items.FirstOrDefault());
 
-            } else
+                await _basketRepository.InsertAsync(basket);
+                // Insert all new items in the basket (only one in this case)
+                foreach (var item in basket.Items)
+                {
+                    await _basketItemRepository.InsertAsync(item);
+                }
+            }
+            else
             {
-                user.Basket.AddOrUpdateItem(product, newQuantity);
-                await _basketItemRepository.UpdateAsync(user.Basket.Items.FirstOrDefault());
+                // Update or add item
+                var basket = user.Basket;
+
+                // Check if item exists
+                var existingItem = basket.Items.FirstOrDefault(i => i.ProductId == productId);
+                basket.AddOrUpdateItem(product, newQuantity);
+
+                if (existingItem == null)
+                {
+                    // New item inserted
+                    var newItem = basket.Items.FirstOrDefault(i => i.ProductId == productId);
+                    if (newItem != null)
+                        await _basketItemRepository.InsertAsync(newItem);
+                }
+                else
+                {
+                    // Existing item updated
+                    await _basketItemRepository.UpdateAsync(existingItem);
+                }
+
+                await _basketRepository.UpdateAsync(basket);
             }
 
             await _uow.SaveChangesAsync();
 
+            // Build basket DTO for response
+            var basketDto = new BasketDTO
+            {
+                Items = user.Basket?.Items.Select(i => new BasketItemDTO
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    Quantity = i.Quantity,
+                    Price = i.Product?.UnitPrice ?? 0,
+                    UnitQuantity = i.Product?.UnitQuantity ?? 0,
+                    ImageDataUrl = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
+                }).ToList() ?? new List<BasketItemDTO>()
+            };
 
             return new ApiResponse<BasketDTO>
             {
-                
+                NotificationType = NotificationType.Success,
+                Data = basketDto
             };
         }
+
 
     }
 }
