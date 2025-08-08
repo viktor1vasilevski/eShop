@@ -6,6 +6,7 @@ using eShop.Application.Interfaces;
 using eShop.Application.Requests.Basket;
 using eShop.Application.Responses;
 using eShop.Domain.Entities;
+using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces;
 using eShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -98,52 +99,50 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int newQuantity)
         {
-            var query = await _basketRepository.GetAsync(
-                filter: b => b.UserId == userId,
-                include: b => b.Include(x => x.Items).ThenInclude(i => i.Product)
-            );
+            var userQuery = await _userRepository.GetAsync(
+                filter: x => x.Id == userId,
+                include: x => x.Include(x => x.Basket).ThenInclude(x => x.Items));
 
-            var basket = query.FirstOrDefault();
-            if (basket is null)
+            var user = userQuery.FirstOrDefault();
+            if (user is null)
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
-                    Message = BasketConstants.BASKET_NOT_FOUND
+                    Message = UserConstants.USER_NOT_FOUND,
                 };
 
-            var item = basket.Items.FirstOrDefault(i => i.ProductId == productId);
-            if (item is null)
+            var product = _productRepository.GetById(productId);
+            if (product is null)
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
-                    Message = BasketConstants.BASKET_ITEM_NOT_FOUND
+                    Message = "Product not found"
                 };
 
-            int validQuantity = Math.Max(1, Math.Min(newQuantity, item.Product?.UnitQuantity ?? int.MaxValue));
 
-            item.Quantity = validQuantity;
 
-            await _basketItemRepository.UpdateAsync(item);
+            if(user.Basket is null)
+            {
+                var basket = Basket.CreateNew(userId);
+                await _basketRepository.InsertAsync(basket);
+
+                basket.AddOrUpdateItem(product, newQuantity);
+                await _basketItemRepository.InsertAsync(basket.Items.FirstOrDefault());
+
+            } else
+            {
+                user.Basket.AddOrUpdateItem(product, newQuantity);
+                await _basketItemRepository.UpdateAsync(user.Basket.Items.FirstOrDefault());
+            }
+
             await _uow.SaveChangesAsync();
 
-            var basketDto = new BasketDTO
-            {
-                Items = basket.Items.Select(i => new BasketItemDTO
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.Product?.Name,
-                    Quantity = i.Quantity,
-                    Price = i.Product?.UnitPrice ?? 0,
-                    UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    ImageDataUrl = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
-                }).ToList()
-            };
 
             return new ApiResponse<BasketDTO>
             {
-                NotificationType = NotificationType.Success,
-                Data = basketDto
+                
             };
         }
+
     }
 }

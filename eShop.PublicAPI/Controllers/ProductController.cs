@@ -1,6 +1,5 @@
 ﻿using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers
@@ -14,6 +13,13 @@ namespace eShop.PublicAPI.Controllers
         public IActionResult Get([FromQuery] ProductRequest request)
         {
             var response = _productService.GetProducts(request);
+            return HandleResponse(response);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetById([FromRoute] Guid id)
+        {
+            var response = _productService.GetProductById(id);
             return HandleResponse(response);
         }
     }

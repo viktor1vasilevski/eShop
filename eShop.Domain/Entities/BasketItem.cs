@@ -32,12 +32,15 @@ public class BasketItem : AuditableBaseEntity
         };
     }
 
-    public void UpdateQuantity(int newQuantity)
+    public void UpdateQuantity(int newQuantity, int? maxQuantity = null)
     {
         if (newQuantity <= 0)
             throw new DomainException("Quantity must be greater than zero.");
 
-        Quantity = newQuantity;
+        if (maxQuantity.HasValue)
+            Quantity = Math.Min(newQuantity, maxQuantity.Value);
+        else
+            Quantity = newQuantity;
     }
 
 }
