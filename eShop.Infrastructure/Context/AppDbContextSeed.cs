@@ -15,13 +15,15 @@ public static class AppDbContextSeed
         if (context.Users.Any(x => x.Role == Role.Customer && x.Username.ToLower() == "viktorvasilevski"))
             return;
 
-        var adminUser = User.CreateNew(
+        var userData = new UserData(
             firstName: "Viktor",
             lastName: "Vasilevski",
             username: "viktorvasilevski",
             email: "viktor@example.com",
             password: "Viktor@123",
             role: Role.Customer);
+
+        var adminUser = User.CreateNew(userData);
 
         context.Users.Add(adminUser);
         context.SaveChanges();
@@ -35,13 +37,15 @@ public static class AppDbContextSeed
         if (context.Users.Any(x => x.Role == Role.Admin))
             return;
 
-        var adminUser = User.CreateNew(
+        var adminData = new UserData(
             firstName: "Admin",
             lastName: "Admin",
             username: "admin",
             email: "admin@example.com",
             password: password,
             role: Role.Admin);
+
+        var adminUser = User.CreateNew(adminData);
 
         context.Users.Add(adminUser);
         context.SaveChanges();

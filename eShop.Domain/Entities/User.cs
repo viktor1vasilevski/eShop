@@ -10,7 +10,7 @@ public class User : AuditableBaseEntity
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
     public string Username { get; private set; } = string.Empty;
-    public Role Role { get; set; }
+    public Role Role { get; private set; }
     public string Email { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
     public string SaltKey { get; private set; } = string.Empty;
@@ -19,35 +19,39 @@ public class User : AuditableBaseEntity
 
     private User() { }
 
-    public static User CreateNew(string firstName, string lastName, string username, string email, string password, Role role)
+    public static User CreateNew(UserData user)
     {
-        ValidateRequired(username, nameof(username));
-        ValidateRequired(email, nameof(email));
-        ValidateRequired(password, "Password");
-        ValidateCoreFields(firstName, lastName, role);
-
-        var salt = PasswordHelper.GenerateSalt();
-        var hash = PasswordHelper.HashPassword(password, salt);
-
-        return new User
-        {
-            FirstName = firstName,
-            LastName = lastName,
-            Username = username.ToLower(),
-            Email = email.ToLower(),
-            PasswordHash = hash,
-            SaltKey = Convert.ToBase64String(salt),
-            Role = role
-        };
+        var instance = new User();
+        instance.Id = Guid.NewGuid();
+        instance.ApplyUserData(user, isNewUser: true);
+        return instance;
     }
 
-    public void ApplyChanges(string firstName, string lastName, Role role)
+    // Update existing user data, optionally allow password update
+    public void Update(UserData user, bool isPasswordChangeAllowed = false)
     {
-        ValidateCoreFields(firstName, lastName, role);
+        ApplyUserData(user, isNewUser: false, isPasswordChangeAllowed);
+    }
 
-        FirstName = firstName;
-        LastName = lastName;
-        Role = role;
+    private void ApplyUserData(UserData user, bool isNewUser, bool isPasswordChangeAllowed = false)
+    {
+        ValidateRequired(user.Username, nameof(user.Username));
+        ValidateRequired(user.Email, nameof(user.Email));
+        ValidateCoreFields(user.FirstName, user.LastName, user.Role);
+
+        Username = user.Username.ToLower();
+        Email = user.Email.ToLower();
+        FirstName = user.FirstName;
+        LastName = user.LastName;
+        Role = user.Role;
+
+        if (isNewUser || isPasswordChangeAllowed)
+        {
+            ValidateRequired(user.Password, "Password");
+            var salt = PasswordHelper.GenerateSalt();
+            PasswordHash = PasswordHelper.HashPassword(user.Password, salt);
+            SaltKey = Convert.ToBase64String(salt);
+        }
     }
 
     public bool VerifyPassword(string inputPassword)
@@ -68,5 +72,32 @@ public class User : AuditableBaseEntity
 
         if (!Enum.IsDefined(typeof(Role), role))
             throw new DomainValidationException("Invalid user role specified.");
+    }
+}
+
+
+public class UserData
+{
+    public string FirstName { get; }
+    public string LastName { get; }
+    public string Username { get; }
+    public string Email { get; }
+    public string Password { get; }
+    public Role Role { get; }
+
+    public UserData(
+        string firstName,
+        string lastName,
+        string username,
+        string email,
+        string password,
+        Role role)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        Username = username;
+        Email = email;
+        Password = password;
+        Role = role;
     }
 }

@@ -1,7 +1,5 @@
 ﻿using eShop.Application.Interfaces;
-using eShop.Application.Requests;
 using eShop.Application.Requests.Basket;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers

@@ -66,8 +66,15 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
 
         try
         {
-            var user = User.CreateNew(request.FirstName, request.LastName,
-                request.Username, request.Email, request.Password, Role.Customer);
+            var userData = new UserData(
+                firstName: request.FirstName,
+                lastName: request.LastName,
+                username: request.Username,
+                email: request.Email,
+                password: request.Password,
+                role: Role.Customer);
+
+            var user = User.CreateNew(userData);
 
             await _userRepository.InsertAsync(user);
             await _uow.SaveChangesAsync();
