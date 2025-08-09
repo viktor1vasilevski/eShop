@@ -7,5 +7,5 @@ public class BasketItemDTO
     public int Quantity { get; set; }
     public decimal Price { get; set; }
     public int UnitQuantity { get; set; }
-    public string? ImageDataUrl { get; set; }
+    public string? Image { get; set; }
 }

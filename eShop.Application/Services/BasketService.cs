@@ -45,7 +45,7 @@ namespace eShop.Application.Services
                     Quantity = i.Quantity,
                     Price = i.Product?.UnitPrice ?? 0,
                     UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    ImageDataUrl = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
+                    Image = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
                 }).ToList()
             };
 
@@ -66,33 +66,77 @@ namespace eShop.Application.Services
                     NotificationType = NotificationType.NotFound
                 };
 
+            // Load basket and include items
             var basket = _basketRepository.Get(
-                filter: x => x.UserId == userId, 
-                include: x => x.Include(b => b.Items)).FirstOrDefault();
+                filter: x => x.UserId == userId,
+                include: x => x.Include(b => b.Items).ThenInclude(x => x.Product)).FirstOrDefault();
 
-            if (basket is null)
+            if (basket == null)
             {
                 basket = Basket.CreateNew(userId);
                 await _basketRepository.InsertAsync(basket);
             }
 
+            // Load products needed for validation, stock limits, etc.
             var productIds = request.Select(r => r.ProductId).Distinct().ToList();
             var products = await _productRepository.GetAsync(x => productIds.Contains(x.Id));
             var productsDict = products.ToDictionary(p => p.Id, p => p);
 
-            var mergeItems = request
-                .Where(r => productsDict.ContainsKey(r.ProductId))
-                .Select(r => new BasketMergeItem(productsDict[r.ProductId], r.Quantity))
-                .ToList();
+            // Merge basket items manually here:
+            foreach (var reqItem in request)
+            {
+                if (!productsDict.TryGetValue(reqItem.ProductId, out var product))
+                    continue; // skip invalid product
 
-            basket.MergeItems(mergeItems);
+                // Check if basket already has this product
+                var basketItem = basket.Items.FirstOrDefault(i => i.ProductId == reqItem.ProductId);
+
+                if (basketItem != null)
+                {
+                    // Add quantities, but do not exceed product's available unit quantity
+                    int newQuantity = basketItem.Quantity + reqItem.Quantity;
+                    basketItem.Quantity = Math.Min(newQuantity, product.UnitQuantity);
+                }
+                else
+                {
+                    // Add new basket item (make sure to not exceed stock limit)
+                    var quantityToAdd = Math.Min(reqItem.Quantity, product.UnitQuantity);
+
+                    basket.Items.Add(new BasketItem
+                    {
+                        ProductId = reqItem.ProductId,
+                        Quantity = quantityToAdd,
+                        // fill other needed properties if applicable, e.g. price, name
+                    });
+                }
+            }
 
             await _uow.SaveChangesAsync();
 
+            var basketDto = MapToBasketDTO(basket);
+
             return new ApiResponse<BasketDTO>
             {
+                Data = basketDto,
                 Message = BasketConstants.BASKET_MERGED,
                 NotificationType = NotificationType.Success
+            };
+        }
+
+
+        private BasketDTO MapToBasketDTO(Basket basket)
+        {
+            return new BasketDTO
+            {
+                Items = basket.Items.Select(i => new BasketItemDTO
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.Product.Name,
+                    Price = i.Product.UnitPrice,
+                    Quantity = i.Quantity,
+                    UnitQuantity = i.Product.UnitQuantity,
+                    Image = ImageHelper.BuildImageDataUrl(i.Product.Image, i.Product.ImageType)
+                }).ToList()
             };
         }
 
@@ -168,7 +212,7 @@ namespace eShop.Application.Services
                     Quantity = i.Quantity,
                     Price = i.Product?.UnitPrice ?? 0,
                     UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    ImageDataUrl = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
+                    Image = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
                 }).ToList() ?? new List<BasketItemDTO>()
             };
 

@@ -38,8 +38,8 @@ public class Basket : AuditableBaseEntity
     {
         if (product == null)
             throw new DomainException("Product cannot be null.");
-        if (quantity <= 0)
-            throw new DomainException("Quantity must be greater than zero.");
+        //if (quantity <= 0)
+        //    throw new DomainException("Quantity must be greater than zero.");
 
         var existingItem = Items.FirstOrDefault(i => i.ProductId == product.Id);
 
