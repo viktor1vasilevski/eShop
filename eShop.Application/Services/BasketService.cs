@@ -139,71 +139,78 @@ namespace eShop.Application.Services
         }
 
 
-        public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int newQuantity)
+        public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
-            var userQuery = await _userRepository.GetAsync(
-                filter: x => x.Id == userId,
-                include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items).ThenInclude(i => i.Product));
+            // 1. Load the user with basket + basket items + products
+            var user = (await _userRepository.GetAsync(
+                filter: u => u.Id == userId,
+                include: u => u.Include(x => x.Basket)
+                               .ThenInclude(b => b.Items)
+                               .ThenInclude(i => i.Product)))
+                .FirstOrDefault();
 
-            var user = userQuery.FirstOrDefault();
-            if (user is null)
+            if (user == null)
+            {
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
-                    Message = UserConstants.USER_NOT_FOUND,
+                    Message = UserConstants.USER_NOT_FOUND
                 };
+            }
 
             var product = _productRepository.GetById(productId);
-            if (product is null)
+            if (product == null)
+            {
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
                     Message = "Product not found"
                 };
+            }
 
-            if (user.Basket is null)
+            // Create basket if it doesn't exist yet
+            if (user.Basket == null)
             {
-                var basket = Basket.CreateNew(userId);
-                basket.AddOrUpdateItem(product, newQuantity);
-
-                await _basketRepository.InsertAsync(basket);
-                // Insert all new items in the basket (only one in this case)
-                foreach (var item in basket.Items)
+                user.Basket = new Basket
                 {
-                    await _basketItemRepository.InsertAsync(item);
+                    UserId = userId,
+                    Items = new List<BasketItem>
+            {
+                new BasketItem
+                {
+                    ProductId = productId,
+                    Quantity = quantityToAdd
                 }
+            }
+                };
             }
             else
             {
-                // Update or add item
-                var basket = user.Basket;
+                var item = user.Basket.Items.FirstOrDefault(i => i.ProductId == productId);
 
-                // Check if item exists
-                var existingItem = basket.Items.FirstOrDefault(i => i.ProductId == productId);
-                basket.AddOrUpdateItem(product, newQuantity);
-
-                if (existingItem == null)
+                if (item == null)
                 {
-                    // New item inserted
-                    var newItem = basket.Items.FirstOrDefault(i => i.ProductId == productId);
-                    if (newItem != null)
-                        await _basketItemRepository.InsertAsync(newItem);
+                    // Add new item
+                    user.Basket.Items.Add(new BasketItem
+                    {
+                        ProductId = productId,
+                        Quantity = quantityToAdd
+                    });
                 }
                 else
                 {
-                    // Existing item updated
-                    await _basketItemRepository.UpdateAsync(existingItem);
+                    // Increment quantity
+                    item.Quantity += quantityToAdd;
                 }
-
-                await _basketRepository.UpdateAsync(basket);
             }
 
+            // EF Core will track changes and save them
             await _uow.SaveChangesAsync();
 
-            // Build basket DTO for response
+            // Map to DTO
             var basketDto = new BasketDTO
             {
-                Items = user.Basket?.Items.Select(i => new BasketItemDTO
+                Items = user.Basket.Items.Select(i => new BasketItemDTO
                 {
                     ProductId = i.ProductId,
                     ProductName = i.Product?.Name,
@@ -211,7 +218,7 @@ namespace eShop.Application.Services
                     Price = i.Product?.UnitPrice ?? 0,
                     UnitQuantity = i.Product?.UnitQuantity ?? 0,
                     Image = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
-                }).ToList() ?? new List<BasketItemDTO>()
+                }).ToList()
             };
 
             return new ApiResponse<BasketDTO>
@@ -220,6 +227,9 @@ namespace eShop.Application.Services
                 Data = basketDto
             };
         }
+
+
+
 
         public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
         {

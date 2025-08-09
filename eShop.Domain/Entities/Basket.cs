@@ -38,16 +38,22 @@ public class Basket : AuditableBaseEntity
     {
         if (product == null)
             throw new DomainException("Product cannot be null.");
-        //if (quantity <= 0)
-        //    throw new DomainException("Quantity must be greater than zero.");
 
         var existingItem = Items.FirstOrDefault(i => i.ProductId == product.Id);
 
         if (existingItem != null)
+        {
             existingItem.UpdateQuantity(existingItem.Quantity + quantity, product.UnitQuantity);
+        }
         else
-            Items.Add(BasketItem.CreateNew(Id, product.Id, Math.Min(quantity, product.UnitQuantity)));
+        {
+            var newItem = BasketItem.CreateNew(Id, product.Id, Math.Min(quantity, product.UnitQuantity));
+            newItem.Basket = this; // <-- crucial for EF tracking
+
+            Items.Add(newItem);
+        }
     }
+
 
     public void UpdateItemQuantity(Guid productId, int newQuantity)
     {
