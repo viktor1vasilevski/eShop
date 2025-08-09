@@ -6,9 +6,7 @@ using eShop.Application.Interfaces;
 using eShop.Application.Requests.Basket;
 using eShop.Application.Responses;
 using eShop.Domain.Entities;
-using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces;
-using eShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services
@@ -223,6 +221,27 @@ namespace eShop.Application.Services
             };
         }
 
+        public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
+        {
+            var userQuery = await _userRepository.GetAsync(
+                filter: x => x.Id == userId,
+                include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
 
+            var user = userQuery.FirstOrDefault();
+            if (user is null)
+                return new ApiResponse<BasketDTO>
+                {
+                    NotificationType = NotificationType.NotFound,
+                    Message = UserConstants.USER_NOT_FOUND,
+                };
+
+            user?.Basket?.Items.Clear();
+            await _uow.SaveChangesAsync();
+
+            return new ApiResponse<BasketDTO>
+            {
+                NotificationType = NotificationType.Success
+            };
+        }
     }
 }

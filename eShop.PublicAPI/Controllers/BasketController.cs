@@ -32,5 +32,11 @@ namespace eShop.PublicAPI.Controllers
             return HandleResponse(response);
         }
 
+        [HttpDelete("clearBasketItems/{userId}")]
+        public async Task<IActionResult> ClearBasket([FromRoute] Guid userId)
+        {
+            var response = await _basketService.ClearBasketItemsForUserAsync(userId);
+            return HandleResponse(response);
+        }
     }
 }
