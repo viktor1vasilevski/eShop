@@ -150,64 +150,29 @@ namespace eShop.Application.Services
                 .FirstOrDefault();
 
             if (user == null)
-            {
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
                     Message = UserConstants.USER_NOT_FOUND
                 };
-            }
 
             var product = _productRepository.GetById(productId);
             if (product == null)
-            {
                 return new ApiResponse<BasketDTO>
                 {
                     NotificationType = NotificationType.NotFound,
                     Message = "Product not found"
                 };
-            }
 
-            // Create basket if it doesn't exist yet
             if (user.Basket == null)
             {
-                user.Basket = new Basket
-                {
-                    UserId = userId,
-                    Items = new List<BasketItem>
-            {
-                new BasketItem
-                {
-                    ProductId = productId,
-                    Quantity = quantityToAdd
-                }
-            }
-                };
-            }
-            else
-            {
-                var item = user.Basket.Items.FirstOrDefault(i => i.ProductId == productId);
-
-                if (item == null)
-                {
-                    // Add new item
-                    user.Basket.Items.Add(new BasketItem
-                    {
-                        ProductId = productId,
-                        Quantity = quantityToAdd
-                    });
-                }
-                else
-                {
-                    // Increment quantity
-                    item.Quantity += quantityToAdd;
-                }
+                user.Basket = Basket.CreateNew(userId);
             }
 
-            // EF Core will track changes and save them
+            user.Basket.AddOrUpdateItem(product, quantityToAdd);
+
             await _uow.SaveChangesAsync();
 
-            // Map to DTO
             var basketDto = new BasketDTO
             {
                 Items = user.Basket.Items.Select(i => new BasketItemDTO
@@ -227,8 +192,6 @@ namespace eShop.Application.Services
                 Data = basketDto
             };
         }
-
-
 
 
         public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
