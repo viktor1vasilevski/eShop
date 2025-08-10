@@ -10,4 +10,5 @@ public interface IBasketService
     Task<ApiResponse<BasketDTO>> GetBasketByUserIdAsync(Guid userId);
     Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int newQuantity);
     Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId);
+    Task<ApiResponse<BasketDTO>> RemoveItemAsync(Guid userId, Guid productId);
 }

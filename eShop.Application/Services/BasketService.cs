@@ -16,7 +16,7 @@ namespace eShop.Application.Services
         private readonly IRepositoryBase<Basket> _basketRepository = _uow.GetRepository<Basket>();
         private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
         private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
-        private readonly IRepositoryBase<BasketItem> _basketItemRepository = _uow.GetRepository<BasketItem>();
+
 
 
         public async Task<ApiResponse<BasketDTO>> GetBasketByUserIdAsync(Guid userId)
@@ -54,7 +54,7 @@ namespace eShop.Application.Services
             };
         }
 
-        public async Task<ApiResponse<BasketDTO>> Merge(Guid userId, List<BasketRequest> request)
+        public async Task<ApiResponse<BasketDTO>> MergeItemsAsync(Guid userId, List<BasketRequest> request)
         {
             var userExists = await _userRepository.ExistsAsync(x => x.Id == userId);
             if (!userExists)
@@ -180,5 +180,51 @@ namespace eShop.Application.Services
                 NotificationType = NotificationType.Success
             };
         }
+
+
+        public async Task<ApiResponse<BasketDTO>> RemoveItemAsync(Guid userId, Guid productId)
+        {
+            var userQuery = await _userRepository.GetAsync(
+                filter: x => x.Id == userId,
+                include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
+
+            var user = userQuery.FirstOrDefault();
+            if (user is null)
+                return new ApiResponse<BasketDTO>
+                {
+                    NotificationType = NotificationType.NotFound,
+                    Message = UserConstants.USER_NOT_FOUND,
+                };
+
+            var basket = user.Basket;
+            if (basket == null)
+            {
+                return new ApiResponse<BasketDTO>
+                {
+                    NotificationType = NotificationType.NotFound,
+                    Message = "Basket not found",
+                };
+            }
+
+            var itemToRemove = basket.Items.FirstOrDefault(x => x.ProductId == productId);
+            if (itemToRemove == null)
+            {
+                return new ApiResponse<BasketDTO>
+                {
+                    NotificationType = NotificationType.NotFound,
+                    Message = "Item not found in basket",
+                };
+            }
+
+            basket.Items.Remove(itemToRemove);
+
+            await _uow.SaveChangesAsync();
+
+            return new ApiResponse<BasketDTO>
+            {
+                NotificationType = NotificationType.Success
+            };
+        }
+
     }
 }
