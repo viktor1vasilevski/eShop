@@ -122,17 +122,20 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
-            var user = (await _userRepository.GetAsync(
-                filter: x => x.Id == userId,
-                include: x => x.Include(x => x.Basket).ThenInclude(x => x.Items))).FirstOrDefault();
+            // Load basket and items directly for user
+            var basket = (await _basketRepository.GetAsync(
+                filter: b => b.UserId == userId,
+                include: b => b.Include(b => b.Items)))
+                .FirstOrDefault();
 
-            if (user == null)
-                return new ApiResponse<BasketDTO>
-                {
-                    NotificationType = NotificationType.NotFound,
-                    Message = UserConstants.USER_NOT_FOUND
-                };
+            if (basket == null)
+            {
+                // Create new basket if none exists
+                basket = Basket.CreateNew(userId);
+                await _basketRepository.InsertAsync(basket);
+            }
 
+            // Load product to validate
             var product = _productRepository.GetById(productId);
             if (product == null)
                 return new ApiResponse<BasketDTO>
@@ -141,12 +144,29 @@ namespace eShop.Application.Services
                     Message = "Product not found"
                 };
 
-            if (user.Basket == null)
-            {
-                user.Basket = Basket.CreateNew(userId);
-            }
+            // Try to find existing item in basket
+            var basketItem = basket.Items.FirstOrDefault(i => i.ProductId == productId);
 
-            user.Basket.AddOrUpdateItem(product, quantityToAdd);
+            if (basketItem != null)
+            {
+                // Update quantity with limit
+                int newQuantity = basketItem.Quantity + quantityToAdd;
+                basketItem.Quantity = Math.Min(newQuantity, product.UnitQuantity);
+            }
+            else
+            {
+                // Add new item with quantity limit
+                int quantityToAddClamped = Math.Min(quantityToAdd, product.UnitQuantity);
+
+                var newItem = new BasketItem
+                {
+                    BasketId = basket.Id,
+                    ProductId = productId,
+                    Quantity = quantityToAddClamped
+                };
+
+                basket.Items.Add(newItem);
+            }
 
             await _uow.SaveChangesAsync();
 
@@ -154,8 +174,10 @@ namespace eShop.Application.Services
             {
                 Data = null,
                 NotificationType = NotificationType.Success,
+                Message = "Basket updated successfully"
             };
         }
+
 
 
         public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
