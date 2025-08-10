@@ -67,7 +67,7 @@ namespace eShop.Application.Services
             // Load basket and include items
             var basket = _basketRepository.Get(
                 filter: x => x.UserId == userId,
-                include: x => x.Include(b => b.Items).ThenInclude(x => x.Product)).FirstOrDefault();
+                include: x => x.Include(b => b.Items)).FirstOrDefault();
 
             if (basket == null)
             {
@@ -111,43 +111,20 @@ namespace eShop.Application.Services
 
             await _uow.SaveChangesAsync();
 
-            var basketDto = MapToBasketDTO(basket);
-
             return new ApiResponse<BasketDTO>
             {
-                Data = basketDto,
+                Data = null,
                 Message = BasketConstants.BASKET_MERGED,
                 NotificationType = NotificationType.Success
             };
         }
 
 
-        private BasketDTO MapToBasketDTO(Basket basket)
-        {
-            return new BasketDTO
-            {
-                Items = basket.Items.Select(i => new BasketItemDTO
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.Product.Name,
-                    Price = i.Product.UnitPrice,
-                    Quantity = i.Quantity,
-                    UnitQuantity = i.Product.UnitQuantity,
-                    Image = ImageHelper.BuildImageDataUrl(i.Product.Image, i.Product.ImageType)
-                }).ToList()
-            };
-        }
-
-
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
-            // 1. Load the user with basket + basket items + products
             var user = (await _userRepository.GetAsync(
-                filter: u => u.Id == userId,
-                include: u => u.Include(x => x.Basket)
-                               .ThenInclude(b => b.Items)
-                               .ThenInclude(i => i.Product)))
-                .FirstOrDefault();
+                filter: x => x.Id == userId,
+                include: x => x.Include(x => x.Basket).ThenInclude(x => x.Items))).FirstOrDefault();
 
             if (user == null)
                 return new ApiResponse<BasketDTO>
@@ -173,23 +150,10 @@ namespace eShop.Application.Services
 
             await _uow.SaveChangesAsync();
 
-            var basketDto = new BasketDTO
-            {
-                Items = user.Basket.Items.Select(i => new BasketItemDTO
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.Product?.Name,
-                    Quantity = i.Quantity,
-                    Price = i.Product?.UnitPrice ?? 0,
-                    UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    Image = ImageHelper.BuildImageDataUrl(i.Product?.Image, i.Product?.ImageType)
-                }).ToList()
-            };
-
             return new ApiResponse<BasketDTO>
             {
+                Data = null,
                 NotificationType = NotificationType.Success,
-                Data = basketDto
             };
         }
 
