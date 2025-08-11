@@ -1,0 +1,101 @@
+﻿using eShop.Application.DTOs.Order;
+using eShop.Application.DTOs.OrderItem;
+using eShop.Application.Enums;
+using eShop.Application.Extensions;
+using eShop.Application.Interfaces;
+using eShop.Application.Requests.Order;
+using eShop.Application.Responses;
+using eShop.Domain.Entities;
+using eShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace eShop.Application.Services;
+
+public class OrderService(IUnitOfWork _uow) : IOrderService
+{
+    private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>(); 
+    private readonly IRepositoryBase<OrderItem> _orderItemRepository = _uow.GetRepository<OrderItem>();
+    private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
+    private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
+
+    public ApiResponse<List<OrderDTO>> GetOrders(OrderRequest request)
+    {
+        var query = _orderRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(request.UserId != Guid.Empty, o => o.UserId == request.UserId),
+            include: x => x.Include(x => x.Items).ThenInclude(p => p.Product));
+
+        var ordersDTO = query.Select(order => new OrderDTO
+        {
+            TotalAmount = order.TotalAmount,
+            OrderCreatedOn = order.Created,
+            Items = order.Items.Select(item => new OrderItemDTO
+            {
+                ProductName = item.Product!.Name,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+            }).ToList()
+        }).ToList();
+
+
+        return new ApiResponse<List<OrderDTO>>
+        {
+            Data = ordersDTO,
+            NotificationType = NotificationType.Success,
+        };
+    }
+
+    public async Task<ApiResponse<OrderDTO>> PlaceOrderAsync(PlaceOrderRequest request)
+    {
+        var response = new ApiResponse<OrderDTO>();
+
+        // 1. Validate user exists (optional)
+        var user = _userRepository.GetById(request.UserId);
+        if (user == null)
+        {
+            response.NotificationType = NotificationType.NotFound;
+            response.Message = "User not found.";
+            return response;
+        }
+
+        // 2. Create new Order entity
+        var order = new Order
+        {
+            UserId = request.UserId,
+            Items = new List<OrderItem>()
+        };
+
+        // 3. For each order item, get product info and create OrderItem entities
+        foreach (var itemRequest in request.Items)
+        {
+            var product = _productRepository.GetById(itemRequest.ProductId);
+            if (product == null)
+            {
+                response.NotificationType = NotificationType.NotFound;
+                response.Message = $"Product with ID {itemRequest.ProductId} not found.";
+                return response;
+            }
+
+            product.UnitQuantity -= itemRequest.Quantity;
+
+            var orderItem = new OrderItem
+            {
+                ProductId = product.Id,
+                Quantity = itemRequest.Quantity,
+                UnitPrice = product.UnitPrice
+            };
+
+            order.Items.Add(orderItem);
+        }
+
+        order.TotalAmount = request.TotalAmount;
+
+        // 4. Save order to database
+        await _orderRepository.InsertAsync(order);
+        await _uow.SaveChangesAsync();
+
+
+
+        return response;
+    }
+
+}
