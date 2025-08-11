@@ -6,9 +6,10 @@ namespace eShop.Domain.Entities;
 public class Subcategory : AuditableBaseEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public Guid CategoryId { get; private set; }
 
+    public Guid CategoryId { get; private set; }
     public virtual Category? Category { get; set; }
+
     public virtual ICollection<Product>? Products { get; set; }
 
 

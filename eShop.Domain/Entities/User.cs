@@ -16,7 +16,8 @@ public class User : AuditableBaseEntity
     public string SaltKey { get; private set; } = string.Empty;
 
     public virtual Basket? Basket { get; set; }
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Order>? Orders { get; set; }
+    public virtual ICollection<Comment>? Comments { get; set; }
 
     private User() { }
 
