@@ -9,7 +9,7 @@ public class Product : AuditableBaseEntity
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public decimal UnitPrice { get; private set; } 
-    public int UnitQuantity { get; private set; }
+    public int UnitQuantity { get; set; }
     public byte[] Image { get; private set; } = [];
     public string ImageType { get; private set; } = string.Empty;
 
