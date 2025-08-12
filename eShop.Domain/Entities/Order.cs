@@ -10,5 +10,4 @@ public class Order : AuditableBaseEntity
     public decimal TotalAmount { get; set; }
 
     public virtual ICollection<OrderItem>? Items { get; set; }
-    public virtual ICollection<Comment>? Comments { get; set; }
 }

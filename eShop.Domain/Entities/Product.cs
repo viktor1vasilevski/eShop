@@ -19,6 +19,7 @@ public class Product : AuditableBaseEntity
 
     public ICollection<BasketItem>? BasketItems { get; set; }
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
+    public virtual ICollection<Comment>? Comments { get; set; }
 
 
     protected Product() { }

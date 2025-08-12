@@ -103,9 +103,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Comment>()
-            .HasOne(c => c.Order)
+            .HasOne(c => c.Product)
             .WithMany(o => o.Comments)
-            .HasForeignKey(c => c.OrderId)
+            .HasForeignKey(c => c.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Comment>()
