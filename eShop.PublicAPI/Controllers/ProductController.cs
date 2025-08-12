@@ -17,9 +17,9 @@ namespace eShop.PublicAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] Guid id)
+        public IActionResult GetById([FromRoute] Guid id, [FromQuery] Guid? userId = null)
         {
-            var response = _productService.GetProductById(id);
+            var response = _productService.GetProductById(id, userId);
             return HandleResponse(response);
         }
     }

@@ -10,6 +10,7 @@ public class ProductDetailsDTO
     public string Category { get; set; } = string.Empty;
     public string Subcategory { get; set; } = string.Empty;
     public string Image { get; set; } = string.Empty;
+    public bool CanComment { get; set; }
     public Guid SubcategoryId { get; set; }
     public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }

@@ -16,6 +16,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 {
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Subcategory> _subcategoryRepository = _uow.GetRepository<Subcategory>();
+    private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
     public ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request)
     {
@@ -88,7 +89,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         };
     }
 
-    public ApiResponse<ProductDetailsDTO> GetProductById(Guid id)
+    public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
     {
         var product = _productRepository.Get(
                 filter: x => x.Id == id,
@@ -100,6 +101,15 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 NotificationType = NotificationType.NotFound,
                 Message = ProductConstants.PRODUCT_DOESNT_EXIST
             };
+
+        bool canComment = false;
+
+        if (userId.HasValue)
+        {
+            canComment = _orderRepository.Exists(o =>
+                o.UserId == userId.Value &&
+                o.Items.Any(oi => oi.ProductId == id));
+        }
 
         var productDto = new ProductDetailsDTO()
         {
@@ -114,6 +124,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             LastModified = product.LastModified,
             Created = product.Created,
             Image = product.Image != null ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}" : null,
+            CanComment = canComment
         };
 
 

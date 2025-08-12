@@ -7,7 +7,7 @@ namespace eShop.Application.Interfaces;
 public interface IProductService
 {
     ApiResponse<List<ProductDetailsDTO>> GetProducts(ProductRequest request);
-    ApiResponse<ProductDetailsDTO> GetProductById(Guid id);
+    ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId);
     ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id);
