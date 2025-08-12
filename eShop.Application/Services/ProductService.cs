@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Constants;
+using eShop.Application.DTOs.Comment;
 using eShop.Application.DTOs.Product;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
@@ -92,9 +93,8 @@ public class ProductService(IUnitOfWork _uow) : IProductService
     public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
     {
         var product = _productRepository.Get(
-                filter: x => x.Id == id,
-                include: x => x.Include(x => x.Comments).Include(x => x.Subcategory).ThenInclude(x => x.Category)).FirstOrDefault();
-
+            filter: x => x.Id == id,
+            include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category)).FirstOrDefault();
 
         if (product is null)
             return new ApiResponse<ProductDetailsDTO>
@@ -127,14 +127,16 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Image = product.Image != null
                 ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}"
                 : null,
-            CanComment = canComment,
-            Comments = product.Comments?.Select(x => new DTOs.Comment.CommentDTO
+            Comments = product.Comments?
+            .OrderByDescending(x => x.Created)
+            .Select(x => new CommentDTO
             {
                 CommentText = x.CommentText,
+                CreatedBy = x.CreatedBy,
+                Created = x.Created,
             }).ToList()
+
         };
-
-
 
         return new ApiResponse<ProductDetailsDTO>
         {
