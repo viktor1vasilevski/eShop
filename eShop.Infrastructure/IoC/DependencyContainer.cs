@@ -19,6 +19,7 @@ public static class DependencyContainer
         services.AddScoped<IBasketService, BasketService>();
         services.AddScoped<ICustomerAuthService, CustomerAuthService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ICommentService, CommentService>();
 
         return services;
     }

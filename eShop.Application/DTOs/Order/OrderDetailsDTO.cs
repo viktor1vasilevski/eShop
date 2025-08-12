@@ -2,7 +2,7 @@
 
 namespace eShop.Application.DTOs.Order;
 
-public class OrderDTO
+public class OrderDetailsDTO
 {
     public List<OrderItemDTO>? Items { get; set; }
     public decimal TotalAmount { get; set; }

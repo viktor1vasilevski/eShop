@@ -6,6 +6,6 @@ namespace eShop.Application.Interfaces;
 
 public interface IOrderService
 {
-    ApiResponse<List<OrderDTO>> GetOrders(OrderRequest request);
-    Task<ApiResponse<OrderDTO>> PlaceOrderAsync(PlaceOrderRequest request);
+    ApiResponse<List<OrderDetailsDTO>> GetOrders(OrderRequest request);
+    Task<ApiResponse<OrderDetailsDTO>> PlaceOrderAsync(PlaceOrderRequest request);
 }

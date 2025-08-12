@@ -93,7 +93,8 @@ public class ProductService(IUnitOfWork _uow) : IProductService
     {
         var product = _productRepository.Get(
                 filter: x => x.Id == id,
-                include: x => x.Include(x => x.Subcategory).ThenInclude(x => x.Category)).FirstOrDefault();
+                include: x => x.Include(x => x.Comments).Include(x => x.Subcategory).ThenInclude(x => x.Category)).FirstOrDefault();
+
 
         if (product is null)
             return new ApiResponse<ProductDetailsDTO>
@@ -123,9 +124,16 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Category = product.Subcategory?.Category?.Name,
             LastModified = product.LastModified,
             Created = product.Created,
-            Image = product.Image != null ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}" : null,
-            CanComment = canComment
+            Image = product.Image != null
+                ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}"
+                : null,
+            CanComment = canComment,
+            Comments = product.Comments?.Select(x => new DTOs.Comment.CommentDTO
+            {
+                CommentText = x.CommentText,
+            }).ToList()
         };
+
 
 
         return new ApiResponse<ProductDetailsDTO>

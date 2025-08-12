@@ -1,4 +1,6 @@
-﻿namespace eShop.Application.DTOs.Product;
+﻿using eShop.Application.DTOs.Comment;
+
+namespace eShop.Application.DTOs.Product;
 
 public class ProductDetailsDTO
 {
@@ -11,6 +13,7 @@ public class ProductDetailsDTO
     public string Subcategory { get; set; } = string.Empty;
     public string Image { get; set; } = string.Empty;
     public bool CanComment { get; set; }
+    public List<CommentDTO>? Comments { get; set; }
     public Guid SubcategoryId { get; set; }
     public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }

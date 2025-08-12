@@ -18,13 +18,13 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
 
-    public ApiResponse<List<OrderDTO>> GetOrders(OrderRequest request)
+    public ApiResponse<List<OrderDetailsDTO>> GetOrders(OrderRequest request)
     {
         var query = _orderRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(request.UserId != Guid.Empty, o => o.UserId == request.UserId),
             include: x => x.Include(x => x.Items).ThenInclude(p => p.Product));
 
-        var ordersDTO = query.Select(order => new OrderDTO
+        var ordersDTO = query.Select(order => new OrderDetailsDTO
         {
             TotalAmount = order.TotalAmount,
             OrderCreatedOn = order.Created,
@@ -37,16 +37,16 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         }).ToList();
 
 
-        return new ApiResponse<List<OrderDTO>>
+        return new ApiResponse<List<OrderDetailsDTO>>
         {
             Data = ordersDTO,
             NotificationType = NotificationType.Success,
         };
     }
 
-    public async Task<ApiResponse<OrderDTO>> PlaceOrderAsync(PlaceOrderRequest request)
+    public async Task<ApiResponse<OrderDetailsDTO>> PlaceOrderAsync(PlaceOrderRequest request)
     {
-        var response = new ApiResponse<OrderDTO>();
+        var response = new ApiResponse<OrderDetailsDTO>();
 
         // 1. Validate user exists (optional)
         var user = _userRepository.GetById(request.UserId);

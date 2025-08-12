@@ -1,0 +1,8 @@
+﻿namespace eShop.Application.Requests.Comment;
+
+public class CreateCommentRequest
+{
+    public Guid ProductId { get; set; }
+    public Guid UserId { get; set; }
+    public string CommentText { get; set; } = string.Empty;
+}

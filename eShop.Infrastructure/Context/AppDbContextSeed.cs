@@ -23,9 +23,9 @@ public static class AppDbContextSeed
             password: "Viktor@123",
             role: Role.Customer);
 
-        var adminUser = User.CreateNew(userData);
+        var user = User.CreateNew(userData);
 
-        context.Users.Add(adminUser);
+        context.Users.Add(user);
         context.SaveChanges();
     }
 
