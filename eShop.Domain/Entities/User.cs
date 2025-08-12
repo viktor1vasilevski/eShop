@@ -14,6 +14,7 @@ public class User : AuditableBaseEntity
     public string Email { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
     public string SaltKey { get; private set; } = string.Empty;
+    public bool IsActive { get; set; } = false;
 
     public virtual Basket? Basket { get; set; }
     public virtual ICollection<Order>? Orders { get; set; }
