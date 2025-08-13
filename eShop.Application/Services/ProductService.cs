@@ -19,133 +19,6 @@ public class ProductService(IUnitOfWork _uow) : IProductService
     private readonly IRepositoryBase<Subcategory> _subcategoryRepository = _uow.GetRepository<Subcategory>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
-    public ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request)
-    {
-        if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-                NotificationType = NotificationType.NotFound
-            };
-
-        try
-        {
-            var productData = new ProductData(
-                name: request.Name,
-                description: request.Description,
-                unitPrice: request.Price,
-                unitQuantity: request.Quantity,
-                subcategoryId: request.SubcategoryId,
-                base64Image: request.Image);
-
-            var product = Product.CreateNew(productData);
-            _productRepository.Insert(product);
-            _uow.SaveChanges();
-
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                Message = ProductConstants.PRODUCT_SUCCESSFULLY_CREATED,
-                NotificationType = NotificationType.Created,
-                Data = new ProductDetailsDTO
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Description = product.Description,
-                    UnitPrice = product.UnitPrice,
-                    UnitQuantity = product.UnitQuantity,
-                    SubcategoryId = product.SubcategoryId,
-                    Created = product.Created,
-                }
-            };
-        }
-        catch (DomainValidationException ex)
-        {
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                NotificationType = NotificationType.BadRequest,
-                Message = ex.Message
-            };
-        }
-
-
-    }
-
-    public ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id)
-    {
-        var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
-        if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                NotificationType = NotificationType.NotFound,
-                Message = ProductConstants.PRODUCT_DOESNT_EXIST
-            };
-
-        product.SoftDelete();
-        _uow.SaveChanges();
-
-        return new ApiResponse<ProductDetailsDTO>
-        {
-            Message = ProductConstants.PRODUCT_SUCCESSFULLY_DELETED,
-            NotificationType = NotificationType.Success
-        };
-    }
-
-    public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
-    {
-        var product = _productRepository.Get(
-            filter: x => x.Id == id && !x.IsDeleted,
-            include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category)).FirstOrDefault();
-
-        if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                NotificationType = NotificationType.NotFound,
-                Message = ProductConstants.PRODUCT_DOESNT_EXIST
-            };
-
-        bool canComment = false;
-
-        if (userId.HasValue)
-        {
-            canComment = _orderRepository.Exists(o =>
-                o.UserId == userId.Value &&
-                o.Items.Any(oi => oi.ProductId == id));
-        }
-
-        var productDto = new ProductDetailsDTO()
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            UnitPrice = product.UnitPrice,
-            UnitQuantity = product.UnitQuantity,
-            SubcategoryId = product.SubcategoryId,
-            Subcategory = product.Subcategory?.Name,
-            Category = product.Subcategory?.Category?.Name,
-            LastModified = product.LastModified,
-            Created = product.Created,
-            CanComment = canComment,
-            Image = product.Image != null
-                ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}"
-                : null,
-            Comments = product.Comments?
-            .OrderByDescending(x => x.Created)
-            .Select(x => new CommentDTO
-            {
-                CommentText = x.CommentText,
-                CreatedBy = x.CreatedBy,
-                Created = x.Created,
-            }).ToList()
-
-        };
-
-        return new ApiResponse<ProductDetailsDTO>
-        {
-            NotificationType = NotificationType.Success,
-            Data = productDto
-        };
-    }
-
     public ApiResponse<List<ProductDetailsDTO>> GetProducts(ProductRequest request)
     {
         var query = _productRepository.GetAsQueryableWhereIf(
@@ -214,6 +87,113 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         };
     }
 
+    public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
+    {
+        var product = _productRepository.Get(
+            filter: x => x.Id == id && !x.IsDeleted,
+            include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category)).FirstOrDefault();
+
+        if (product is null)
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                NotificationType = NotificationType.NotFound,
+                Message = ProductConstants.PRODUCT_DOESNT_EXIST
+            };
+
+        bool canComment = false;
+
+        if (userId.HasValue)
+        {
+            canComment = _orderRepository.Exists(o =>
+                o.UserId == userId.Value &&
+                o.Items.Any(oi => oi.ProductId == id));
+        }
+
+        var productDto = new ProductDetailsDTO()
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            SubcategoryId = product.SubcategoryId,
+            Subcategory = product.Subcategory?.Name,
+            Category = product.Subcategory?.Category?.Name,
+            LastModified = product.LastModified,
+            Created = product.Created,
+            CanComment = canComment,
+            Image = product.Image != null
+                ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}"
+                : null,
+            Comments = product.Comments?
+            .OrderByDescending(x => x.Created)
+            .Select(x => new CommentDTO
+            {
+                CommentText = x.CommentText,
+                CreatedBy = x.CreatedBy,
+                Created = x.Created,
+            }).ToList()
+
+        };
+
+        return new ApiResponse<ProductDetailsDTO>
+        {
+            NotificationType = NotificationType.Success,
+            Data = productDto
+        };
+    }
+
+    public ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request)
+    {
+        if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
+                NotificationType = NotificationType.NotFound
+            };
+
+        try
+        {
+            var productData = new ProductData(
+                name: request.Name,
+                description: request.Description,
+                unitPrice: request.Price,
+                unitQuantity: request.Quantity,
+                subcategoryId: request.SubcategoryId,
+                base64Image: request.Image);
+
+            var product = Product.CreateNew(productData);
+            _productRepository.Insert(product);
+            _uow.SaveChanges();
+
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                Message = ProductConstants.PRODUCT_SUCCESSFULLY_CREATED,
+                NotificationType = NotificationType.Created,
+                Data = new ProductDetailsDTO
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    UnitPrice = product.UnitPrice,
+                    UnitQuantity = product.UnitQuantity,
+                    SubcategoryId = product.SubcategoryId,
+                    Created = product.Created,
+                }
+            };
+        }
+        catch (DomainValidationException ex)
+        {
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                NotificationType = NotificationType.BadRequest,
+                Message = ex.Message
+            };
+        }
+
+
+    }
+
     public ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request)
     {
         var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
@@ -232,7 +212,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             };
 
 
-        if(product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
+        if (product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
             return new ApiResponse<ProductDetailsDTO>
             {
                 NotificationType = NotificationType.Conflict,
@@ -267,5 +247,25 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 Message = ex.Message
             };
         }
+    }
+
+    public ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id)
+    {
+        var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
+        if (product is null)
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                NotificationType = NotificationType.NotFound,
+                Message = ProductConstants.PRODUCT_DOESNT_EXIST
+            };
+
+        product.SoftDelete();
+        _uow.SaveChanges();
+
+        return new ApiResponse<ProductDetailsDTO>
+        {
+            Message = ProductConstants.PRODUCT_SUCCESSFULLY_DELETED,
+            NotificationType = NotificationType.Success
+        };
     }
 }
