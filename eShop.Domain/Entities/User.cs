@@ -14,7 +14,8 @@ public class User : AuditableBaseEntity
     public string Email { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
     public string SaltKey { get; private set; } = string.Empty;
-    public bool IsActive { get; set; } = false;
+    public bool IsDeleted { get; set; }
+
 
     public virtual Basket? Basket { get; set; }
     public virtual ICollection<Order>? Orders { get; set; }
@@ -46,7 +47,6 @@ public class User : AuditableBaseEntity
         Email = user.Email.ToLower();
         FirstName = user.FirstName;
         LastName = user.LastName;
-        IsActive = user.IsActive;
         Role = user.Role;
 
         if (isNewUser || isPasswordChangeAllowed)
@@ -87,7 +87,6 @@ public class UserData
     public string Username { get; }
     public string Email { get; }
     public string Password { get; }
-    public bool IsActive { get; set; }
     public Role Role { get; }
 
     public UserData(
@@ -96,7 +95,6 @@ public class UserData
         string username,
         string email,
         string password,
-        bool isActive,
         Role role)
     {
         FirstName = firstName;
@@ -104,7 +102,6 @@ public class UserData
         Username = username;
         Email = email;
         Password = password;
-        IsActive = isActive;
         Role = role;
     }
 }

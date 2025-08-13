@@ -16,14 +16,11 @@ namespace eShop.Application.Services;
 public class CategoryService(IUnitOfWork _uow) : ICategoryService
 {
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
-    private readonly IRepositoryBase<Subcategory> _subcategoryRepository = _uow.GetRepository<Subcategory>();
-
-
 
     public ApiResponse<List<CategoryDetailsDTO>> GetCategories(CategoryRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
+            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())).Where(x => !x.IsDeleted));
 
         var totalCount = query.Count();
 
@@ -49,7 +46,6 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 };
             }
         }
-
 
         if (request.Skip.HasValue)
             sortedQuery = sortedQuery.Skip(request.Skip.Value);
@@ -166,7 +162,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 NotificationType = NotificationType.Conflict
             };
 
-        category.IsActive = false;
+        category.SoftDelete();
         _uow.SaveChanges();
 
         return new ApiResponse<CategoryDetailsDTO>
@@ -201,7 +197,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public ApiResponse<CategoryDTO> GetCategoryById(Guid id)
     {
-        var category = _categoryRepository.GetById(id);
+        var category = _categoryRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
 
         if (category is null)
             return new ApiResponse<CategoryDTO>

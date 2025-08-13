@@ -12,7 +12,7 @@ public class Product : AuditableBaseEntity
     public int UnitQuantity { get; set; }
     public byte[] Image { get; private set; } = [];
     public string ImageType { get; private set; } = string.Empty;
-    public bool IsActive { get; set; } = false;
+    public bool IsDeleted { get; set; }
 
     public Guid SubcategoryId { get; private set; }
     public virtual Subcategory? Subcategory { get; set; }
