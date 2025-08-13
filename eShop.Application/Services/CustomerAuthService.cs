@@ -72,6 +72,7 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
                 username: request.Username,
                 email: request.Email,
                 password: request.Password,
+                isActive: request.IsActive,
                 role: Role.Customer);
 
             var user = User.CreateNew(userData);

@@ -21,6 +21,7 @@ public static class AppDbContextSeed
             username: "viktorvasilevski",
             email: "viktor@example.com",
             password: "Viktor@123",
+            isActive: true,
             role: Role.Customer);
 
         var user = User.CreateNew(userData);
@@ -43,6 +44,7 @@ public static class AppDbContextSeed
             username: "admin",
             email: "admin@example.com",
             password: password,
+            isActive: true,
             role: Role.Admin);
 
         var adminUser = User.CreateNew(adminData);

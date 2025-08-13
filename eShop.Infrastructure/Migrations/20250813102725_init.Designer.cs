@@ -12,8 +12,8 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250812230744_add_IsActive_prop_for_Category_Subcategory_Product_and_User")]
-    partial class add_IsActive_prop_for_Category_Subcategory_Product_and_User
+    [Migration("20250813102725_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -166,7 +166,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 NotificationType = NotificationType.Conflict
             };
 
-        _categoryRepository.Delete(category);
+        category.IsActive = false;
         _uow.SaveChanges();
 
         return new ApiResponse<CategoryDetailsDTO>
