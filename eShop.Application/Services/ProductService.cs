@@ -80,7 +80,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 Message = ProductConstants.PRODUCT_DOESNT_EXIST
             };
 
-        _productRepository.Delete(product);
+        product.SoftDelete();
         _uow.SaveChanges();
 
         return new ApiResponse<ProductDetailsDTO>
@@ -124,6 +124,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Category = product.Subcategory?.Category?.Name,
             LastModified = product.LastModified,
             Created = product.Created,
+            CanComment = canComment,
             Image = product.Image != null
                 ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}"
                 : null,

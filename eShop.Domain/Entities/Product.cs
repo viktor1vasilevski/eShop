@@ -12,7 +12,7 @@ public class Product : AuditableBaseEntity
     public int UnitQuantity { get; set; }
     public byte[] Image { get; private set; } = [];
     public string ImageType { get; private set; } = string.Empty;
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
 
     public Guid SubcategoryId { get; private set; }
     public virtual Subcategory? Subcategory { get; set; }
@@ -65,8 +65,8 @@ public class Product : AuditableBaseEntity
         if (product.Name.Length > 50)
             throw new DomainValidationException("Brand name cannot exceed 50 characters.");
 
-        if (product.Description.Length > 500)
-            throw new DomainValidationException("Description cannot exceed 500 characters.");
+        if (product.Description.Length > 1500)
+            throw new DomainValidationException("Description cannot exceed 1500 characters.");
 
         if (product.UnitPrice <= 0)
             throw new DomainValidationException("Unit price must be greater than zero.");
