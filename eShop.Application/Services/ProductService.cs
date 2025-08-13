@@ -215,6 +215,14 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
     public ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request)
     {
+        var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
+        if (product is null)
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                NotificationType = NotificationType.NotFound,
+                Message = ProductConstants.PRODUCT_DOESNT_EXIST
+            };
+
         if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
             return new ApiResponse<ProductDetailsDTO>
             {
@@ -222,14 +230,6 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
             };
 
-        var product = _productRepository.GetById(id);
-
-        if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                NotificationType = NotificationType.NotFound,
-                Message = ProductConstants.PRODUCT_DOESNT_EXIST
-            };
 
         if(product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
             return new ApiResponse<ProductDetailsDTO>
