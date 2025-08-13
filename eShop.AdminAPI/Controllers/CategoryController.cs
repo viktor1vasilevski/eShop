@@ -55,9 +55,9 @@ namespace eShop.AdminAPI.Controllers
         }
 
         [HttpGet("GetCategoriesDropdownList")]
-        public IActionResult GetCategoriesDropdownList()
+        public async Task<IActionResult> GetCategoriesDropdownListAsync()
         {
-            var response = _categoryService.GetCategoriesDropdownList();
+            var response = await _categoryService.GetCategoriesDropdownListAsync();
             return HandleResponse(response);
         }
     }

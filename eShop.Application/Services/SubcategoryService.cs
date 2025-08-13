@@ -144,7 +144,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     {
         var query = _subcategoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.CategoryId == request.CategoryId)
-                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())).Where(x => !x.IsDeleted),
             include: x => x.Include(x => x.Category));
 
         var totalCount = query.Count();
@@ -215,7 +215,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     public ApiResponse<List<SelectSubcategoryListItemDTO>> GetSubcategoriesWithCategoriesDropdownList()
     {
         var uncategorizedCategoryId = _categoryRepository
-                        .Get(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME)
+                        .Get(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME && !x.IsDeleted)
                         .Select(x => x.Id)
                         .FirstOrDefault();
 
@@ -241,16 +241,15 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
     public ApiResponse<SubcategoryDetailsDTO> GetSubcategoryById(Guid id)
     {
-        if (!_subcategoryRepository.Exists(x => x.Id == id))
+        var subcategory = _subcategoryRepository.GetAsQueryable(x => x.Id == id && !x.IsDeleted, null,
+            x => x.Include(x => x.Products).Include(x => x.Category)).FirstOrDefault();
+
+        if(subcategory is null)
             return new ApiResponse<SubcategoryDetailsDTO>
             {
                 NotificationType = NotificationType.NotFound,
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
             };
-
-
-        var subcategory = _subcategoryRepository.GetAsQueryable(x => x.Id == id, null,
-            x => x.Include(x => x.Products).Include(x => x.Category)).FirstOrDefault();
 
         return new ApiResponse<SubcategoryDetailsDTO>
         {

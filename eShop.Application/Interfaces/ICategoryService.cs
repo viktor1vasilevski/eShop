@@ -12,6 +12,6 @@ public interface ICategoryService
     ApiResponse<CategoryDetailsDTO> DeleteCategory(Guid id);
     ApiResponse<CategoryDTO> GetCategoryById(Guid id);
 
-    ApiResponse<List<SelectCategoryListItemDTO>> GetCategoriesDropdownList();
+    Task<ApiResponse<List<SelectCategoryListItemDTO>>> GetCategoriesDropdownListAsync();
     ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu();
 }

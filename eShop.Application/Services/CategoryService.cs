@@ -172,9 +172,9 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-    public ApiResponse<List<SelectCategoryListItemDTO>> GetCategoriesDropdownList()
+    public async Task<ApiResponse<List<SelectCategoryListItemDTO>>> GetCategoriesDropdownListAsync()
     {
-        var categories = _categoryRepository.GetAsQueryable();
+        var categories = await _categoryRepository.GetAsync(x => !x.IsDeleted);
 
         var categoriesDropdownDTO = categories.Select(x => new SelectCategoryListItemDTO
         {

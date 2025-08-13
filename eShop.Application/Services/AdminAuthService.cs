@@ -23,7 +23,7 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration) :
         var response = await _userRepository.GetAsync(x => x.Username == normalizedUsername);
         var user = response?.FirstOrDefault();
 
-        if (user is null || user?.Role != Role.Admin || !user.VerifyPassword(request.Password))
+        if (user is null || user?.Role != Role.Admin || user.IsDeleted || !user.VerifyPassword(request.Password))
             return new ApiResponse<LoginDTO>
             {
                 Message = AuthConstants.INVALID_CREDENTIAL,
