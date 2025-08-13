@@ -121,7 +121,6 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         try
         {
             category.Update(request.Name);
-            _categoryRepository.Update(category);
             _uow.SaveChanges();
 
             return new ApiResponse<CategoryDetailsDTO>
@@ -155,7 +154,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 NotificationType = NotificationType.NotFound
             };
 
-        if (HasRelatedEntities(category))
+        if(category.HasRelatedSubcategoriesOrProducts())
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,

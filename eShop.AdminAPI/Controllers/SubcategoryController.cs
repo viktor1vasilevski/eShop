@@ -56,9 +56,9 @@ public class SubcategoryController(ISubcategoryService _subcategoryService) : Ba
 
 
     [HttpGet("DropdownList")]
-    public IActionResult GetSubcategoriesDropdownList()
+    public async Task<IActionResult> GetSubcategoriesDropdownListAsync()
     {
-        var response = _subcategoryService.GetSubcategoriesDropdownList();
+        var response = await _subcategoryService.GetSubcategoriesDropdownListAsync();
         return HandleResponse(response);
 
     }

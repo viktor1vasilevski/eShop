@@ -66,7 +66,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     public ApiResponse<SubcategoryDTO> DeleteSubcategory(Guid id)
     {
         var subcategory = _subcategoryRepository.GetAsQueryable(
-                        filter: x => x.Id == id && x.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME,
+                        filter: x => x.Id == id && x.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && !x.IsDeleted,
                         include: x => x.Include(x => x.Products)).FirstOrDefault();
 
         if (subcategory is null)
@@ -76,7 +76,8 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
                 NotificationType = NotificationType.NotFound
             };
 
-        if (HasRelatedEntities(subcategory))
+
+        if(subcategory.HasRelatedProducts())
             return new ApiResponse<SubcategoryDTO>
             {
                 Message = SubcategoryConstants.SUBCATEGORY_HAS_RELATED_ENTITIES,
@@ -107,7 +108,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             return new ApiResponse<SubcategoryDTO>
             {
                 NotificationType = NotificationType.NotFound,
-                Message = CategoryConstants.CATEGORY_DOESNT_EXIST,
+                Message = CategoryConstants.CATEGORY_DOESNT_EXIST
             };
 
         if (_subcategoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower() && x.Id != id))
@@ -120,7 +121,6 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         try
         {
             subcategory.Update(request.CategoryId, request.Name);
-            _subcategoryRepository.Update(subcategory);
             _uow.SaveChanges();
 
             return new ApiResponse<SubcategoryDTO>
@@ -138,6 +138,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
                 Message = ex.Message
             };
         }
+
     }
 
     public ApiResponse<List<SubcategoryDetailsDTO>> GetSubcategories(SubcategoryRequest request)
@@ -196,9 +197,9 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         };
     }
 
-    public ApiResponse<List<SelectSubcategoryListItemDTO>> GetSubcategoriesDropdownList()
+    public async Task<ApiResponse<List<SelectSubcategoryListItemDTO>>> GetSubcategoriesDropdownListAsync()
     {
-        var subcategories = _subcategoryRepository.GetAsQueryable();
+        var subcategories = await _subcategoryRepository.GetAsync(x => !x.IsDeleted);
 
         var subcategoriesDropdownDTO = subcategories.Select(x => new SelectSubcategoryListItemDTO
         {
@@ -268,6 +269,6 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
     private bool HasRelatedEntities(Subcategory subcategory)
     {
-        return subcategory.Products?.Any() == true;
+        return subcategory.Products?.Any(x => !x.IsDeleted) == true;
     }
 }
