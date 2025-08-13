@@ -150,9 +150,9 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         var query = _productRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.Subcategory.Category.Id == request.CategoryId)
                           .WhereIf(!String.IsNullOrEmpty(request.SubcategoryId.ToString()), x => x.Subcategory.Id == request.SubcategoryId)
-                          .WhereIf(true, x => x.UnitQuantity > 0)
                           .WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
-                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower()))
+                     .Where(x => x.UnitQuantity > 0 && !x.IsDeleted),
             include: x => x.Include(x => x.Subcategory).ThenInclude(sc => sc.Category));
 
         var totalCount = query.Count();
