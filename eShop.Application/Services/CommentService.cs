@@ -12,6 +12,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
 {
     private readonly IRepositoryBase<Comment> _commentRepository = _uow.GetRepository<Comment>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
+    private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
 
     public ApiResponse<CommentDTO> CreateComment(CreateCommentRequest request)
     {
@@ -31,16 +32,19 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
             Id = Guid.NewGuid(),
             ProductId = request.ProductId,
             UserId = request.UserId,
-            CommentText = request.CommentText
+            CommentText = request.CommentText,
+            Rating = request.Rating,
         };
 
         _commentRepository.Insert(comment);
         _uow.SaveChanges();
 
-
         var resultDto = new CommentDTO
         {
             CommentText = comment.CommentText,
+            CreatedBy = comment.CreatedBy,
+            Created = comment.Created,
+            Rating = comment.Rating,
         };
 
         return new ApiResponse<CommentDTO>

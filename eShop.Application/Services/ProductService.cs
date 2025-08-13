@@ -132,6 +132,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 CommentText = x.CommentText,
                 CreatedBy = x.CreatedBy,
                 Created = x.Created,
+                Rating = x.Rating,
             }).ToList()
 
         };
