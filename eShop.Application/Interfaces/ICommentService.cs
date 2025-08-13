@@ -6,5 +6,6 @@ namespace eShop.Application.Interfaces;
 
 public interface ICommentService
 {
+    ApiResponse<List<CommentDTO>> GetComments(CommentRequest request);
     ApiResponse<CommentDTO> CreateComment(CreateCommentRequest request);
 }

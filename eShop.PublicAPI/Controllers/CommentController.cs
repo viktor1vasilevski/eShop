@@ -10,7 +10,12 @@ namespace eShop.PublicAPI.Controllers;
 [ApiController]
 public class CommentController(ICommentService _commentService) : BaseController
 {
-
+    [HttpGet]
+    public IActionResult Get([FromQuery] CommentRequest request)
+    {
+        var response = _commentService.GetComments(request);
+        return HandleResponse(response);
+    }
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]

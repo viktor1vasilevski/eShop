@@ -1,4 +1,5 @@
-﻿using eShop.Application.DTOs.Comment;
+﻿using eShop.Application.DTOs.Category;
+using eShop.Application.DTOs.Comment;
 using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Comment;
@@ -12,8 +13,56 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
 {
     private readonly IRepositoryBase<Comment> _commentRepository = _uow.GetRepository<Comment>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
-    private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
 
+
+    public ApiResponse<List<CommentDTO>> GetComments(CommentRequest request)
+    {
+        var query = _commentRepository.GetAsQueryable();
+
+        var totalCount = query.Count();
+
+        var sortedQuery = query;
+        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
+        {
+            if (request.SortDirection.ToLower() == "asc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    _ => sortedQuery.OrderBy(x => x.Created)
+                };
+            }
+            else if (request.SortDirection.ToLower() == "desc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
+                };
+            }
+        }
+
+        if (request.Skip.HasValue)
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+
+        if (request.Take.HasValue)
+            sortedQuery = sortedQuery.Take(request.Take.Value);
+
+        var commentsDTO = sortedQuery.Select(x => new CommentDTO
+        {
+            Rating = x.Rating,
+            Created = x.Created,
+            CommentText = x.CommentText,
+            CreatedBy = x.CreatedBy
+        }).ToList();
+
+        return new ApiResponse<List<CommentDTO>>()
+        {
+            Data = commentsDTO,
+            TotalCount = totalCount,
+            NotificationType = NotificationType.Success,
+        };
+    }
     public ApiResponse<CommentDTO> CreateComment(CreateCommentRequest request)
     {
         bool hasBought = _orderRepository.Exists(o =>
@@ -53,4 +102,6 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
             Data = resultDto
         };
     }
+
+
 }
