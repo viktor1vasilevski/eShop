@@ -38,6 +38,8 @@ public class Product : AuditableBaseEntity
         ApplyProductData(product);
     }
 
+    public void SoftDelete() => IsDeleted = true;
+
     private void ApplyProductData(ProductData product)
     {
         var imageBytes = ConvertBase64ToBytes(product.Base64Image);

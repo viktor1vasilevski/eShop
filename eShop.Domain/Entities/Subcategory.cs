@@ -6,7 +6,7 @@ namespace eShop.Domain.Entities;
 public class Subcategory : AuditableBaseEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
 
     public Guid CategoryId { get; private set; }
     public virtual Category? Category { get; set; }
@@ -39,6 +39,8 @@ public class Subcategory : AuditableBaseEntity
         CategoryId = categoryId;
         Name = name;
     }
+
+    public void SoftDelete() => IsDeleted = true;
 
     public bool HasRelatedProducts()
     {

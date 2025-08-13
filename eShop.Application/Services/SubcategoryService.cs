@@ -84,7 +84,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
                 NotificationType = NotificationType.Conflict
             };
 
-        _subcategoryRepository.Delete(subcategory);
+        subcategory.SoftDelete();
         _uow.SaveChanges();
 
         return new ApiResponse<SubcategoryDTO>

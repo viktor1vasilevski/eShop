@@ -72,7 +72,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
     public ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id)
     {
-        var product = _productRepository.GetById(id);
+        var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
         if (product is null)
             return new ApiResponse<ProductDetailsDTO>
             {
