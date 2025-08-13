@@ -1,7 +1,6 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
-using eShop.Domain.Models;
 
 namespace eShop.Domain.Entities;
 
@@ -23,16 +22,6 @@ public class Basket : AuditableBaseEntity
             UserId = userId
         };
     }
-
-    public void MergeItems(IEnumerable<BasketMergeItem> items)
-    {
-        foreach (var item in items)
-        {
-            AddOrUpdateItem(item.Product, item.Quantity);
-        }
-    }
-
-
 
     public void AddOrUpdateItem(Product product, int quantity)
     {
