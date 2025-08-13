@@ -93,7 +93,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
     public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
     {
         var product = _productRepository.Get(
-            filter: x => x.Id == id,
+            filter: x => x.Id == id && !x.IsDeleted,
             include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category)).FirstOrDefault();
 
         if (product is null)
