@@ -11,7 +11,7 @@ public class Subcategory : AuditableBaseEntity
     public Guid CategoryId { get; private set; }
     public virtual Category? Category { get; set; }
 
-    public virtual ICollection<Product>? Products { get; set; }
+    public virtual ICollection<Product>? Products { get; private set; }
 
 
 
@@ -38,6 +38,11 @@ public class Subcategory : AuditableBaseEntity
 
         CategoryId = categoryId;
         Name = name;
+    }
+
+    public bool HasRelatedProducts()
+    {
+        return Products?.Any(x => !x.IsDeleted) == true;
     }
 
 }
