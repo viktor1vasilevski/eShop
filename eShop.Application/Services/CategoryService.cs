@@ -143,9 +143,8 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
     public ApiResponse<CategoryDetailsDTO> DeleteCategory(Guid id)
     {
         var category = _categoryRepository.GetAsQueryable(
-                         filter: x => x.Id == id && x.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME,
-                         include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)
-                         ).FirstOrDefault();
+              filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME,
+              include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
 
         if (category is null)
             return new ApiResponse<CategoryDetailsDTO>
@@ -154,7 +153,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 NotificationType = NotificationType.NotFound
             };
 
-        if(category.HasRelatedSubcategoriesOrProducts())
+        if(category.HasRelatedSubcategories())
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,

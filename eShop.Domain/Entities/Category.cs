@@ -8,6 +8,7 @@ public class Category : AuditableBaseEntity
     public string Name { get; private set; } = string.Empty;
     public bool IsDeleted { get; private set; }
 
+    // navigation property
     public virtual ICollection<Subcategory>? Subcategories { get; private set; }
 
 
@@ -21,7 +22,8 @@ public class Category : AuditableBaseEntity
         return new Category
         {
             Id = Guid.NewGuid(),
-            Name = name
+            Name = name,
+            IsDeleted = false,
         };
     }
 
@@ -33,9 +35,8 @@ public class Category : AuditableBaseEntity
 
     public void SoftDelete() => IsDeleted = true;
 
-    public bool HasRelatedSubcategoriesOrProducts()
+    public bool HasRelatedSubcategories()
     {
-        return Subcategories?.Any(x => !x.IsDeleted) == true || Subcategories?.FirstOrDefault()?.HasRelatedProducts() == true;
+        return Subcategories?.Any(x => !x.IsDeleted) == true;
     }
-
 }
