@@ -26,38 +26,44 @@ public class Basket : AuditableBaseEntity
 
     public void ClearItems() => _items.Clear();
 
-    public void AddOrUpdateItem(Product product, int quantity)
+    public void RemoveItem(Guid productId)
+    {
+        var item = _items.FirstOrDefault(i => i.ProductId == productId);
+        if (item != null)
+            _items.Remove(item);
+    }
+
+    public void AddItem(Product product, int quantity)
     {
         if (product == null)
             throw new DomainException("Product cannot be null.");
 
-        var existingItem = Items.FirstOrDefault(i => i.ProductId == product.Id);
+        var existingItem = _items.FirstOrDefault(i => i.ProductId == product.Id);
 
         if (existingItem != null)
         {
-            existingItem.UpdateQuantity(existingItem.Quantity + quantity, product.UnitQuantity);
+            // Update quantity but do not exceed product.UnitQuantity
+            existingItem.Quantity = Math.Min(existingItem.Quantity + quantity, product.UnitQuantity);
         }
         else
         {
-            var newItem = BasketItem.CreateNew(Id, product.Id, Math.Min(quantity, product.UnitQuantity));
-            newItem.Basket = this; // <-- crucial for EF tracking
-
-            Items.Add(newItem);
+            var newItem = new BasketItem
+            {
+                ProductId = product.Id,
+                Quantity = Math.Min(quantity, product.UnitQuantity),
+                Basket = this // EF tracking
+            };
+            _items.Add(newItem);
         }
     }
 
 
-    public void UpdateItemQuantity(Guid productId, int newQuantity)
+    public void UpdateItemQuantity(Guid productId, int quantity)
     {
-        if (productId == Guid.Empty)
-            throw new DomainException("ProductId cannot be empty.");
+        var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
+        if (existingItem == null)
+            throw new DomainException("Item not found in the basket.");
 
-        var item = Items.FirstOrDefault(i => i.ProductId == productId);
-        if (item is null)
-            throw new DomainException("Basket item not found.");
-
-        item.UpdateQuantity(newQuantity, item.Product?.UnitQuantity ?? int.MaxValue);
+        existingItem.UpdateQuantity(quantity, existingItem.Quantity);
     }
-
-
 }

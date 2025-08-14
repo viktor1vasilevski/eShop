@@ -56,6 +56,7 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> MergeItemsAsync(Guid userId, List<BasketRequest> request)
         {
+            // Check if user exists
             var userExists = await _userRepository.ExistsAsync(x => x.Id == userId);
             if (!userExists)
                 return new ApiResponse<BasketDTO>
@@ -64,7 +65,7 @@ namespace eShop.Application.Services
                     NotificationType = NotificationType.NotFound
                 };
 
-            // Load basket and include items
+            // Load basket including items (tracked)
             var basket = _basketRepository.Get(
                 filter: x => x.UserId == userId,
                 include: x => x.Include(b => b.Items)).FirstOrDefault();
@@ -75,40 +76,22 @@ namespace eShop.Application.Services
                 await _basketRepository.InsertAsync(basket);
             }
 
-            // Load products needed for validation, stock limits, etc.
+            // Load all products needed for validation
             var productIds = request.Select(r => r.ProductId).Distinct().ToList();
             var products = await _productRepository.GetAsync(x => productIds.Contains(x.Id));
-            var productsDict = products.ToDictionary(p => p.Id, p => p);
+            var productsDict = products.ToDictionary(p => p.Id);
 
-            // Merge basket items manually here:
+            // Merge items
             foreach (var reqItem in request)
             {
                 if (!productsDict.TryGetValue(reqItem.ProductId, out var product))
-                    continue; // skip invalid product
+                    continue; // skip invalid products
 
-                // Check if basket already has this product
-                var basketItem = basket.Items.FirstOrDefault(i => i.ProductId == reqItem.ProductId);
-
-                if (basketItem != null)
-                {
-                    // Add quantities, but do not exceed product's available unit quantity
-                    int newQuantity = basketItem.Quantity + reqItem.Quantity;
-                    basketItem.Quantity = Math.Min(newQuantity, product.UnitQuantity);
-                }
-                else
-                {
-                    // Add new basket item (make sure to not exceed stock limit)
-                    var quantityToAdd = Math.Min(reqItem.Quantity, product.UnitQuantity);
-
-                    basket.Items.Add(new BasketItem
-                    {
-                        ProductId = reqItem.ProductId,
-                        Quantity = quantityToAdd,
-                        // fill other needed properties if applicable, e.g. price, name
-                    });
-                }
+                // Use Basket method to ensure EF tracking is correct
+                basket.AddItem(product, reqItem.Quantity);
             }
 
+            // Save everything at once
             await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
@@ -118,6 +101,7 @@ namespace eShop.Application.Services
                 NotificationType = NotificationType.Success
             };
         }
+
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
@@ -148,23 +132,11 @@ namespace eShop.Application.Services
 
             if (basketItem != null)
             {
-                // Update quantity with limit
-                int newQuantity = basketItem.Quantity + quantityToAdd;
-                basketItem.Quantity = Math.Min(newQuantity, product.UnitQuantity);
+                basket.UpdateItemQuantity(productId, basketItem.Quantity + quantityToAdd);
             }
             else
             {
-                // Add new item with quantity limit
-                int quantityToAddClamped = Math.Min(quantityToAdd, product.UnitQuantity);
-
-                var newItem = new BasketItem
-                {
-                    BasketId = basket.Id,
-                    ProductId = productId,
-                    Quantity = quantityToAddClamped
-                };
-
-                basket.Items.Add(newItem);
+                basket.AddItem(product, quantityToAdd);
             }
 
             await _uow.SaveChangesAsync();
@@ -237,7 +209,7 @@ namespace eShop.Application.Services
                 };
             }
 
-            basket.Items.Remove(itemToRemove);
+            basket.RemoveItem(productId);
 
             await _uow.SaveChangesAsync();
 
