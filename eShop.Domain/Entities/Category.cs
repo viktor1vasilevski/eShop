@@ -8,8 +8,6 @@ public class Category : AuditableBaseEntity
     public string Name { get; private set; } = string.Empty;
     public bool IsDeleted { get; private set; }
 
-
-    // Navigation properties for EF relationships
     public virtual ICollection<Subcategory>? Subcategories { get; private set; }
 
 

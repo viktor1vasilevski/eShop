@@ -9,10 +9,9 @@ public class Subcategory : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
     public Guid CategoryId { get; private set; }
-
-
-    // Navigation properties for EF relationships
     public virtual Category? Category { get; private set; }
+
+
     public virtual ICollection<Product>? Products { get; private set; }
 
 

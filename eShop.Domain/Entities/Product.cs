@@ -13,11 +13,12 @@ public class Product : AuditableBaseEntity
     public byte[] Image { get; private set; } = [];
     public string ImageType { get; private set; } = string.Empty;
     public bool IsDeleted { get; private set; }
+
     public Guid SubcategoryId { get; private set; }
     public virtual Subcategory? Subcategory { get; set; }
 
 
-    public ICollection<BasketItem>? BasketItems { get; set; }
+    public virtual ICollection<BasketItem>? BasketItems { get; set; }
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
     public virtual ICollection<Comment>? Comments { get; set; }
 
