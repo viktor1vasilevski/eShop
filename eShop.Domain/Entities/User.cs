@@ -31,12 +31,6 @@ public class User : AuditableBaseEntity
         return instance;
     }
 
-    // Update existing user data, optionally allow password update
-    public void Update(UserData user, bool isPasswordChangeAllowed = false)
-    {
-        ApplyUserData(user, isNewUser: false, isPasswordChangeAllowed);
-    }
-
     private void ApplyUserData(UserData user, bool isNewUser, bool isPasswordChangeAllowed = false)
     {
         ValidateRequired(user.Username, nameof(user.Username));
