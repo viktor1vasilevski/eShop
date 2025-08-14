@@ -36,7 +36,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
         try
         {
-            var subcategory = Subcategory.CreateNew(request.CategoryId, request.Name);
+            var subcategory = Subcategory.Create(request.CategoryId, request.Name);
             _subcategoryRepository.Insert(subcategory);
             _uow.SaveChanges();
 

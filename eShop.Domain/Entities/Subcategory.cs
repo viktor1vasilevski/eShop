@@ -9,8 +9,10 @@ public class Subcategory : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
     public Guid CategoryId { get; private set; }
-    public virtual Category? Category { get; set; }
 
+
+    // Navigation properties for EF relationships
+    public virtual Category? Category { get; private set; }
     public virtual ICollection<Product>? Products { get; private set; }
 
 
@@ -18,7 +20,7 @@ public class Subcategory : AuditableBaseEntity
 
     private Subcategory() { }
 
-    public static Subcategory CreateNew(Guid categoryId, string name)
+    public static Subcategory Create(Guid categoryId, string name)
     {
         DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));

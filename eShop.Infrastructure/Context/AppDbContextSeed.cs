@@ -73,7 +73,7 @@ public static class AppDbContextSeed
 
         var category = context.Categories.Where(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME).First();
 
-        var uncategorizedSubcategory = Subcategory.CreateNew(category.Id, SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME);
+        var uncategorizedSubcategory = Subcategory.Create(category.Id, SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME);
 
         context.Subcategories.Add(uncategorizedSubcategory);
         context.SaveChanges();
