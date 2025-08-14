@@ -17,7 +17,7 @@ public class User : AuditableBaseEntity
     public bool IsDeleted { get; set; }
 
 
-    public virtual Basket? Basket { get; set; }
+    public virtual Basket? Basket { get; private set; }
     public virtual ICollection<Order>? Orders { get; set; }
     public virtual ICollection<Comment>? Comments { get; set; }
 
@@ -30,6 +30,9 @@ public class User : AuditableBaseEntity
         instance.ApplyUserData(user, isNewUser: true);
         return instance;
     }
+
+    public void ClearBasket() => Basket?.ClearItems();
+
 
     private void ApplyUserData(UserData user, bool isNewUser, bool isPasswordChangeAllowed = false)
     {

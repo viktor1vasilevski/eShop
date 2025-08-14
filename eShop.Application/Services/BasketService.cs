@@ -119,7 +119,6 @@ namespace eShop.Application.Services
             };
         }
 
-
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
             // Load basket and items directly for user
@@ -179,7 +178,6 @@ namespace eShop.Application.Services
         }
 
 
-
         public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
         {
             var userQuery = await _userRepository.GetAsync(
@@ -194,7 +192,8 @@ namespace eShop.Application.Services
                     Message = UserConstants.USER_NOT_FOUND,
                 };
 
-            user?.Basket?.Items.Clear();
+            user?.ClearBasket();
+
             await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>

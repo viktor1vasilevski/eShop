@@ -9,7 +9,8 @@ public class Basket : AuditableBaseEntity
     public Guid UserId { get; set; }
     public virtual User? User { get; private set; }
 
-    public virtual ICollection<BasketItem> Items { get; set; } = [];
+    private readonly List<BasketItem> _items = [];
+    public IReadOnlyCollection<BasketItem>? Items => _items.AsReadOnly();
 
 
     public static Basket CreateNew(Guid userId)
@@ -22,6 +23,8 @@ public class Basket : AuditableBaseEntity
             UserId = userId
         };
     }
+
+    public void ClearItems() => _items.Clear();
 
     public void AddOrUpdateItem(Product product, int quantity)
     {
