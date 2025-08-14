@@ -24,7 +24,7 @@ public class Product : AuditableBaseEntity
 
     protected Product() { }
 
-    public static Product CreateNew(ProductData product)
+    public static Product Create(ProductData product)
     {
         var instance = new Product();
         instance.Id = Guid.NewGuid();

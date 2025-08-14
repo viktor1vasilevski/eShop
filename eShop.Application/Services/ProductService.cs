@@ -163,7 +163,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 subcategoryId: request.SubcategoryId,
                 base64Image: request.Image);
 
-            var product = Product.CreateNew(productData);
+            var product = Product.Create(productData);
             _productRepository.Insert(product);
             _uow.SaveChanges();
 

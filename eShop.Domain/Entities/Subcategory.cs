@@ -29,7 +29,8 @@ public class Subcategory : AuditableBaseEntity
         {
             Id = Guid.NewGuid(),
             Name = name,
-            CategoryId = categoryId
+            CategoryId = categoryId,
+            IsDeleted = false,
         };
     }
 
