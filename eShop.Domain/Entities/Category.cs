@@ -8,7 +8,10 @@ public class Category : AuditableBaseEntity
     public string Name { get; private set; } = string.Empty;
     public bool IsDeleted { get; private set; }
 
-    public virtual ICollection<Subcategory>? Subcategories { get; private set; }
+
+
+    private readonly List<Subcategory> _subcategories = [];
+    public IReadOnlyCollection<Subcategory> Subcategories => _subcategories.AsReadOnly();
 
 
 
@@ -36,6 +39,6 @@ public class Category : AuditableBaseEntity
 
     public bool HasRelatedSubcategories()
     {
-        return Subcategories?.Any(x => !x.IsDeleted) == true;
+        return _subcategories.Any(x => !x.IsDeleted);
     }
 }
