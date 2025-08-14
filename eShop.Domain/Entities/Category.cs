@@ -15,7 +15,7 @@ public class Category : AuditableBaseEntity
 
     private Category() { }
 
-    public static Category CreateNew(string name)
+    public static Category Create(string name)
     {
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
 

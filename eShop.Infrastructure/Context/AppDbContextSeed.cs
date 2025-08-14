@@ -58,7 +58,7 @@ public static class AppDbContextSeed
         if (context.Categories.Any(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME))
             return;
 
-        var uncategorizedCategory = Category.CreateNew(SystemConstants.UNCATEGORIZED_CATEGORY_NAME);
+        var uncategorizedCategory = Category.Create(SystemConstants.UNCATEGORIZED_CATEGORY_NAME);
 
         context.Categories.Add(uncategorizedCategory);
         context.SaveChanges();

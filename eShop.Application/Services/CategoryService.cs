@@ -80,7 +80,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         try
         {
-            var category = Category.CreateNew(request.Name);
+            var category = Category.Create(request.Name);
             _categoryRepository.Insert(category);
             _uow.SaveChanges();
 
