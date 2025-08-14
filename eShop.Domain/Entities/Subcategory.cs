@@ -12,7 +12,8 @@ public class Subcategory : AuditableBaseEntity
     public virtual Category? Category { get; private set; }
 
 
-    public virtual ICollection<Product>? Products { get; private set; }
+    private readonly List<Product> _products = [];
+    public virtual IReadOnlyCollection<Product>? Products => _products.AsReadOnly();
 
 
 
@@ -46,7 +47,7 @@ public class Subcategory : AuditableBaseEntity
 
     public bool HasRelatedProducts()
     {
-        return Products?.Any(x => !x.IsDeleted) == true;
+        return _products?.Any(x => !x.IsDeleted) == true;
     }
 
 }

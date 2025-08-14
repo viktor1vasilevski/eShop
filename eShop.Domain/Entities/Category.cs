@@ -11,7 +11,7 @@ public class Category : AuditableBaseEntity
 
 
     private readonly List<Subcategory> _subcategories = [];
-    public IReadOnlyCollection<Subcategory> Subcategories => _subcategories.AsReadOnly();
+    public IReadOnlyCollection<Subcategory>? Subcategories => _subcategories.AsReadOnly();
 
 
 
