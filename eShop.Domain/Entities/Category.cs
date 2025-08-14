@@ -6,7 +6,7 @@ namespace eShop.Domain.Entities;
 public class Category : AuditableBaseEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
 
     public virtual ICollection<Subcategory>? Subcategories { get; private set; }
 
