@@ -1,4 +1,5 @@
 ﻿using eShop.Domain.Entities.Base;
+using eShop.Domain.Helpers;
 
 namespace eShop.Domain.Entities;
 
@@ -17,6 +18,10 @@ public class Comment : AuditableBaseEntity
     private Comment() { }
     public static Comment Create(string commentText, int rating, Guid productId, Guid userId)
     {
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(commentText, nameof(commentText));
+        DomainValidatorHelper.ThrowIfEmptyGuid(productId, nameof(productId));
+        DomainValidatorHelper.ThrowIfEmptyGuid(userId, nameof(userId));
+
         return new Comment
         {
             Id = Guid.NewGuid(),

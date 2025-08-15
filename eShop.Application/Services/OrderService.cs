@@ -77,13 +77,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
 
             product.UnitQuantity -= itemRequest.Quantity;
 
-            var orderItem = new OrderItem
-            {
-                ProductId = product.Id,
-                Quantity = itemRequest.Quantity,
-                UnitPrice = product.UnitPrice
-            };
-
+            var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice);
             order.Items.Add(orderItem);
         }
 
