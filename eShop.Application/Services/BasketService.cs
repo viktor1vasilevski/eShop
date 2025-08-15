@@ -56,7 +56,6 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> MergeItemsAsync(Guid userId, List<BasketRequest> request)
         {
-            // Check if user exists
             var userExists = await _userRepository.ExistsAsync(x => x.Id == userId);
             if (!userExists)
                 return new ApiResponse<BasketDTO>
@@ -65,7 +64,6 @@ namespace eShop.Application.Services
                     NotificationType = NotificationType.NotFound
                 };
 
-            // Load basket including items (tracked)
             var basket = _basketRepository.Get(
                 filter: x => x.UserId == userId,
                 include: x => x.Include(b => b.Items)).FirstOrDefault();
@@ -76,22 +74,19 @@ namespace eShop.Application.Services
                 await _basketRepository.InsertAsync(basket);
             }
 
-            // Load all products needed for validation
             var productIds = request.Select(r => r.ProductId).Distinct().ToList();
             var products = await _productRepository.GetAsync(x => productIds.Contains(x.Id));
             var productsDict = products.ToDictionary(p => p.Id);
 
-            // Merge items
+
             foreach (var reqItem in request)
             {
                 if (!productsDict.TryGetValue(reqItem.ProductId, out var product))
-                    continue; // skip invalid products
+                    continue;
 
-                // Use Basket method to ensure EF tracking is correct
-                basket.AddItem(product, reqItem.Quantity);
+                basket.AddOrUpdateItem(product, reqItem.Quantity);
             }
 
-            // Save everything at once
             await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
@@ -105,7 +100,6 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
-            // Load basket and items directly for user
             var basket = (await _basketRepository.GetAsync(
                 filter: b => b.UserId == userId,
                 include: b => b.Include(b => b.Items)))
@@ -113,12 +107,10 @@ namespace eShop.Application.Services
 
             if (basket == null)
             {
-                // Create new basket if none exists
                 basket = Basket.CreateNew(userId);
                 await _basketRepository.InsertAsync(basket);
             }
 
-            // Load product to validate
             var product = _productRepository.GetById(productId);
             if (product == null)
                 return new ApiResponse<BasketDTO>
@@ -127,18 +119,7 @@ namespace eShop.Application.Services
                     Message = "Product not found"
                 };
 
-            // Try to find existing item in basket
-            var basketItem = basket.Items.FirstOrDefault(i => i.ProductId == productId);
-
-            if (basketItem != null)
-            {
-                basket.UpdateItemQuantity(productId, basketItem.Quantity + quantityToAdd);
-            }
-            else
-            {
-                basket.AddItem(product, quantityToAdd);
-            }
-
+            basket.AddOrUpdateItem(product, quantityToAdd);
             await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>

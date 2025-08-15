@@ -6,13 +6,14 @@ namespace eShop.Domain.Entities;
 
 public class Basket : AuditableBaseEntity
 {
-    public Guid UserId { get; set; }
+    public Guid UserId { get; private set; }
     public virtual User? User { get; private set; }
 
     private readonly List<BasketItem> _items = [];
     public IReadOnlyCollection<BasketItem>? Items => _items.AsReadOnly();
 
 
+    private Basket() { }
     public static Basket CreateNew(Guid userId)
     {
         DomainValidatorHelper.ThrowIfEmptyGuid(userId, nameof(userId));
@@ -33,29 +34,28 @@ public class Basket : AuditableBaseEntity
             _items.Remove(item);
     }
 
-    public void AddItem(Product product, int quantity)
+    public void AddOrUpdateItem(Product product, int quantityToAdd)
     {
         if (product == null)
             throw new DomainException("Product cannot be null.");
 
-        var existingItem = _items.FirstOrDefault(i => i.ProductId == product.Id);
+        if (quantityToAdd <= 0)
+            throw new DomainException("Quantity must be greater than zero.");
 
+        var existingItem = _items.FirstOrDefault(i => i.ProductId == product.Id);
         if (existingItem != null)
         {
-            // Update quantity but do not exceed product.UnitQuantity
-            existingItem.Quantity = Math.Min(existingItem.Quantity + quantity, product.UnitQuantity);
+            int totalQuantity = existingItem.Quantity + quantityToAdd;
+            existingItem.UpdateQuantity(totalQuantity, product.UnitQuantity);
         }
         else
         {
-            var newItem = new BasketItem
-            {
-                ProductId = product.Id,
-                Quantity = Math.Min(quantity, product.UnitQuantity),
-                Basket = this // EF tracking
-            };
+            var newItem = BasketItem.CreateNew(this.Id, product.Id, Math.Min(quantityToAdd, product.UnitQuantity));
             _items.Add(newItem);
         }
     }
+
+
 
 
     public void UpdateItemQuantity(Guid productId, int quantity)

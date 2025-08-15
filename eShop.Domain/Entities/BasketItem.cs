@@ -5,16 +5,17 @@ namespace eShop.Domain.Entities;
 
 public class BasketItem : AuditableBaseEntity
 {
-    public Guid BasketId { get; set; }
-    public virtual Basket? Basket { get; set; }
+    public Guid BasketId { get; private set; }
+    public virtual Basket? Basket { get; private set; }
 
-    public Guid ProductId { get; set; }
-    public virtual Product? Product { get; set; }
+    public Guid ProductId { get; private set; }
+    public virtual Product? Product { get; private set; }
 
-    public int Quantity { get; set; }
+    public int Quantity { get; private set; }
 
 
 
+    private BasketItem() { }
 
     public static BasketItem CreateNew(Guid basketId, Guid productId, int quantity)
     {
@@ -25,7 +26,6 @@ public class BasketItem : AuditableBaseEntity
 
         return new BasketItem
         {
-            Id = Guid.NewGuid(),
             BasketId = basketId,
             ProductId = productId,
             Quantity = quantity
