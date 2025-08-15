@@ -104,9 +104,6 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         if (userId.HasValue)
         {
-            var fgasd = _orderRepository.Get(x => x.UserId == userId.Value, null, x => x.Include(x => x.Items));
-
-
             canComment = _orderRepository.Exists(o =>
                 o.UserId == userId.Value &&
                 o.Items.Any(oi => oi.ProductId == id));
