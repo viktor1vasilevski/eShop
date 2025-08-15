@@ -213,16 +213,15 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
     {
-
         var result = _categoryRepository
             .GetAsQueryable(
-                filter: c => c.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME
+                filter: c => c.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME && !c.IsDeleted
             )
             .Select(c => new
             {
                 Category = c,
                 ValidSubcategories = c.Subcategories
-                    .Where(sc => sc.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && sc.Products.Any())
+                    .Where(sc => sc.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && !sc.IsDeleted && sc.Products.Any())
                     .Select(sc => new { sc.Id, sc.Name })
                     .ToList()
             })
@@ -236,10 +235,8 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                     {
                         Id = sc.Id,
                         Name = sc.Name
-                    })
-                    .ToList()
-            })
-            .ToList();
+                    }).ToList()
+            }).ToList();
 
         return new ApiResponse<List<CategoryWithSubcategoriesDTO>>
         {
