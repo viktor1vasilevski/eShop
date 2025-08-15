@@ -96,7 +96,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 
         modelBuilder.Entity<OrderItem>()
             .HasOne(oi => oi.Order)
-            .WithMany(o => o.Items)
+            .WithMany(o => o.OrderItems)
             .HasForeignKey(oi => oi.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
