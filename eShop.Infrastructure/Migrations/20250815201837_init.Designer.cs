@@ -12,8 +12,8 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250813184714_remove_Raiting_from_Product_and_move_to_Comment")]
-    partial class remove_Raiting_from_Product_and_move_to_Comment
+    [Migration("20250815201837_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
