@@ -106,7 +106,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         {
             canComment = _orderRepository.Exists(o =>
                 o.UserId == userId.Value &&
-                o.Items.Any(oi => oi.ProductId == id));
+                o.OrderItems.Any(oi => oi.ProductId == id));
         }
 
         var productDto = new ProductDetailsDTO()

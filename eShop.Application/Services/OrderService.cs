@@ -22,21 +22,20 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
     {
         var query = _orderRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(request.UserId != Guid.Empty, o => o.UserId == request.UserId),
-            include: x => x.Include(x => x.Items).ThenInclude(p => p.Product));
+            include: x => x.Include(x => x.OrderItems).ThenInclude(p => p.Product));
 
         var ordersDTO = query.Select(order => new OrderDetailsDTO
         {
             TotalAmount = order.TotalAmount,
             OrderCreatedOn = order.Created,
-            Items = order.Items.Select(item => new OrderItemDTO
+            Items = order.OrderItems.Select(item => new OrderItemDTO
             {
                 ProductName = item.Product!.Name,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
             }).ToList()
         }).ToList();
-
-
+       
         return new ApiResponse<List<OrderDetailsDTO>>
         {
             Data = ordersDTO,
@@ -56,14 +55,8 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
             return response;
         }
 
-        // 2. Create new Order entity
-        var order = new Order
-        {
-            UserId = request.UserId,
-            Items = new List<OrderItem>()
-        };
+        var order = Order.Create(request.UserId);
 
-        // 3. For each order item, get product info and create OrderItem entities
         foreach (var itemRequest in request.Items)
         {
             var product = _productRepository.GetById(itemRequest.ProductId);
@@ -77,16 +70,13 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
             product.SubtrackQuantity(itemRequest.Quantity);
 
             var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice);
-            order.Items.Add(orderItem);
+            order.AddOrderItem(orderItem);
         }
 
-        order.TotalAmount = request.TotalAmount;
+        order.TotalValue(request.TotalAmount);
 
-        // 4. Save order to database
         await _orderRepository.InsertAsync(order);
         await _uow.SaveChangesAsync();
-
-
 
         return response;
     }

@@ -67,7 +67,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
     {
         bool hasBought = _orderRepository.Exists(o =>
             o.UserId == request.UserId &&
-            o.Items.Any(i => i.ProductId == request.ProductId));
+            o.OrderItems.Any(i => i.ProductId == request.ProductId));
 
         if (!hasBought)
             return new ApiResponse<CommentDTO>
