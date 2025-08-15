@@ -76,14 +76,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
                 Message = "User cannot comment without buying the product."
             };
 
-        var comment = new Comment
-        {
-            Id = Guid.NewGuid(),
-            ProductId = request.ProductId,
-            UserId = request.UserId,
-            CommentText = request.CommentText,
-            Rating = request.Rating,
-        };
+        var comment = Comment.Create(request.CommentText, request.Rating, request.ProductId, request.UserId);
 
         _commentRepository.Insert(comment);
         _uow.SaveChanges();
