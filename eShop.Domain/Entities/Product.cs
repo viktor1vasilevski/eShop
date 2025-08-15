@@ -1,6 +1,7 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
+using System.Collections.Generic;
 
 namespace eShop.Domain.Entities;
 
@@ -18,12 +19,19 @@ public class Product : AuditableBaseEntity
     public virtual Subcategory? Subcategory { get; set; }
 
 
-    public virtual ICollection<BasketItem>? BasketItems { get; set; }
-    public virtual ICollection<OrderItem>? OrderItems { get; set; }
-    public virtual ICollection<Comment>? Comments { get; set; }
+    private readonly List<BasketItem> _basketItems = [];
+    public virtual ICollection<BasketItem>? BasketItems => _basketItems.AsReadOnly();
 
 
-    protected Product() { }
+    private readonly List<OrderItem> _orderItems = [];
+    public virtual ICollection<OrderItem>? OrderItems => _orderItems.AsReadOnly();
+
+
+    private readonly List<Comment> _comments = [];
+    public virtual ICollection<Comment>? Comments => _comments.AsReadOnly();
+
+
+    private Product() { }
 
     public static Product Create(ProductData product)
     {
