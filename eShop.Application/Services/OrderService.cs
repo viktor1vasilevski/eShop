@@ -48,7 +48,6 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
     {
         var response = new ApiResponse<OrderDetailsDTO>();
 
-        // 1. Validate user exists (optional)
         var user = _userRepository.GetById(request.UserId);
         if (user == null)
         {
@@ -75,7 +74,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
                 return response;
             }
 
-            product.UnitQuantity -= itemRequest.Quantity;
+            product.SubtrackQuantity(itemRequest.Quantity);
 
             var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice);
             order.Items.Add(orderItem);
