@@ -24,14 +24,14 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             return new ApiResponse<SubcategoryDetailsDTO>()
             {
                 Message = CategoryConstants.CATEGORY_DOESNT_EXIST,
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
             };
 
         if (_subcategoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower()))
             return new ApiResponse<SubcategoryDetailsDTO>()
             {
                 Message = SubcategoryConstants.SUBCATEGORY_EXISTS,
-                NotificationType = ResponseStatus.Conflict
+                Status = ResponseStatus.Conflict
             };
 
         try
@@ -42,7 +42,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
             return new ApiResponse<SubcategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.Created,
+                Status = ResponseStatus.Created,
                 Message = SubcategoryConstants.SUBCATEGORY_SUCCESSFULLY_CREATED,
                 Data = new SubcategoryDetailsDTO
                 {
@@ -57,7 +57,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         {
             return new ApiResponse<SubcategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.BadRequest,
+                Status = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
@@ -73,7 +73,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             return new ApiResponse<SubcategoryDTO>
             {
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-                NotificationType = ResponseStatus.NotFound
+                Status = ResponseStatus.NotFound
             };
 
 
@@ -81,7 +81,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             return new ApiResponse<SubcategoryDTO>
             {
                 Message = SubcategoryConstants.SUBCATEGORY_HAS_RELATED_ENTITIES,
-                NotificationType = ResponseStatus.Conflict
+                Status = ResponseStatus.Conflict
             };
 
         subcategory.SoftDelete();
@@ -90,7 +90,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         return new ApiResponse<SubcategoryDTO>
         {
             Message = SubcategoryConstants.SUBCATEGORY_SUCCESSFULLY_DELETED,
-            NotificationType = ResponseStatus.Success
+            Status = ResponseStatus.Success
         };
     }
 
@@ -100,21 +100,21 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         if (subcategory is null)
             return new ApiResponse<SubcategoryDTO>
             {
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST
             };
 
         if (!_categoryRepository.Exists(x => x.Id == request.CategoryId))
             return new ApiResponse<SubcategoryDTO>
             {
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CATEGORY_DOESNT_EXIST
             };
 
         if (_subcategoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower() && x.Id != id))
             return new ApiResponse<SubcategoryDTO>
             {
-                NotificationType = ResponseStatus.Conflict,
+                Status = ResponseStatus.Conflict,
                 Message = SubcategoryConstants.SUBCATEGORY_EXISTS
             };
 
@@ -125,7 +125,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
             return new ApiResponse<SubcategoryDTO>
             {
-                NotificationType = ResponseStatus.Success,
+                Status = ResponseStatus.Success,
                 Message = SubcategoryConstants.SUBCATEGORY_SUCCESSFULLY_EDITED,
                 Data = new SubcategoryDTO { Id = id, Name = subcategory.Name }
             };
@@ -134,7 +134,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         {
             return new ApiResponse<SubcategoryDTO>
             {
-                NotificationType = ResponseStatus.BadRequest,
+                Status = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
@@ -192,7 +192,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         return new ApiResponse<List<SubcategoryDetailsDTO>>()
         {
             Data = subcategoriesDTO,
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
             TotalCount = totalCount
         };
     }
@@ -248,13 +248,13 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         if(subcategory is null)
             return new ApiResponse<SubcategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
             };
 
         return new ApiResponse<SubcategoryDetailsDTO>
         {
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
             Data = new SubcategoryDetailsDTO()
             {
                 Id = subcategory.Id,

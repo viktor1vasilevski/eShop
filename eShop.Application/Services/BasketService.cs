@@ -30,7 +30,7 @@ namespace eShop.Application.Services
             if (basket is null)
                 return new ApiResponse<BasketDTO>
                 {
-                    NotificationType = ResponseStatus.NotFound,
+                    Status = ResponseStatus.NotFound,
                     Message = BasketConstants.BASKET_NOT_FOUND_FOR_USER
                 };
 
@@ -49,7 +49,7 @@ namespace eShop.Application.Services
 
             return new ApiResponse<BasketDTO>
             {
-                NotificationType = ResponseStatus.Success,
+                Status = ResponseStatus.Success,
                 Data = basketDto
             };
         }
@@ -61,7 +61,7 @@ namespace eShop.Application.Services
                 return new ApiResponse<BasketDTO>
                 {
                     Message = UserConstants.USER_NOT_FOUND,
-                    NotificationType = ResponseStatus.NotFound
+                    Status = ResponseStatus.NotFound
                 };
 
             var basket = _basketRepository.Get(
@@ -93,7 +93,7 @@ namespace eShop.Application.Services
             {
                 Data = null,
                 Message = BasketConstants.BASKET_MERGED,
-                NotificationType = ResponseStatus.Success
+                Status = ResponseStatus.Success
             };
         }
 
@@ -115,7 +115,7 @@ namespace eShop.Application.Services
             if (product == null)
                 return new ApiResponse<BasketDTO>
                 {
-                    NotificationType = ResponseStatus.NotFound,
+                    Status = ResponseStatus.NotFound,
                     Message = "Product not found"
                 };
 
@@ -125,7 +125,7 @@ namespace eShop.Application.Services
             return new ApiResponse<BasketDTO>
             {
                 Data = null,
-                NotificationType = ResponseStatus.Success,
+                Status = ResponseStatus.Success,
                 Message = "Basket updated successfully"
             };
         }
@@ -141,7 +141,7 @@ namespace eShop.Application.Services
             if (user is null)
                 return new ApiResponse<BasketDTO>
                 {
-                    NotificationType = ResponseStatus.NotFound,
+                    Status = ResponseStatus.NotFound,
                     Message = UserConstants.USER_NOT_FOUND,
                 };
 
@@ -151,7 +151,7 @@ namespace eShop.Application.Services
 
             return new ApiResponse<BasketDTO>
             {
-                NotificationType = ResponseStatus.Success
+                Status = ResponseStatus.Success
             };
         }
 
@@ -166,7 +166,7 @@ namespace eShop.Application.Services
             if (user is null)
                 return new ApiResponse<BasketDTO>
                 {
-                    NotificationType = ResponseStatus.NotFound,
+                    Status = ResponseStatus.NotFound,
                     Message = UserConstants.USER_NOT_FOUND,
                 };
 
@@ -175,7 +175,7 @@ namespace eShop.Application.Services
             {
                 return new ApiResponse<BasketDTO>
                 {
-                    NotificationType = ResponseStatus.NotFound,
+                    Status = ResponseStatus.NotFound,
                     Message = "Basket not found",
                 };
             }
@@ -185,7 +185,7 @@ namespace eShop.Application.Services
             {
                 return new ApiResponse<BasketDTO>
                 {
-                    NotificationType = ResponseStatus.NotFound,
+                    Status = ResponseStatus.NotFound,
                     Message = "Item not found in basket",
                 };
             }
@@ -196,7 +196,7 @@ namespace eShop.Application.Services
 
             return new ApiResponse<BasketDTO>
             {
-                NotificationType = ResponseStatus.Success
+                Status = ResponseStatus.Success
             };
         }
 

@@ -27,14 +27,14 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration) :
             return new ApiResponse<LoginDTO>
             {
                 Message = AuthConstants.INVALID_CREDENTIAL,
-                NotificationType = ResponseStatus.Unauthorized
+                Status = ResponseStatus.Unauthorized
             };
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
         return new ApiResponse<LoginDTO>
         {
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
             Message = AuthConstants.ADMIN_LOGIN_SUCCESS,
             Data = new LoginDTO
             {

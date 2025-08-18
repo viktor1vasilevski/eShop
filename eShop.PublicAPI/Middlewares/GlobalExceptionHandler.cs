@@ -17,7 +17,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         {
             Data = null,
             Message = "An unexpected error occurred.",
-            NotificationType = ResponseStatus.ServerError,
+            Status = ResponseStatus.ServerError,
             Location = null
         };
 

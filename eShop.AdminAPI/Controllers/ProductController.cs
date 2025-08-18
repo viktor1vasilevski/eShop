@@ -26,7 +26,7 @@ public class ProductController(IProductService _productService) : BaseController
     public IActionResult Create([FromBody] CreateUpdateProductRequest request)
     {
         var response = _productService.CreateProduct(request);
-        if (response.NotificationType == ResponseStatus.Created && response.Data?.Id != null)
+        if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
             var locationUri = Url.Action(nameof(GetById), "Product", new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;

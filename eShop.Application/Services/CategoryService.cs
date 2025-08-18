@@ -65,7 +65,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         {
             Data = categoriesDTO,
             TotalCount = totalCount,
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
         };
     }
 
@@ -75,7 +75,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             return new ApiResponse<CategoryDetailsDTO>()
             {
                 Message = CategoryConstants.CATEGORY_EXISTS,
-                NotificationType = ResponseStatus.Conflict
+                Status = ResponseStatus.Conflict
             };
 
         try
@@ -86,7 +86,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
             return new ApiResponse<CategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.Created,
+                Status = ResponseStatus.Created,
                 Message = CategoryConstants.CATEGORY_SUCCESSFULLY_CREATED,
                 Data = new CategoryDetailsDTO { Id = category.Id, Name = category.Name, Created = category.Created }
             };
@@ -95,7 +95,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         {
             return new ApiResponse<CategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.BadRequest,
+                Status = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
@@ -107,14 +107,14 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         if (category is null)
             return new ApiResponse<CategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CATEGORY_DOESNT_EXIST
             };
 
         if (_categoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower() && x.Id != id))
             return new ApiResponse<CategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.Conflict,
+                Status = ResponseStatus.Conflict,
                 Message = CategoryConstants.CATEGORY_EXISTS
             };
 
@@ -125,7 +125,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
             return new ApiResponse<CategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.Success,
+                Status = ResponseStatus.Success,
                 Message = CategoryConstants.CATEGORY_SUCCESSFULLY_UPDATE,
                 Data = new CategoryDetailsDTO { Id = id, Name = category.Name }
             };
@@ -134,7 +134,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         {
             return new ApiResponse<CategoryDetailsDTO>
             {
-                NotificationType = ResponseStatus.BadRequest,
+                Status = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
@@ -150,14 +150,14 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Message = CategoryConstants.CATEGORY_DOESNT_EXIST,
-                NotificationType = ResponseStatus.NotFound
+                Status = ResponseStatus.NotFound
             };
 
         if(category.HasRelatedSubcategories())
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,
-                NotificationType = ResponseStatus.Conflict
+                Status = ResponseStatus.Conflict
             };
 
         category.SoftDelete();
@@ -166,7 +166,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         return new ApiResponse<CategoryDetailsDTO>
         {
             Message = CategoryConstants.CATEGORY_SUCCESSFULLY_DELETED,
-            NotificationType = ResponseStatus.Success
+            Status = ResponseStatus.Success
         };
     }
 
@@ -193,13 +193,13 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         if (category is null)
             return new ApiResponse<CategoryDTO>
             {
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CATEGORY_DOESNT_EXIST
             };
 
         return new ApiResponse<CategoryDTO>
         {
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
             Data = new CategoryDTO { Id = category.Id, Name = category.Name }
         };
     }

@@ -9,7 +9,7 @@ public abstract class BaseController : ControllerBase
 {
     protected IActionResult HandleResponse<T>(ApiResponse<T> response) where T : class
     {
-        return response.NotificationType switch
+        return response.Status switch
         {
             ResponseStatus.Success => Ok(response),
             ResponseStatus.BadRequest => BadRequest(response),

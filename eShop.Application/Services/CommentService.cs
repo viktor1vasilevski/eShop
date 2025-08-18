@@ -60,7 +60,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
         {
             Data = commentsDTO,
             TotalCount = totalCount,
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
         };
     }
     public ApiResponse<CommentDTO> CreateComment(CreateCommentRequest request)
@@ -72,7 +72,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
         if (!hasBought)
             return new ApiResponse<CommentDTO>
             {
-                NotificationType = ResponseStatus.NotFound,
+                Status = ResponseStatus.NotFound,
                 Message = "User cannot comment without buying the product."
             };
 
@@ -91,7 +91,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
 
         return new ApiResponse<CommentDTO>
         {
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
             Data = resultDto
         };
     }

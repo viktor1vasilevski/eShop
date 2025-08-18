@@ -24,7 +24,7 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
     public IActionResult Create([FromBody] CreateUpdateCategoryRequest request)
     {
         var response = _categoryService.CreateCategory(request);
-        if (response.NotificationType == ResponseStatus.Created && response.Data?.Id != null)
+        if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
             var locationUri = Url.Action(nameof(GetById), "Category", new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;

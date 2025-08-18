@@ -40,7 +40,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         return new ApiResponse<List<OrderDetailsDTO>>
         {
             Data = ordersDTO,
-            NotificationType = ResponseStatus.Success,
+            Status = ResponseStatus.Success,
         };
     }
 
@@ -51,7 +51,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         var user = _userRepository.GetById(request.UserId);
         if (user == null)
         {
-            response.NotificationType = ResponseStatus.NotFound;
+            response.Status = ResponseStatus.NotFound;
             response.Message = "User not found.";
             return response;
         }
@@ -63,7 +63,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
             var product = _productRepository.GetById(itemRequest.ProductId);
             if (product == null)
             {
-                response.NotificationType = ResponseStatus.NotFound;
+                response.Status = ResponseStatus.NotFound;
                 response.Message = $"Product with ID {itemRequest.ProductId} not found.";
                 return response;
             }
