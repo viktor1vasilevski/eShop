@@ -11,14 +11,14 @@ public abstract class BaseController : ControllerBase
     {
         return response.NotificationType switch
         {
-            NotificationType.Success => Ok(response),
-            NotificationType.BadRequest => BadRequest(response),
-            NotificationType.NotFound => NotFound(response),
-            NotificationType.Created => StatusCode(201, response),
-            NotificationType.NoContent => NoContent(),
-            NotificationType.ServerError => StatusCode(500, response),
-            NotificationType.Conflict => StatusCode(409, response),
-            NotificationType.Unauthorized => Unauthorized(response),
+            ResponseStatus.Success => Ok(response),
+            ResponseStatus.BadRequest => BadRequest(response),
+            ResponseStatus.NotFound => NotFound(response),
+            ResponseStatus.Created => StatusCode(201, response),
+            ResponseStatus.NoContent => NoContent(),
+            ResponseStatus.ServerError => StatusCode(500, response),
+            ResponseStatus.Conflict => StatusCode(409, response),
+            ResponseStatus.Unauthorized => Unauthorized(response),
             _ => Ok(response),
         };
     }

@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Enums;
 
-public enum NotificationType
+public enum ResponseStatus
 {
     Success,
     BadRequest,

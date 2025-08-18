@@ -28,7 +28,7 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
         {
             return new ApiResponse<LoginDTO>
             {
-                NotificationType = NotificationType.Unauthorized,
+                NotificationType = ResponseStatus.Unauthorized,
                 Message = AuthConstants.INVALID_CREDENTIAL,
             };
         }
@@ -37,7 +37,7 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
 
         return new ApiResponse<LoginDTO>
         {
-            NotificationType = NotificationType.Success,
+            NotificationType = ResponseStatus.Success,
             Message = AuthConstants.CUSTOMER_LOGIN_SUCCESS,
             Data = new LoginDTO
             {
@@ -60,7 +60,7 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
         if (usersExist)
             return new ApiResponse<RegisterDTO>
             {
-                NotificationType = NotificationType.Conflict,
+                NotificationType = ResponseStatus.Conflict,
                 Message = AuthConstants.ACCOUNT_ALREADY_EXISTS
             };
 
@@ -81,7 +81,7 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
 
             return new ApiResponse<RegisterDTO>
             {
-                NotificationType = NotificationType.Success,
+                NotificationType = ResponseStatus.Success,
                 Message = AuthConstants.CUSTOMER_REGISTER_SUCCESS,
                 Data = new RegisterDTO
                 {
@@ -97,7 +97,7 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
         {
             return new ApiResponse<RegisterDTO>
             {
-                NotificationType = NotificationType.BadRequest,
+                NotificationType = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }

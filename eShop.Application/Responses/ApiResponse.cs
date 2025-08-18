@@ -1,13 +1,12 @@
 ﻿using eShop.Application.Enums;
 
-namespace eShop.Application.Responses
+namespace eShop.Application.Responses;
+
+public class ApiResponse<T> where T : class
 {
-    public class ApiResponse<T> where T : class
-    {
-        public T? Data { get; set; }
-        public string? Message { get; set; }
-        public NotificationType NotificationType { get; set; }
-        public string? Location { get; set; }
-        public int? TotalCount { get; set; }
-    }
+    public T? Data { get; set; }
+    public string? Message { get; set; }
+    public ResponseStatus NotificationType { get; set; }
+    public string? Location { get; set; }
+    public int? TotalCount { get; set; }
 }

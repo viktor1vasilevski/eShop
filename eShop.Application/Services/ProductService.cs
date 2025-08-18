@@ -31,6 +31,9 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         var totalCount = query.Count();
 
+
+        throw new Exception("this is random exception");
+
         var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
@@ -83,7 +86,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         {
             Data = productsDTO,
             TotalCount = totalCount,
-            NotificationType = NotificationType.Success
+            NotificationType = ResponseStatus.Success
         };
     }
 
@@ -96,7 +99,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         if (product is null)
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.NotFound,
+                NotificationType = ResponseStatus.NotFound,
                 Message = ProductConstants.PRODUCT_DOESNT_EXIST
             };
 
@@ -139,7 +142,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         return new ApiResponse<ProductDetailsDTO>
         {
-            NotificationType = NotificationType.Success,
+            NotificationType = ResponseStatus.Success,
             Data = productDto
         };
     }
@@ -150,7 +153,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             return new ApiResponse<ProductDetailsDTO>
             {
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-                NotificationType = NotificationType.NotFound
+                NotificationType = ResponseStatus.NotFound
             };
 
         try
@@ -170,7 +173,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             return new ApiResponse<ProductDetailsDTO>
             {
                 Message = ProductConstants.PRODUCT_SUCCESSFULLY_CREATED,
-                NotificationType = NotificationType.Created,
+                NotificationType = ResponseStatus.Created,
                 Data = new ProductDetailsDTO
                 {
                     Id = product.Id,
@@ -187,7 +190,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         {
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.BadRequest,
+                NotificationType = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
@@ -201,14 +204,14 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         if (product is null)
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.NotFound,
+                NotificationType = ResponseStatus.NotFound,
                 Message = ProductConstants.PRODUCT_DOESNT_EXIST
             };
 
         if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.NotFound,
+                NotificationType = ResponseStatus.NotFound,
                 Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
             };
 
@@ -216,7 +219,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         if (product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.Conflict,
+                NotificationType = ResponseStatus.Conflict,
                 Message = ProductConstants.PRODUCT_EXISTS
             };
 
@@ -236,7 +239,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.Success,
+                NotificationType = ResponseStatus.Success,
                 Message = ProductConstants.PRODUCT_SUCCESSFULLY_UPDATED,
             };
         }
@@ -244,7 +247,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         {
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.BadRequest,
+                NotificationType = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
@@ -256,7 +259,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         if (product is null)
             return new ApiResponse<ProductDetailsDTO>
             {
-                NotificationType = NotificationType.NotFound,
+                NotificationType = ResponseStatus.NotFound,
                 Message = ProductConstants.PRODUCT_DOESNT_EXIST
             };
 
@@ -266,7 +269,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         return new ApiResponse<ProductDetailsDTO>
         {
             Message = ProductConstants.PRODUCT_SUCCESSFULLY_DELETED,
-            NotificationType = NotificationType.Success
+            NotificationType = ResponseStatus.Success
         };
     }
 }

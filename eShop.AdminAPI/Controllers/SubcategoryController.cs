@@ -31,7 +31,7 @@ public class SubcategoryController(ISubcategoryService _subcategoryService) : Ba
     public IActionResult Create([FromBody] CreateUpdateSubcategoryRequest request)
     {
         var response = _subcategoryService.CreateSubcategory(request);
-        if (response.NotificationType == NotificationType.Created && response.Data?.Id != null)
+        if (response.NotificationType == ResponseStatus.Created && response.Data?.Id != null)
         {
             var locationUri = Url.Action(nameof(GetById), "Subcategory", new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;

@@ -1,7 +1,8 @@
 using eShop.Infrastructure.Context;
-using eShop.PublicAPI.Extensions;
-using Microsoft.EntityFrameworkCore;
 using eShop.Infrastructure.IoC;
+using eShop.PublicAPI.Extensions;
+using eShop.PublicAPI.Middlewares;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddIoCService();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,10 +39,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseExceptionHandler();
+
 app.UseCors("MyPolicy");
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

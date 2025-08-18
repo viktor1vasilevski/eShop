@@ -29,7 +29,7 @@ public class UserService(IUnitOfWork _uow) : IUserService
         return new ApiResponse<List<UserDTO>>
         {
             Data = usersDTO,
-            NotificationType = NotificationType.Success,
+            NotificationType = ResponseStatus.Success,
             TotalCount = totalCount,
         };
     }
