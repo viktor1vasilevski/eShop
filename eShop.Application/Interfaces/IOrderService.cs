@@ -7,5 +7,6 @@ namespace eShop.Application.Interfaces;
 public interface IOrderService
 {
     ApiResponse<List<OrderDetailsDTO>> GetOrders(OrderRequest request);
+    ApiResponse<List<OrderDetailsDTO>> GetOrdersForUserId(Guid userId);
     Task<ApiResponse<OrderDetailsDTO>> PlaceOrderAsync(PlaceOrderRequest request);
 }

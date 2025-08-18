@@ -22,4 +22,12 @@ public class OrderController(IOrderService _orderService) : BaseController
         var response = await _orderService.PlaceOrderAsync(request);
         return HandleResponse(response);
     }
+
+
+    [HttpGet("{userId}")]
+    public IActionResult GetOrdersForUser([FromRoute] Guid userId)
+    {
+        var response = _orderService.GetOrdersForUserId(userId);
+        return HandleResponse(response);
+    }
 }

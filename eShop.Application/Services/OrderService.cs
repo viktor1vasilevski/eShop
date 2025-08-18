@@ -45,6 +45,40 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         };
     }
 
+    public ApiResponse<List<OrderDetailsDTO>> GetOrdersForUserId(Guid userId)
+    {
+        var order = _orderRepository.GetAsQueryable(
+            filter: x => x.UserId == userId,
+            orderBy: x => x.OrderByDescending(x => x.Created),
+            include: x => x.Include(x => x.OrderItems).ThenInclude(p => p.Product));
+
+        if (order is null || order.Count() == 0)
+            return new ApiResponse<List<OrderDetailsDTO>>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = "asdas"
+            };
+
+        var ordersDTO = order.Select(order => new OrderDetailsDTO
+        {
+            TotalAmount = order.TotalAmount,
+            OrderCreatedOn = order.Created,
+            Items = order.OrderItems.Select(item => new OrderItemDTO
+            {
+                ProductName = item.Product!.Name,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                Image = ImageHelper.BuildImageDataUrl(item.Product.Image, item.Product.ImageType)
+            }).ToList()
+        }).ToList();
+
+        return new ApiResponse<List<OrderDetailsDTO>>
+        {
+            Data = ordersDTO,
+            Status = ResponseStatus.Success,
+        };
+    }
+
     public async Task<ApiResponse<OrderDetailsDTO>> PlaceOrderAsync(PlaceOrderRequest request)
     {
         var response = new ApiResponse<OrderDetailsDTO>();
