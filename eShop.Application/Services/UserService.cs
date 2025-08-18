@@ -60,6 +60,7 @@ public class UserService(IUnitOfWork _uow) : IUserService
             LastName = x.LastName,
             Email = x.Email,
             Username = x.Username,
+            Created = x.Created,
         }).ToList();
 
         return new ApiResponse<List<UserDTO>>
