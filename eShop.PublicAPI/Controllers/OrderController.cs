@@ -8,7 +8,7 @@ namespace eShop.PublicAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Cusomer")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
 public class OrderController(IOrderService _orderService) : BaseController
 {
 
