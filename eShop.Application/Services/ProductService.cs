@@ -31,9 +31,6 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         var totalCount = query.Count();
 
-
-        throw new Exception("this is random exception");
-
         var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {

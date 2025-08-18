@@ -7,13 +7,13 @@ namespace eShop.Domain.Entities;
 
 public class User : AuditableBaseEntity
 {
-    public string FirstName { get; private set; } = string.Empty;
-    public string LastName { get; private set; } = string.Empty;
-    public string Username { get; private set; } = string.Empty;
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+    public string Username { get; private set; }
     public Role Role { get; private set; }
-    public string Email { get; private set; } = string.Empty;
-    public string PasswordHash { get; private set; } = string.Empty;
-    public string SaltKey { get; private set; } = string.Empty;
+    public string Email { get; private set; }
+    public string PasswordHash { get; private set; }
+    public string SaltKey { get; private set; }
     public bool IsDeleted { get; set; }
 
 

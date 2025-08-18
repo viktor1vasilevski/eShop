@@ -2,6 +2,7 @@
 using eShop.Application.DTOs.OrderItem;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Order;
 using eShop.Application.Responses;
@@ -33,7 +34,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
                 ProductName = item.Product!.Name,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                Image = item.Product.Image != null ? $"data:{item.Product.ImageType};base64,{Convert.ToBase64String(item.Product.Image)}" : null,
+                Image = ImageHelper.BuildImageDataUrl(item.Product.Image, item.Product.ImageType)
             }).ToList()
         }).ToList();
        
