@@ -1,4 +1,5 @@
 using eShop.AdminAPI.Extension;
+using eShop.AdminAPI.Middlewares;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddIoCService();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
 
@@ -53,10 +55,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
+
 app.UseCors("MyPolicy");
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

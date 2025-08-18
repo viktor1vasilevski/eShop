@@ -2,7 +2,7 @@
 using eShop.Application.Responses;
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace eShop.PublicAPI.Middlewares;
+namespace eShop.AdminAPI.Middlewares;
 
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> _logger) : IExceptionHandler
 {
