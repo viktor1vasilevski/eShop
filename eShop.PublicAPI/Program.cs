@@ -27,6 +27,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddIoCService();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
