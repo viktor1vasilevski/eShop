@@ -186,13 +186,6 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-
-    private bool HasRelatedEntities(Category category)
-    {
-        return category.Subcategories?.Any() == true ||
-               category.Subcategories?.FirstOrDefault()?.Products?.Any() == true;
-    }
-
     public ApiResponse<CategoryDTO> GetCategoryById(Guid id)
     {
         var category = _categoryRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();

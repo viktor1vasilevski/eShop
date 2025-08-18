@@ -264,11 +264,4 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             }
         };
     }
-
-
-
-    private bool HasRelatedEntities(Subcategory subcategory)
-    {
-        return subcategory.Products?.Any(x => !x.IsDeleted) == true;
-    }
 }

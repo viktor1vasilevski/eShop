@@ -14,7 +14,6 @@ namespace eShop.Application.Services;
 public class OrderService(IUnitOfWork _uow) : IOrderService
 {
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>(); 
-    private readonly IRepositoryBase<OrderItem> _orderItemRepository = _uow.GetRepository<OrderItem>();
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
 

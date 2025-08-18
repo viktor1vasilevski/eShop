@@ -1,7 +1,6 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
-using System.Collections.Generic;
 
 namespace eShop.Domain.Entities;
 
