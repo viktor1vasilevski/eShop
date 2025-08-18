@@ -21,6 +21,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
     {
         var query = _orderRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(request.UserId != Guid.Empty, o => o.UserId == request.UserId),
+            orderBy: x => x.OrderByDescending(x => x.Created),
             include: x => x.Include(x => x.OrderItems).ThenInclude(p => p.Product));
 
         var ordersDTO = query.Select(order => new OrderDetailsDTO
