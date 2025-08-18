@@ -9,13 +9,6 @@ namespace eShop.PublicAPI.Controllers;
 public class OrderController(IOrderService _orderService) : BaseController
 {
 
-    [HttpGet]
-    public IActionResult Get([FromQuery] OrderRequest request)
-    {
-        var response = _orderService.GetOrders(request);
-        return HandleResponse(response);
-    }
-
     [HttpPost]
     public async Task<IActionResult> PlaceOrderAsync([FromBody] PlaceOrderRequest request)
     {

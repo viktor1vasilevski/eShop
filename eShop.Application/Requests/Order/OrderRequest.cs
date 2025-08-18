@@ -2,5 +2,4 @@
 
 public class OrderRequest
 {
-    public Guid? UserId { get; set; }
 }

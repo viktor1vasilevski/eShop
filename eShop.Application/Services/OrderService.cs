@@ -20,8 +20,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
 
     public ApiResponse<List<OrderDetailsDTO>> GetOrders(OrderRequest request)
     {
-        var query = _orderRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(request.UserId != Guid.Empty, o => o.UserId == request.UserId),
+        var query = _orderRepository.GetAsQueryable(
             orderBy: x => x.OrderByDescending(x => x.Created),
             include: x => x.Include(x => x.OrderItems).ThenInclude(p => p.Product));
 
