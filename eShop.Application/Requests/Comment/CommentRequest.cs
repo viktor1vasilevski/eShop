@@ -2,4 +2,5 @@
 
 public class CommentRequest : BaseRequest
 {
+    public Guid ProductId { get; set; }
 }

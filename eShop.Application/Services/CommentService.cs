@@ -17,7 +17,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
 
     public ApiResponse<List<CommentDTO>> GetComments(CommentRequest request)
     {
-        var query = _commentRepository.GetAsQueryable();
+        var query = _commentRepository.GetAsQueryable(x => x.ProductId == request.ProductId);
 
         var totalCount = query.Count();
 
