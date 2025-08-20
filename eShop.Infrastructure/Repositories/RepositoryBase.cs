@@ -6,11 +6,11 @@ using System.Linq.Expressions;
 
 namespace eShop.Infrastructure.Repositories;
 
-public class RepositoryBasey<TEntity> : IRepositoryBase<TEntity> where TEntity : class
+public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
 {
     internal AppDbContext _dbContext;
     internal DbSet<TEntity> dbSet;
-    public RepositoryBasey(AppDbContext dbContext)
+    public RepositoryBase(AppDbContext dbContext)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         dbSet = _dbContext.Set<TEntity>();
