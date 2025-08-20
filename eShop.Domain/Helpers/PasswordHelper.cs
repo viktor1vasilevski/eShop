@@ -14,8 +14,12 @@ public static class PasswordHelper
     public static bool VerifyPassword(string inputPassword, string storedHash, string storedSalt)
     {
         byte[] salt = Convert.FromBase64String(storedSalt);
-        string hash = HashPassword(inputPassword, salt);
-        return hash == storedHash;
+        byte[] storedHashBytes = Convert.FromBase64String(storedHash);
+
+        string computedHash = HashPassword(inputPassword, salt);
+        byte[] computedHashBytes = Convert.FromBase64String(computedHash);
+
+        return CryptographicOperations.FixedTimeEquals(storedHashBytes, computedHashBytes);
     }
 
     public static byte[] GenerateSalt(int size = 16)
