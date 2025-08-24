@@ -1,7 +1,10 @@
+using eShop.Application.Validations.Order;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
 using eShop.PublicAPI.Extensions;
 using eShop.PublicAPI.Middlewares;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +28,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddIoCService();
+
+// Fluent Validations
+builder.Services.AddValidatorsFromAssemblyContaining<PlaceOrderRequestValidator>(ServiceLifetime.Transient);
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
