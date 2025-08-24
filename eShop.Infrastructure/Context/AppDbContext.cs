@@ -44,7 +44,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
             entry.Property(nameof(entity.Created)).IsModified = false;
             entry.Property(nameof(entity.CreatedBy)).IsModified = false;
 
-            entity.LastModified = DateTime.UtcNow;
+            entity.LastModified = DateTime.Now;
             entity.LastModifiedBy = username;
         }
 
