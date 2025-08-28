@@ -2,6 +2,7 @@
 using eShop.Application.Services;
 using eShop.Domain.Interfaces;
 using eShop.Infrastructure.Repositories;
+using eShop.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace eShop.Infrastructure.IoC;
@@ -21,6 +22,9 @@ public static class DependencyContainer
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IUserService, UserService>();
+
+        // AI Product Description Generator
+        services.AddHttpClient<IProductDescriptionGenerator, OpenAiProductDescriptionGenerator>();
 
         return services;
     }
