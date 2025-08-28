@@ -9,10 +9,28 @@ namespace eShop.AdminAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class ProductController(IProductService _productService) : BaseController
+//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+public class ProductController(IProductService _productService, IProductDescriptionGenerator _descriptionGenerator) : BaseController
 {
+    [HttpGet("generate")]
+    public async Task<IActionResult> Generate(
+    string productName,
+    string category,
+    string subcategory,
+    string? additionalContext = null)
+    {
+        try
+        {
+            var description = await _descriptionGenerator.GenerateDescriptionAsync(
+                productName, category, subcategory, additionalContext);
 
+            return Ok(new { Description = description });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
 
     [HttpGet]
     public IActionResult Get([FromQuery] ProductRequest request)

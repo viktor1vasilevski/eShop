@@ -1,12 +1,27 @@
 ﻿using eShop.Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
 
 namespace eShop.Infrastructure.Services;
 
-public class OpenAiProductDescriptionGenerator(HttpClient _httpClient, string _apiKey) : IProductDescriptionGenerator
+public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
 {
-    public async Task<string> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null)
+    private readonly HttpClient _httpClient;
+    private readonly string _apiKey;
+
+    public OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfiguration configuration)
+    {
+        _httpClient = httpClient;
+        _apiKey = configuration["OpenAI:ApiKey"]
+                  ?? throw new InvalidOperationException("OpenAI API key is missing in configuration.");
+    }
+
+    public async Task<string> GenerateDescriptionAsync(
+        string productName,
+        string category,
+        string subcategory,
+        string? additionalContext = null)
     {
         var prompt = BuildPrompt(productName, category, subcategory, additionalContext);
 
@@ -15,9 +30,9 @@ public class OpenAiProductDescriptionGenerator(HttpClient _httpClient, string _a
             model = "gpt-4o-mini",
             messages = new[]
             {
-                new { role = "system", content = "You are a helpful assistant that generates product descriptions." },
-                new { role = "user", content = prompt }
-            }
+                    new { role = "system", content = "You are a helpful assistant that generates product descriptions." },
+                    new { role = "user", content = prompt }
+                }
         };
 
         var json = JsonSerializer.Serialize(requestBody);
