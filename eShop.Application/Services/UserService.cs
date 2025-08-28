@@ -7,6 +7,7 @@ using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Enums;
 using eShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services;
 
@@ -14,6 +15,18 @@ public class UserService(IUnitOfWork _uow) : IUserService
 {
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
 
+    public ApiResponse<UserDetailsDTO> GetUserDetailsById(Guid userId)
+    {
+        var query = _userRepository.GetAsQueryable(
+            filter: x => x.Id == userId,
+            include: x => x.Include(x => x.Orders)
+            );
+
+        return new ApiResponse<UserDetailsDTO>
+        {
+
+        };
+    }
 
     public ApiResponse<List<UserDTO>> GetUsers(UserRequest request)
     {

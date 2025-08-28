@@ -1,7 +1,6 @@
 ﻿using eShop.Application.DTOs.Order;
 using eShop.Application.DTOs.OrderItem;
 using eShop.Application.Enums;
-using eShop.Application.Extensions;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Order;
@@ -9,6 +8,7 @@ using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace eShop.Application.Services;
 
@@ -44,22 +44,54 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         };
     }
 
-    public ApiResponse<List<OrderDetailsDTO>> GetOrdersForUserId(Guid userId)
+    public ApiResponse<List<OrderDetailsDTO>> GetOrdersForUserId(Guid userId, OrderRequest request)
     {
-        var order = _orderRepository.GetAsQueryable(
+        var query = _orderRepository.GetAsQueryable(
             filter: x => x.UserId == userId,
             orderBy: x => x.OrderByDescending(x => x.Created),
             include: x => x.Include(x => x.OrderItems).ThenInclude(p => p.Product));
 
-        if (order is null || order.Count() == 0)
+        var totalCount = query.Count();
+
+        if (query is null || query.Count() == 0)
             return new ApiResponse<List<OrderDetailsDTO>>
             {
                 Status = ResponseStatus.NotFound,
                 Message = "asdas"
             };
 
-        var ordersDTO = order.Select(order => new OrderDetailsDTO
+        var sortedQuery = query;
+        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
+            if (request.SortDirection.ToLower() == "asc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    _ => sortedQuery.OrderBy(x => x.Created)
+                };
+            }
+            else if (request.SortDirection.ToLower() == "desc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
+                };
+            }
+        }
+
+        if (request.Skip.HasValue)
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+
+        if (request.Take.HasValue)
+            sortedQuery = sortedQuery.Take(request.Take.Value);
+
+        var ordersDTO = sortedQuery.Select(order => new OrderDetailsDTO
+        {
+            FirstName = order.User.FirstName,
+            LastName = order.User.LastName,
+            Username = order.User.Username,
             TotalAmount = order.TotalAmount,
             OrderCreatedOn = order.Created,
             Items = order.OrderItems.Select(item => new OrderItemDTO
@@ -75,6 +107,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         {
             Data = ordersDTO,
             Status = ResponseStatus.Success,
+            TotalCount = totalCount,
         };
     }
 

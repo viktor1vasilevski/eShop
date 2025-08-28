@@ -19,4 +19,11 @@ public class UserController(IUserService _userService) : BaseController
         return HandleResponse(response);
     }
 
+    //[HttpGet("{userId}")]
+    //public IActionResult GetById([FromRoute] Guid userId)
+    //{
+    //    var response = _orderService.GetOrdersForUserId(userId);
+    //    return HandleResponse(response);
+    //}
+
 }
