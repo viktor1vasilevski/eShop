@@ -1,4 +1,5 @@
-﻿using eShop.Application.Enums;
+﻿using Azure.Core;
+using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,27 +10,14 @@ namespace eShop.AdminAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
 public class ProductController(IProductService _productService, IProductDescriptionGenerator _descriptionGenerator) : BaseController
 {
     [HttpGet("generate")]
-    public async Task<IActionResult> Generate(
-    string productName,
-    string category,
-    string subcategory,
-    string? additionalContext = null)
+    public async Task<IActionResult> Generate(string productName, string category, string subcategory, string? additionalContext = null)
     {
-        try
-        {
-            var description = await _descriptionGenerator.GenerateDescriptionAsync(
-                productName, category, subcategory, additionalContext);
-
-            return Ok(new { Description = description });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var response = await _descriptionGenerator.GenerateDescriptionAsync(productName, category, subcategory, additionalContext);
+        return HandleResponse(response);
     }
 
     [HttpGet]

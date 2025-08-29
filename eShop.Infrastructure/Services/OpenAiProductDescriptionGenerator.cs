@@ -1,4 +1,7 @@
-﻿using eShop.Application.Interfaces;
+﻿using eShop.Application.Enums;
+using eShop.Application.Interfaces;
+using eShop.Application.Responses;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
@@ -17,11 +20,7 @@ public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
                   ?? throw new InvalidOperationException("OpenAI API key is missing in configuration.");
     }
 
-    public async Task<string> GenerateDescriptionAsync(
-        string productName,
-        string category,
-        string subcategory,
-        string? additionalContext = null)
+    public async Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null)
     {
         var prompt = BuildPrompt(productName, category, subcategory, additionalContext);
 
@@ -30,9 +29,9 @@ public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
             model = "gpt-4o-mini",
             messages = new[]
             {
-                    new { role = "system", content = "You are a helpful assistant that generates product descriptions." },
-                    new { role = "user", content = prompt }
-                }
+                new { role = "system", content = "You are a helpful assistant that generates product descriptions." },
+                new { role = "user", content = prompt }
+            }
         };
 
         var json = JsonSerializer.Serialize(requestBody);
@@ -43,17 +42,56 @@ public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
         };
 
         var response = await _httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
 
-        using var stream = await response.Content.ReadAsStreamAsync();
-        using var doc = await JsonDocument.ParseAsync(stream);
+        if (!response.IsSuccessStatusCode)
+        {
+            try
+            {
+                using var errorDoc = JsonDocument.Parse(responseContent);
+                var errorMessage = errorDoc.RootElement
+                    .GetProperty("error")
+                    .GetProperty("message")
+                    .GetString();
 
-        return doc.RootElement
-                  .GetProperty("choices")[0]
-                  .GetProperty("message")
-                  .GetProperty("content")
-                  .GetString()
-                  ?? string.Empty;
+                return new ApiResponse<string>
+                {
+                    Message = $"OpenAI API error: {errorMessage}",
+                    Status = ResponseStatus.ServerError
+                };
+            }
+            catch
+            {
+                return new ApiResponse<string>
+                {
+                    Message = $"OpenAI API error: {response.StatusCode} : {responseContent}",
+                    Status = ResponseStatus.ServerError
+                };
+            }
+        }
+
+        using var doc = JsonDocument.Parse(responseContent);
+
+        var description = doc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString();
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return new ApiResponse<string>
+            {
+                Message = "No description generated.",
+                Status = ResponseStatus.Info
+            };
+        }
+
+        return new ApiResponse<string>
+        {
+            Status = ResponseStatus.Success,
+            Data = description,
+        };
     }
 
     private string BuildPrompt(string productName, string category, string subcategory, string? additionalContext)

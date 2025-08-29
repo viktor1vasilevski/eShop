@@ -1,4 +1,6 @@
-﻿namespace eShop.Application.Interfaces;
+﻿using eShop.Application.Responses;
+
+namespace eShop.Application.Interfaces;
 
 public interface IProductDescriptionGenerator
 {
@@ -10,5 +12,5 @@ public interface IProductDescriptionGenerator
     /// <param name="subcategory">The subcategory the product belongs to.</param>
     /// <param name="additionalContext">Optional details like features, style, or target audience.</param>
     /// <returns>The generated description text.</returns>
-    Task<string> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null);
+    Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null);
 }

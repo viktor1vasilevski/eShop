@@ -10,5 +10,6 @@ public enum ResponseStatus
     NotFound,
     NoContent,
     Conflict,
-    Unauthorized
+    Unauthorized,
+    Info
 }
