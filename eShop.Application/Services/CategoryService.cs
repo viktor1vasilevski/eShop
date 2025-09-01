@@ -221,12 +221,12 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             .Where(x => x.ValidSubcategories.Any())
             .Select(x => new CategoryWithSubcategoriesDTO
             {
-                Id = x.Category.Id,
+                CategoryId = x.Category.Id,
                 Name = x.Category.Name,
                 Subcategories = x.ValidSubcategories
                     .Select(sc => new SelectSubcategoryListItemDTO
                     {
-                        Id = sc.Id,
+                        SubcategoryId = sc.Id,
                         Name = sc.Name
                     }).ToList()
             }).ToList();

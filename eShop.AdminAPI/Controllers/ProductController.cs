@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using eShop.Application.Enums;
+﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

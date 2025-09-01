@@ -203,7 +203,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
         var subcategoriesDropdownDTO = subcategories.Select(x => new SelectSubcategoryListItemDTO
         {
-            Id = x.Id,
+            SubcategoryId = x.Id,
             Name = x.Name
         }).ToList();
 
@@ -229,7 +229,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             .Get(x => x.CategoryId != uncategorizedCategoryId || x.Id == uncategorizedSubcategoryId, null, x => x.Include(x => x.Category))
             .Select(x => new SelectSubcategoryListItemDTO
             {
-                Id = x.Id,
+                SubcategoryId = x.Id,
                 Name = $"{x.Name} ({x.Category.Name})"
             })
             .ToList();
