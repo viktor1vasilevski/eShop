@@ -50,8 +50,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "eShop.Admin API");
-        c.DocumentTitle = "eShop.Admin API Docs";
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "eShop.Customer API");
     });
 }
 

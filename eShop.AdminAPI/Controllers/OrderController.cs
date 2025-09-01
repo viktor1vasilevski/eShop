@@ -21,9 +21,9 @@ public class OrderController(IOrderService _orderService) : BaseController
 
 
     [HttpGet("{userId}")]
-    public IActionResult GetOrdersForUser([FromRoute] Guid userId, [FromQuery] OrderRequest request)
+    public IActionResult GetOrdersForUser([FromRoute] Guid userId)
     {
-        var response = _orderService.GetOrdersForUserId(userId, request);
+        var response = _orderService.GetOrdersForUserId(userId);
         return HandleResponse(response);
     }
 }

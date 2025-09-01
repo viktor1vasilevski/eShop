@@ -12,15 +12,15 @@ public static class AppDbContextSeed
     {
         context.Database.Migrate();
 
-        if (context.Users.Any(x => x.Role == Role.Customer && x.Username.ToLower() == "viktorvasilevski"))
+        if (context.Users.Any(x => x.Role == Role.Customer && x.Username.ToLower() == "testuser"))
             return;
 
         var userData = new UserData(
-            firstName: "Viktor",
-            lastName: "Vasilevski",
-            username: "viktorvasilevski",
-            email: "viktor@example.com",
-            password: "Viktor@123",
+            firstName: "Test",
+            lastName: "Test",
+            username: "testuser",
+            email: "test@example.com",
+            password: "Test@123",
             role: Role.Customer);
 
         var user = User.CreateNew(userData);

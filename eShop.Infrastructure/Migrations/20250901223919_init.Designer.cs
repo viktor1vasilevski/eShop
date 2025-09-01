@@ -12,8 +12,8 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250901221327_add_image_for_subcategories_and_categories")]
-    partial class add_image_for_subcategories_and_categories
+    [Migration("20250901223919_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

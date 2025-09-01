@@ -44,7 +44,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
         };
     }
 
-    public ApiResponse<List<OrderDetailsDTO>> GetOrdersForUserId(Guid userId, OrderRequest request)
+    public ApiResponse<List<OrderDetailsDTO>> GetOrdersForUserId(Guid userId)
     {
         var query = _orderRepository.GetAsQueryable(
             filter: x => x.UserId == userId,
@@ -58,36 +58,9 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
             {
                 Status = ResponseStatus.NotFound,
                 Message = "asdas"
-            };
+            };       
 
-        var sortedQuery = query;
-        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
-        {
-            if (request.SortDirection.ToLower() == "asc")
-            {
-                sortedQuery = request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderBy(x => x.Created),
-                    _ => sortedQuery.OrderBy(x => x.Created)
-                };
-            }
-            else if (request.SortDirection.ToLower() == "desc")
-            {
-                sortedQuery = request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderByDescending(x => x.Created),
-                    _ => sortedQuery.OrderByDescending(x => x.Created)
-                };
-            }
-        }
-
-        if (request.Skip.HasValue)
-            sortedQuery = sortedQuery.Skip(request.Skip.Value);
-
-        if (request.Take.HasValue)
-            sortedQuery = sortedQuery.Take(request.Take.Value);
-
-        var ordersDTO = sortedQuery.Select(order => new OrderDetailsDTO
+        var ordersDTO = query.Select(order => new OrderDetailsDTO
         {
             FirstName = order.User.FirstName,
             LastName = order.User.LastName,
