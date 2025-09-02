@@ -54,8 +54,8 @@ public class Product : AuditableBaseEntity
 
     private void ApplyProductData(ProductData product)
     {
-        var imageBytes = ConvertBase64ToBytes(product.Base64Image);
-        var imageType = ExtractImageType(product.Base64Image);
+        var imageBytes = ImageHelper.ConvertBase64ToBytes(product.Base64Image);
+        var imageType = ImageHelper.ExtractImageType(product.Base64Image);
 
         Validate(product, imageBytes, imageType);
 
@@ -86,46 +86,7 @@ public class Product : AuditableBaseEntity
         if (product.UnitQuantity <= 0)
             throw new DomainValidationException("Unit quantity must be greater than zero.");
 
-        ValidateImage(imageBytes, imageType);
-    }
-
-    private void ValidateImage(byte[] imageBytes, string imageType)
-    {
-        if (imageBytes == null || imageBytes.Length == 0)
-            throw new DomainValidationException("Image must be provided.");
-
-        const int maxImageSizeInBytes = 5 * 1024 * 1024; // 5MB
-        if (imageBytes.Length > maxImageSizeInBytes)
-            throw new DomainValidationException("Image size cannot exceed 5MB.");
-
-        if (string.IsNullOrWhiteSpace(imageType))
-            throw new DomainValidationException("Image type must be provided.");
-
-        var allowedTypes = new[] { "jpeg", "png", "webp" };
-        if (!allowedTypes.Contains(imageType.ToLower()))
-            throw new DomainValidationException($"Unsupported image type: {imageType}");
-    }
-
-    private byte[] ConvertBase64ToBytes(string base64String)
-    {
-        if (string.IsNullOrEmpty(base64String)) return Array.Empty<byte>();
-
-        string base64Data = base64String.Contains("base64,")
-            ? base64String.Substring(base64String.IndexOf("base64,") + 7)
-            : base64String;
-
-        return Convert.FromBase64String(base64Data);
-    }
-
-    private string ExtractImageType(string base64String)
-    {
-        if (string.IsNullOrEmpty(base64String)) return string.Empty;
-
-        var parts = base64String.Split(';');
-        if (parts.Length == 0 || !parts[0].Contains("/")) return string.Empty;
-
-        var typeParts = parts[0].Split('/');
-        return typeParts.Length > 1 ? typeParts[1] : string.Empty;
+        ImageHelper.ValidateImage(imageBytes, imageType);
     }
 }
 

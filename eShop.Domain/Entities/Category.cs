@@ -11,7 +11,6 @@ public class Category : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
-
     private readonly List<Subcategory> _subcategories = [];
     public IReadOnlyCollection<Subcategory>? Subcategories => _subcategories.AsReadOnly();
 
@@ -19,22 +18,37 @@ public class Category : AuditableBaseEntity
 
     private Category() { }
 
-    public static Category Create(string name)
+    public static Category Create(string name, string? image)
     {
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+
+        var imageBytes = ImageHelper.ConvertBase64ToBytes(image);
+        var imageType = ImageHelper.ExtractImageType(image);
+
+        ImageHelper.ValidateImage(imageBytes, imageType);
 
         return new Category
         {
             Id = Guid.NewGuid(),
             Name = name,
+            Image = imageBytes,
+            ImageType = imageType,
             IsDeleted = false,
         };
     }
 
-    public void Update(string name)
+    public void Update(string name, string? image)
     {
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+
+        var imageBytes = ImageHelper.ConvertBase64ToBytes(image);
+        var imageType = ImageHelper.ExtractImageType(image);
+
+        ImageHelper.ValidateImage(imageBytes, imageType);
+
         Name = name;
+        Image = imageBytes;
+        ImageType = imageType;
     }
 
     public void SoftDelete() => IsDeleted = true;

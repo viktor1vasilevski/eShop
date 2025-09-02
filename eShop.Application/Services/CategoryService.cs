@@ -3,6 +3,7 @@ using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Subcategory;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Category;
 using eShop.Application.Responses;
@@ -57,6 +58,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         {
             Id = x.Id,
             Name = x.Name,
+            Image = ImageHelper.BuildImageDataUrl(x.Image, x.ImageType),
             Created = x.Created,
             LastModified = x.LastModified,
         }).ToList();
@@ -80,7 +82,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         try
         {
-            var category = Category.Create(request.Name);
+            var category = Category.Create(request.Name, request.Image);
             _categoryRepository.Insert(category);
             _uow.SaveChanges();
 
@@ -120,7 +122,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         try
         {
-            category.Update(request.Name);
+            category.Update(request.Name, request.Image);
             _uow.SaveChanges();
 
             return new ApiResponse<CategoryDetailsDTO>

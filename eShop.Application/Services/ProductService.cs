@@ -3,6 +3,7 @@ using eShop.Application.DTOs.Comment;
 using eShop.Application.DTOs.Product;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
 using eShop.Application.Responses;
@@ -71,7 +72,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Description = x.Description,
             UnitPrice = x.UnitPrice,
             UnitQuantity = x.UnitQuantity,
-            Image = x.Image != null ? $"data:{x.ImageType};base64,{Convert.ToBase64String(x.Image)}" : null,
+            Image = ImageHelper.BuildImageDataUrl(x.Image, x.ImageType),
             Category = x.Subcategory.Category.Name,
             Subcategory = x.Subcategory.Name,
             SubcategoryId = x.SubcategoryId,
