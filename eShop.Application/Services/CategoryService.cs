@@ -178,7 +178,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         var categoriesDropdownDTO = categories.Select(x => new SelectCategoryListItemDTO
         {
-            Id = x.Id,
+            CategoryId = x.Id,
             Name = x.Name
         }).ToList();
 
