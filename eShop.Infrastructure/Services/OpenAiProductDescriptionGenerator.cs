@@ -29,8 +29,10 @@ public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
             model = "gpt-4o-mini",
             messages = new[]
             {
-                new { role = "system", content = "You are a helpful assistant that generates product descriptions." },
-                new { role = "user", content = prompt }
+                new { role = "system", content = "You write natural, concise product descriptions for ecommerce." },
+                new { role = "user", content = $"Write a short product description (3–5 sentences) for '{productName}' in " +
+                $"{category}/{subcategory}. Do not include a title, heading, or tagline—only the description text. Additional context: {additionalContext ?? "n/a"}" }
+
             }
         };
 
