@@ -23,7 +23,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         if (!_categoryRepository.Exists(x => x.Id == request.CategoryId))
             return new ApiResponse<SubcategoryDetailsDTO>()
             {
-                Message = CategoryConstants.CATEGORY_DOESNT_EXIST,
+                Message = CategoryConstants.CategoryDoesNotExist,
                 Status = ResponseStatus.NotFound,
             };
 
@@ -108,7 +108,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             return new ApiResponse<SubcategoryDTO>
             {
                 Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CATEGORY_DOESNT_EXIST
+                Message = CategoryConstants.CategoryDoesNotExist
             };
 
         if (_subcategoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower() && x.Id != id))

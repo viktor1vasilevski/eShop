@@ -1,4 +1,6 @@
-﻿namespace eShop.Application.DTOs.Category;
+﻿using eShop.Application.DTOs.Subcategory;
+
+namespace eShop.Application.DTOs.Category;
 
 public class CategoryDetailsDTO
 {
@@ -7,4 +9,5 @@ public class CategoryDetailsDTO
     public string Image { get; set; } = string.Empty;
     public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }
+    public List<SubcategoryDTO>? Subcategories { get; set; }
 }

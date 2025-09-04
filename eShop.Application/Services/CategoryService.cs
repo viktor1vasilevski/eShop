@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Constants;
 using eShop.Application.DTOs.Category;
+using eShop.Application.DTOs.Product;
 using eShop.Application.DTOs.Subcategory;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
@@ -18,7 +19,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 {
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
-    public ApiResponse<List<CategoryDetailsDTO>> GetCategories(CategoryRequest request)
+    public ApiResponse<List<CategoryDTO>> GetCategories(CategoryRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())).Where(x => !x.IsDeleted));
@@ -54,21 +55,60 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var categoriesDTO = sortedQuery.Select(x => new CategoryDetailsDTO
+        var categoriesDTO = sortedQuery.Select(x => new CategoryDTO
         {
             Id = x.Id,
             Name = x.Name,
-            Image = ImageHelper.BuildImageDataUrl(x.Image, x.ImageType),
             Created = x.Created,
             LastModified = x.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<CategoryDetailsDTO>>()
+        return new ApiResponse<List<CategoryDTO>>()
         {
             Data = categoriesDTO,
             TotalCount = totalCount,
             Status = ResponseStatus.Success,
         };
+    }
+
+    public async Task<ApiResponse<CategoryDetailsDTO>> GetCategoryByIdAsync(Guid id)
+    {
+        var category = (await _categoryRepository.GetAsync(
+            filter: x => x.Id == id && !x.IsDeleted,
+            include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)))?.FirstOrDefault();
+
+        if (category is null)
+            return new ApiResponse<CategoryDetailsDTO>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = CategoryConstants.CategoryDoesNotExist
+            };
+
+        return new ApiResponse<CategoryDetailsDTO>
+        {
+            Status = ResponseStatus.Success,
+            Data = new CategoryDetailsDTO
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Created = category.Created,
+                LastModified = category.LastModified,
+                Image = ImageHelper.BuildImageDataUrl(category.Image, category.ImageType),
+                Subcategories = category.Subcategories
+                    .Select(sc => new SubcategoryDTO
+                    {
+                        Id = sc.Id,
+                        Name = sc.Name,
+                        Products = sc.Products
+                            .Select(p => new ProductDTO
+                            {
+                                Id = p.Id,
+                                Name = p.Name
+                            }).ToList()
+                    }).ToList()
+            }
+        };
+
     }
 
     public ApiResponse<CategoryDetailsDTO> CreateCategory(CreateUpdateCategoryRequest request)
@@ -110,7 +150,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CATEGORY_DOESNT_EXIST
+                Message = CategoryConstants.CategoryDoesNotExist
             };
 
         if (_categoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower() && x.Id != id))
@@ -151,7 +191,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         if (category is null)
             return new ApiResponse<CategoryDetailsDTO>
             {
-                Message = CategoryConstants.CATEGORY_DOESNT_EXIST,
+                Message = CategoryConstants.CategoryDoesNotExist,
                 Status = ResponseStatus.NotFound
             };
 
@@ -188,23 +228,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-    public ApiResponse<CategoryDTO> GetCategoryById(Guid id)
-    {
-        var category = _categoryRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
 
-        if (category is null)
-            return new ApiResponse<CategoryDTO>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CATEGORY_DOESNT_EXIST
-            };
-
-        return new ApiResponse<CategoryDTO>
-        {
-            Status = ResponseStatus.Success,
-            Data = new CategoryDTO { Id = category.Id, Name = category.Name }
-        };
-    }
 
     public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
     {

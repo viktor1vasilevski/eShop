@@ -13,7 +13,7 @@ public static class CategoryConstants
     public const string CATEGORY_SUCCESSFULLY_DELETED = "Category successfully deleted.";
 
     public const string CATEGORY_EXISTS = "Category with that name already exists.";
-    public const string CATEGORY_DOESNT_EXIST = "Category doesn't exist.";
+    public const string CategoryDoesNotExist = "Category doesn't exist.";
     public const string CATEGORY_HAS_RELATED_ENTITIES = "Category cannot be deleted because it has related subcategories or products";
 
 }

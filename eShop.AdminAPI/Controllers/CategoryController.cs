@@ -26,7 +26,7 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
         var response = _categoryService.CreateCategory(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
-            var locationUri = Url.Action(nameof(GetById), "Category", new { id = response.Data.Id }, Request.Scheme);
+            var locationUri = Url.Action(nameof(GetByIdAsync), "Category", new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;
         }
 
@@ -41,9 +41,9 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById([FromRoute] Guid id)
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
     {
-        var response = _categoryService.GetCategoryById(id);
+        var response = await _categoryService.GetCategoryByIdAsync(id);
         return HandleResponse(response);
     }
 
