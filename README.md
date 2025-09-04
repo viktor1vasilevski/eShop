@@ -16,8 +16,7 @@ It’s still **in progress**, but the goal is to provide a solid reference imple
 ## 🛠️ Tech Stack (Planned / Current)
 - **Backend**: .NET / C#  
 - **Frontend**: Angular (planned)  
-- **Database**: PostgreSQL  
-- **Infrastructure**: Azure Cloud Services, CI/CD Pipelines, Docker (TBD)  
+- **Database**: SQL  
 
 ---
 
