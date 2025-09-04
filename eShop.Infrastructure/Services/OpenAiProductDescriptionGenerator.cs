@@ -1,24 +1,16 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Responses;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
 
 namespace eShop.Infrastructure.Services;
 
-public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
+public class OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfiguration configuration) : IProductDescriptionGenerator
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
-
-    public OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfiguration configuration)
-    {
-        _httpClient = httpClient;
-        _apiKey = configuration["OpenAI:ApiKey"]
-                  ?? throw new InvalidOperationException("OpenAI API key is missing in configuration.");
-    }
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly string _apiKey = configuration["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI API key is missing in configuration.");
 
     public async Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null)
     {
@@ -32,7 +24,6 @@ public class OpenAiProductDescriptionGenerator : IProductDescriptionGenerator
                 new { role = "system", content = "You write natural, concise product descriptions for ecommerce." },
                 new { role = "user", content = $"Write a short product description (3–5 sentences) for '{productName}' in " +
                 $"{category}/{subcategory}. Do not include a title, heading, or tagline—only the description text. Additional context: {additionalContext ?? "n/a"}" }
-
             }
         };
 
