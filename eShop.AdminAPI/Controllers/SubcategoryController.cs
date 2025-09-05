@@ -21,9 +21,9 @@ public class SubcategoryController(ISubcategoryService _subcategoryService) : Ba
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById([FromRoute] Guid id)
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
     {
-        var response = _subcategoryService.GetSubcategoryById(id);
+        var response = await _subcategoryService.GetSubcategoryByIdAsync(id);
         return HandleResponse(response);
     }
 
@@ -33,7 +33,7 @@ public class SubcategoryController(ISubcategoryService _subcategoryService) : Ba
         var response = _subcategoryService.CreateSubcategory(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
-            var locationUri = Url.Action(nameof(GetById), "Subcategory", new { id = response.Data.Id }, Request.Scheme);
+            var locationUri = Url.Action(nameof(GetByIdAsync), "Subcategory", new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;
         }
         return HandleResponse(response);
