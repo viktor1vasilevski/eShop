@@ -26,6 +26,12 @@ public class ProductController(IProductService _productService, IProductDescript
         return HandleResponse(response);
     }
 
+    [HttpGet("{id}")]
+    public IActionResult GetById([FromRoute] Guid id, [FromQuery] Guid? userId = null)
+    {
+        var response = _productService.GetProductById(id, userId);
+        return HandleResponse(response);
+    }
 
     [HttpPost]
     public IActionResult Create([FromBody] CreateUpdateProductRequest request)
@@ -38,14 +44,6 @@ public class ProductController(IProductService _productService, IProductDescript
         }
         return HandleResponse(response);
     }
-
-    [HttpGet("{id}")]
-    public IActionResult GetById([FromRoute] Guid id, [FromQuery] Guid? userId = null)
-    {
-        var response = _productService.GetProductById(id, userId);
-        return HandleResponse(response);
-    }
-
 
     [HttpPut("{id}")]
     public IActionResult Update([FromRoute] Guid id, [FromBody] CreateUpdateProductRequest request)

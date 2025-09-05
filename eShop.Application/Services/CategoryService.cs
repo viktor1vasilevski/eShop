@@ -94,12 +94,12 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 Created = category.Created,
                 LastModified = category.LastModified,
                 Image = ImageHelper.BuildImageDataUrl(category.Image, category.ImageType),
-                Subcategories = category.Subcategories
+                Subcategories = category.Subcategories?
                     .Select(sc => new SubcategoryRefDTO
                     {
                         Id = sc.Id,
                         Name = sc.Name,
-                        Products = sc.Products
+                        Products = sc.Products?
                             .Select(p => new ProductRefDTO
                             {
                                 Id = p.Id,

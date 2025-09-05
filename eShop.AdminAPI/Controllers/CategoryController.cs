@@ -20,6 +20,13 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
         return HandleResponse(response);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
+    {
+        var response = await _categoryService.GetCategoryByIdAsync(id);
+        return HandleResponse(response);
+    }
+
     [HttpPost]
     public IActionResult Create([FromBody] CreateUpdateCategoryRequest request)
     {
@@ -40,12 +47,7 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
         return HandleResponse(response);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
-    {
-        var response = await _categoryService.GetCategoryByIdAsync(id);
-        return HandleResponse(response);
-    }
+
 
     [HttpDelete("{id}")]
     public IActionResult Delete([FromRoute] Guid id)
