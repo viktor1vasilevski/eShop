@@ -7,9 +7,9 @@ namespace eShop.Application.Interfaces;
 public interface ISubcategoryService
 {
     ApiResponse<List<SubcategoryDTO>> GetSubcategories(SubcategoryRequest request);
+    Task<ApiResponse<SubcategoryDetailsDTO>> GetSubcategoryById(Guid id);
     ApiResponse<SubcategoryDetailsDTO> CreateSubcategory(CreateUpdateSubcategoryRequest request);
     ApiResponse<SubcategoryDTO> UpdateSubcategory(Guid id, CreateUpdateSubcategoryRequest request);
-    ApiResponse<SubcategoryDetailsDTO> GetSubcategoryById(Guid id);
     ApiResponse<SubcategoryDTO> DeleteSubcategory(Guid id);
     ApiResponse<List<SelectSubcategoryListItemDTO>> GetSubcategoriesWithCategoriesDropdownList();
     Task<ApiResponse<List<SelectSubcategoryListItemDTO>>> GetSubcategoriesDropdownListAsync();

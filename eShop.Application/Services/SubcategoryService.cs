@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Constants;
 using eShop.Application.DTOs.Category;
+using eShop.Application.DTOs.Product;
 using eShop.Application.DTOs.Subcategory;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
@@ -240,10 +241,12 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         };
     }
 
-    public ApiResponse<SubcategoryDetailsDTO> GetSubcategoryById(Guid id)
+    public async Task<ApiResponse<SubcategoryDetailsDTO>> GetSubcategoryById(Guid id)
     {
-        var subcategory = _subcategoryRepository.GetAsQueryable(x => x.Id == id && !x.IsDeleted, null,
-            x => x.Include(x => x.Products).Include(x => x.Category)).FirstOrDefault();
+        var subcategory = (await _subcategoryRepository.GetAsync(
+            filter: x => x.Id == id && !x.IsDeleted,
+            include: x => x.Include(x => x.Products).Include(x => x.Category)
+            )).FirstOrDefault();
 
         if(subcategory is null)
             return new ApiResponse<SubcategoryDetailsDTO>
@@ -260,7 +263,12 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
                 Id = subcategory.Id,
                 Name = subcategory.Name,
                 CategoryId = subcategory.Category.Id,
-                Category = subcategory.Category.Name
+                Category = subcategory.Category.Name,
+                Products = subcategory.Products.Select(x => new ProductRefDTO
+                {
+                    Id=x.Id,
+                    Name = x.Name,
+                }).ToList()
             }
         };
     }
