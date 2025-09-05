@@ -141,7 +141,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
     }
 
-    public ApiResponse<List<SubcategoryDetailsDTO>> GetSubcategories(SubcategoryRequest request)
+    public ApiResponse<List<SubcategoryDTO>> GetSubcategories(SubcategoryRequest request)
     {
         var query = _subcategoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.CategoryId == request.CategoryId)
@@ -179,7 +179,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var subcategoriesDTO = sortedQuery.Select(x => new SubcategoryDetailsDTO
+        var subcategoriesDTO = sortedQuery.Select(x => new SubcategoryDTO
         {
             Id = x.Id,
             Name = x.Name,
@@ -189,7 +189,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
             LastModified = x.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<SubcategoryDetailsDTO>>()
+        return new ApiResponse<List<SubcategoryDTO>>()
         {
             Data = subcategoriesDTO,
             Status = ResponseStatus.Success,

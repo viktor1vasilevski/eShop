@@ -6,7 +6,8 @@ public class SubcategoryDTO
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public DateTime? Created { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public Guid CategoryId { get; set; }
+    public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }
-    public List<ProductDTO>? Products { get; set; }
 }
