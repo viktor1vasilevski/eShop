@@ -1,6 +1,7 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
+using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +40,7 @@ public class ProductController(IProductService _productService, IProductDescript
         var response = _productService.CreateProduct(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
-            var locationUri = Url.Action(nameof(GetById), "Product", new { id = response.Data.Id }, Request.Scheme);
+            var locationUri = Url.Action(nameof(GetById), nameof(Product), new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;
         }
         return HandleResponse(response);

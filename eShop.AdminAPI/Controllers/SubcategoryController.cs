@@ -1,6 +1,7 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Subcategory;
+using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ public class SubcategoryController(ISubcategoryService _subcategoryService) : Ba
         var response = _subcategoryService.CreateSubcategory(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
-            var locationUri = Url.Action(nameof(GetByIdAsync), "Subcategory", new { id = response.Data.Id }, Request.Scheme);
+            var locationUri = Url.Action(nameof(GetByIdAsync), nameof(Subcategory), new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;
         }
         return HandleResponse(response);

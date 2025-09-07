@@ -1,6 +1,7 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Category;
+using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
         var response = _categoryService.CreateCategory(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
-            var locationUri = Url.Action(nameof(GetByIdAsync), "Category", new { id = response.Data.Id }, Request.Scheme);
+            var locationUri = Url.Action(nameof(GetByIdAsync), nameof(Category), new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;
         }
 
