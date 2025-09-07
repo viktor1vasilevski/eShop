@@ -126,7 +126,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
         try
         {
-            var subcategory = Subcategory.Create(request.CategoryId, request.Name);
+            var subcategory = Subcategory.Create(request.CategoryId, request.Name, request.Image);
             _subcategoryRepository.Insert(subcategory);
             _uow.SaveChanges();
 
@@ -210,7 +210,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
         try
         {
-            subcategory.Update(request.CategoryId, request.Name);
+            subcategory.Update(request.CategoryId, request.Name, null);
             _uow.SaveChanges();
 
             return new ApiResponse<SubcategoryDTO>

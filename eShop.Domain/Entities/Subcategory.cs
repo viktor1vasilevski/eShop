@@ -1,5 +1,8 @@
 ﻿using eShop.Domain.Entities.Base;
+using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
+using System.ComponentModel.DataAnnotations;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace eShop.Domain.Entities;
 
@@ -18,31 +21,45 @@ public class Subcategory : AuditableBaseEntity
     public virtual IReadOnlyCollection<Product>? Products => _products.AsReadOnly();
 
 
-
-
     private Subcategory() { }
 
-    public static Subcategory Create(Guid categoryId, string name)
+    public static Subcategory Create(Guid categoryId, string name, string base64Image)
     {
-        DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
-
-        return new Subcategory
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            CategoryId = categoryId,
-            IsDeleted = false,
-        };
+        var instance = new Subcategory();
+        instance.Id = Guid.NewGuid();
+        instance.ApplySubcategoryData(categoryId, name, base64Image);
+        return instance;
     }
 
-    public void Update(Guid categoryId, string name)
+    public void Update(Guid categoryId, string name, string? base64Image)
     {
-        DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        ApplySubcategoryData(categoryId, name, base64Image);
+    }
+
+    private void ApplySubcategoryData(Guid categoryId, string name, string? base64Image)
+    {
+        var (imageBytes, imageType) = ProcessImage(base64Image);
+        Validate(categoryId, name, imageBytes, imageType);
 
         CategoryId = categoryId;
         Name = name;
+        Image = imageBytes;
+        ImageType = imageType;
+    }
+
+    private static void Validate(Guid categoryId, string name, byte[] imageBytes, string imageType)
+    {
+        DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+
+        ImageHelper.ValidateImage(imageBytes, imageType);
+    }
+
+    private static (byte[] ImageBytes, string ImageType) ProcessImage(string? base64Image)
+    {
+        var imageBytes = ImageHelper.ConvertBase64ToBytes(base64Image);
+        var imageType = ImageHelper.ExtractImageType(base64Image);
+        return (imageBytes, imageType);
     }
 
     public void SoftDelete() => IsDeleted = true;
