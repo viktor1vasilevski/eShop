@@ -13,7 +13,7 @@ public static class ProductConstants
     public const string PRODUCT_SUCCESSFULLY_DELETED = "Product was successfully deleted.";
 
     public const string PRODUCT_EXISTS = "Product with that name already exists.";
-    public const string PRODUCT_DOESNT_EXIST = "Product doesn't exist.";
+    public const string ProductDoesNotExist = "Product doesn't exist.";
     public const string PRODUCT_HAS_RELATED_ENTITIES = "Product cannot be deleted because it has related orders or dependencies.";
 
 }

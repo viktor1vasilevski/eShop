@@ -8,6 +8,7 @@ public interface IProductService
 {
     ApiResponse<List<ProductDetailsDTO>> GetProducts(ProductRequest request);
     ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId);
+    Task<ApiResponse<ProductDetailsDTO>> GetProductByIdAsync(Guid id);
     ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id);

@@ -10,11 +10,12 @@ public class ProductDetailsDTO
     public decimal UnitPrice { get; set; }
     public int UnitQuantity { get; set; }
     public string Category { get; set; } = string.Empty;
+    public Guid CategoryId { get; set; }
     public string Subcategory { get; set; } = string.Empty;
+    public Guid SubcategoryId { get; set; }
     public string Image { get; set; } = string.Empty;
     public bool CanComment { get; set; }
     public List<CommentDTO>? Comments { get; set; }
-    public Guid SubcategoryId { get; set; }
     public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }
 }

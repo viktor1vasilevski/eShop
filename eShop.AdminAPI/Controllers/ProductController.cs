@@ -27,10 +27,17 @@ public class ProductController(IProductService _productService, IProductDescript
         return HandleResponse(response);
     }
 
+    //[HttpGet("{id}")]
+    //public IActionResult GetById([FromRoute] Guid id, [FromQuery] Guid? userId = null)
+    //{
+    //    var response = _productService.GetProductById(id, userId);
+    //    return HandleResponse(response);
+    //}
+
     [HttpGet("{id}")]
-    public IActionResult GetById([FromRoute] Guid id, [FromQuery] Guid? userId = null)
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
     {
-        var response = _productService.GetProductById(id, userId);
+        var response = await _productService.GetProductByIdAsync(id);
         return HandleResponse(response);
     }
 
@@ -40,7 +47,7 @@ public class ProductController(IProductService _productService, IProductDescript
         var response = _productService.CreateProduct(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
-            var locationUri = Url.Action(nameof(GetById), nameof(Product), new { id = response.Data.Id }, Request.Scheme);
+            var locationUri = Url.Action(nameof(GetByIdAsync), nameof(Product), new { id = response.Data.Id }, Request.Scheme);
             response.Location = locationUri;
         }
         return HandleResponse(response);

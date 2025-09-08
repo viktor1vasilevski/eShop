@@ -98,7 +98,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             return new ApiResponse<ProductDetailsDTO>
             {
                 Status = ResponseStatus.NotFound,
-                Message = ProductConstants.PRODUCT_DOESNT_EXIST
+                Message = ProductConstants.ProductDoesNotExist
             };
 
         bool canComment = false;
@@ -203,7 +203,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             return new ApiResponse<ProductDetailsDTO>
             {
                 Status = ResponseStatus.NotFound,
-                Message = ProductConstants.PRODUCT_DOESNT_EXIST
+                Message = ProductConstants.ProductDoesNotExist
             };
 
         if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
@@ -258,7 +258,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             return new ApiResponse<ProductDetailsDTO>
             {
                 Status = ResponseStatus.NotFound,
-                Message = ProductConstants.PRODUCT_DOESNT_EXIST
+                Message = ProductConstants.ProductDoesNotExist
             };
 
         product.SoftDelete();
@@ -268,6 +268,52 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         {
             Message = ProductConstants.PRODUCT_SUCCESSFULLY_DELETED,
             Status = ResponseStatus.Success
+        };
+    }
+
+    public async Task<ApiResponse<ProductDetailsDTO>> GetProductByIdAsync(Guid id)
+    {
+        var product = (await _productRepository.GetAsync(
+            filter: x => !x.IsDeleted && x.Id == id,
+            include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category))).FirstOrDefault();
+
+        if (product is null)
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = ProductConstants.ProductDoesNotExist
+            };
+
+        var productDto = new ProductDetailsDTO()
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            Subcategory = product.Subcategory?.Name,
+            SubcategoryId = product.SubcategoryId,
+            Category = product.Subcategory?.Category?.Name,
+            CategoryId = product.Subcategory.Category.Id,
+            LastModified = product.LastModified,
+            Created = product.Created,
+            Image = ImageHelper.BuildImageDataUrl(product.Image, product.ImageType),
+            Comments = product.Comments?
+            .OrderByDescending(x => x.Created)
+            .Select(x => new CommentDTO
+            {
+                CommentText = x.CommentText,
+                CreatedBy = x.CreatedBy,
+                Created = x.Created,
+                Rating = x.Rating,
+            }).ToList()
+
+        };
+
+        return new ApiResponse<ProductDetailsDTO>
+        {
+            Status = ResponseStatus.Success,
+            Data = productDto
         };
     }
 }
