@@ -1,0 +1,35 @@
+﻿using eShop.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace eShop.Infrastructure.Persistence.Configurations;
+
+public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+{
+    public void Configure(EntityTypeBuilder<Category> builder)
+    {
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Name)
+               .HasMaxLength(200)
+               .IsRequired();
+
+        builder.HasIndex(x => x.Name).IsUnique();
+
+        builder.OwnsOne(x => x.Image, img =>
+        {
+            img.Property(i => i.Bytes)
+               .HasColumnName("Image")
+               .HasColumnType("varbinary(max)")
+               .IsRequired();
+
+            img.Property(i => i.Type)
+               .HasColumnName("ImageType")
+               .HasMaxLength(32)
+               .IsRequired();
+        });
+
+        builder.Navigation(x => x.Image).IsRequired();
+    }
+}
+

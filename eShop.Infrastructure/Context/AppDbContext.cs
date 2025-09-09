@@ -57,6 +57,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
         modelBuilder.Entity<Category>()
             .HasMany(x => x.Subcategories)
             .WithOne(x => x.Category)
