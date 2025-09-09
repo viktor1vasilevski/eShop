@@ -11,6 +11,7 @@ using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces;
+using eShop.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services;
@@ -93,7 +94,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 Name = category.Name,
                 Created = category.Created,
                 LastModified = category.LastModified,
-                Image = ImageHelper.BuildImageDataUrl(category.Image, category.ImageType),
+                Image = ImageHelper.BuildImageDataUrl(category.Image),
                 Subcategories = category.Subcategories?
                     .Select(sc => new SubcategoryRefDTO
                     {
@@ -113,8 +114,9 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public ApiResponse<CategoryDetailsDTO> CreateCategory(CreateUpdateCategoryRequest request)
     {
-        if (_categoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower()))
-            return new ApiResponse<CategoryDetailsDTO>()
+        var normalizedName = (request.Name ?? string.Empty).Trim();
+        if (_categoryRepository.Exists(x => x.Name.ToLower() == normalizedName.ToLower()))
+            return new ApiResponse<CategoryDetailsDTO>
             {
                 Message = CategoryConstants.CATEGORY_EXISTS,
                 Status = ResponseStatus.Conflict
@@ -122,7 +124,10 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         try
         {
-            var category = Category.Create(request.Name, request.Image);
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
+            var category = Category.Create(normalizedName, image);
             _categoryRepository.Insert(category);
             _uow.SaveChanges();
 
@@ -162,7 +167,10 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
         try
         {
-            category.Update(request.Name, request.Image);
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
+            category.Update(request.Name, image);
             _uow.SaveChanges();
 
             return new ApiResponse<CategoryDetailsDTO>

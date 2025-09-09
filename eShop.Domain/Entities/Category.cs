@@ -1,13 +1,14 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Helpers;
+using eShop.Domain.ValueObjects;
+
 
 namespace eShop.Domain.Entities;
 
 public class Category : AuditableBaseEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public byte[] Image { get; private set; } = [];
-    public string ImageType { get; private set; } = string.Empty;
+    public Image Image { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 
 
@@ -18,37 +19,25 @@ public class Category : AuditableBaseEntity
 
     private Category() { }
 
-    public static Category Create(string name, string? image)
+    public static Category Create(string name, Image image)
     {
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
 
-        var imageBytes = ImageHelper.ConvertBase64ToBytes(image);
-        var imageType = ImageHelper.ExtractImageType(image);
-
-        ImageHelper.ValidateImage(imageBytes, imageType);
-
-        return new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Image = imageBytes,
-            ImageType = imageType,
-            IsDeleted = false,
+        return new Category 
+        { 
+            Id = Guid.NewGuid(), 
+            Name = name, 
+            Image = image, 
+            IsDeleted = false
         };
     }
 
-    public void Update(string name, string? image)
+    public void Update(string name, Image image)
     {
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
 
-        var imageBytes = ImageHelper.ConvertBase64ToBytes(image);
-        var imageType = ImageHelper.ExtractImageType(image);
-
-        ImageHelper.ValidateImage(imageBytes, imageType);
-
         Name = name;
-        Image = imageBytes;
-        ImageType = imageType;
+        Image = image;
     }
 
     public void SoftDelete() => IsDeleted = true;
