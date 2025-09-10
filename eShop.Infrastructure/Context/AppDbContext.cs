@@ -59,18 +59,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        modelBuilder.Entity<Category>()
-            .HasMany(x => x.Subcategories)
-            .WithOne(x => x.Category)
-            .HasForeignKey(x => x.CategoryId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Product>()
-            .HasOne(x => x.Subcategory)
-            .WithMany(x => x.Products)
-            .HasForeignKey(u => u.SubcategoryId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         modelBuilder.Entity<User>()
             .HasOne(u => u.Basket)
             .WithOne(b => b.User)
@@ -122,4 +110,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 
         base.OnModelCreating(modelBuilder);
     }
+
 }

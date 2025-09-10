@@ -55,10 +55,10 @@ public static class AppDbContextSeed
     {
         context.Database.Migrate();
 
-        if (context.Categories.Any(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME))
+        if (context.Categories.Any(x => x.Name == SystemConstants.UncategorizedCategoryName))
             return;
 
-        var uncategorizedCategory = Category.Create(SystemConstants.UNCATEGORIZED_CATEGORY_NAME, null);
+        var uncategorizedCategory = Category.Create(SystemConstants.UncategorizedCategoryName, null);
 
         context.Categories.Add(uncategorizedCategory);
         context.SaveChanges();
@@ -68,12 +68,12 @@ public static class AppDbContextSeed
     {
         context.Database.Migrate();
 
-        if (context.Subcategories.Any(x => x.Name == SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME))
+        if (context.Subcategories.Any(x => x.Name == SystemConstants.UncategorizedSubcategoryName))
             return;
 
-        var category = context.Categories.Where(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME).First();
+        var category = context.Categories.Where(x => x.Name == SystemConstants.UncategorizedCategoryName).First();
 
-        var uncategorizedSubcategory = Subcategory.Create(category.Id, SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME, null);
+        var uncategorizedSubcategory = Subcategory.Create(SystemConstants.UncategorizedSubcategoryName,category.Id, null);
 
         context.Subcategories.Add(uncategorizedSubcategory);
         context.SaveChanges();
