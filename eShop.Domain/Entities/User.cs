@@ -1,7 +1,6 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Enums;
 using eShop.Domain.Exceptions;
-using eShop.Domain.Helpers;
 
 namespace eShop.Domain.Entities;
 
@@ -27,52 +26,38 @@ public class User : AuditableBaseEntity
     {
         var instance = new User();
         instance.Id = Guid.NewGuid();
-        instance.ApplyUserData(user, isNewUser: true);
+        instance.ApplyUserData(user);
         return instance;
     }
 
     public void ClearBasket() => Basket?.ClearItems();
 
 
-    private void ApplyUserData(UserData user, bool isNewUser, bool isPasswordChangeAllowed = false)
+    private void ApplyUserData(UserData user)
     {
+        ValidateRequired(user.FirstName, nameof(user.FirstName));
+        ValidateRequired(user.LastName, nameof(user.LastName));
         ValidateRequired(user.Username, nameof(user.Username));
         ValidateRequired(user.Email, nameof(user.Email));
-        ValidateCoreFields(user.FirstName, user.LastName, user.Role);
+        ValidateRequired(user.PasswordHash, nameof(user.PasswordHash));
+        ValidateRequired(user.Salt, nameof(user.Salt));
+
+        if (!Enum.IsDefined(typeof(Role), user.Role))
+            throw new DomainValidationException("Invalid user role specified.");
 
         Username = user.Username.ToLower();
         Email = user.Email.ToLower();
         FirstName = user.FirstName;
         LastName = user.LastName;
         Role = user.Role;
-
-        if (isNewUser || isPasswordChangeAllowed)
-        {
-            ValidateRequired(user.Password, "Password");
-            var salt = PasswordHelper.GenerateSalt();
-            PasswordHash = PasswordHelper.HashPassword(user.Password, salt);
-            SaltKey = Convert.ToBase64String(salt);
-        }
-    }
-
-    public bool VerifyPassword(string inputPassword)
-    {
-        return PasswordHelper.VerifyPassword(inputPassword, PasswordHash, SaltKey);
+        PasswordHash = user.PasswordHash;
+        SaltKey = user.Salt;
     }
 
     private static void ValidateRequired(string value, string fieldName)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainValidationException($"{fieldName} cannot be empty.");
-    }
-
-    private static void ValidateCoreFields(string firstName, string lastName, Role role)
-    {
-        ValidateRequired(firstName, nameof(firstName));
-        ValidateRequired(lastName, nameof(lastName));
-
-        if (!Enum.IsDefined(typeof(Role), role))
-            throw new DomainValidationException("Invalid user role specified.");
     }
 }
 
@@ -83,7 +68,8 @@ public class UserData
     public string LastName { get; }
     public string Username { get; }
     public string Email { get; }
-    public string Password { get; }
+    public string PasswordHash { get; }
+    public string Salt { get; }
     public Role Role { get; }
 
     public UserData(
@@ -91,14 +77,16 @@ public class UserData
         string lastName,
         string username,
         string email,
-        string password,
+        string passwordHash,
+        string salt,
         Role role)
     {
         FirstName = firstName;
         LastName = lastName;
         Username = username;
         Email = email;
-        Password = password;
+        PasswordHash = passwordHash;
+        Salt = salt;
         Role = role;
     }
 }

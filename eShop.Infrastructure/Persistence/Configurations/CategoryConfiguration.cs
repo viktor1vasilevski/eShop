@@ -21,15 +21,15 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             img.Property(i => i.Bytes)
                .HasColumnName("Image")
                .HasColumnType("varbinary(max)")
-               .IsRequired();
+               .IsRequired(false);
 
             img.Property(i => i.Type)
                .HasColumnName("ImageType")
                .HasMaxLength(32)
-               .IsRequired();
+               .IsRequired(false);
         });
 
-        builder.Navigation(x => x.Image).IsRequired();
+        builder.Navigation(x => x.Image);
     }
 }
 

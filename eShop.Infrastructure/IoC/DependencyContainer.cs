@@ -11,8 +11,7 @@ public static class DependencyContainer
 {
     public static IServiceCollection AddIoCService(this IServiceCollection services)
     {
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+        // Application.Services
         services.AddScoped<IAuthService, AdminAuthService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISubcategoryService, SubcategoryService>();
@@ -23,8 +22,10 @@ public static class DependencyContainer
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IUserService, UserService>();
 
-        // AI Product Description Generator
+        // Infrastructure.Services
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHttpClient<IProductDescriptionGenerator, OpenAiProductDescriptionGenerator>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;
     }

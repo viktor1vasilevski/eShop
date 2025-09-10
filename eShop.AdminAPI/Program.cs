@@ -1,8 +1,10 @@
 using eShop.AdminAPI.Extension;
 using eShop.AdminAPI.Middlewares;
+using eShop.Application.Interfaces;
 using eShop.Application.Validations.Category;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
+using eShop.Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -47,15 +49,16 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var _passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
     try
     {
         var password = builder.Configuration["SeedAdmin:Password"];
-        AppDbContextSeed.SeedAdminUser(dbContext, password);
+        AppDbContextSeed.SeedAdminUser(dbContext, password, _passwordHasher);
+        AppDbContextSeed.SeedTestUser(dbContext, _passwordHasher);
 
         AppDbContextSeed.SeedUncategorizedCategory(dbContext);
         AppDbContextSeed.SeedUncategorizedSubcategory(dbContext);
-        AppDbContextSeed.SeedTestUser(dbContext);
     }
     catch (Exception ex)
     {

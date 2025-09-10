@@ -14,9 +14,11 @@ using Microsoft.Extensions.Logging;
 
 namespace eShop.Application.Services;
 
-public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration, ILogger<AdminAuthService> _logger) : ICustomerAuthService
+public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration, ILogger<AdminAuthService> _logger,
+    IPasswordHasher _passwordHasher) : ICustomerAuthService
 {
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
+
 
     public async Task<ApiResponse<LoginDTO>> LoginAsync(UserLoginRequest request)
     {
@@ -24,14 +26,12 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
         var response = await _userRepository.GetAsync(x => x.Username == normalizedUsername);
         var user = response?.FirstOrDefault();
 
-        if (user is null || user?.Role.ToString() != Role.Customer.ToString() || !user.VerifyPassword(request.Password))
-        {
+        if (user is null || user?.Role != Role.Customer || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
             return new ApiResponse<LoginDTO>
             {
                 Status = ResponseStatus.Unauthorized,
                 Message = AuthConstants.INVALID_CREDENTIAL,
             };
-        }
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
@@ -66,12 +66,15 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
 
         try
         {
+            var passwordHash = _passwordHasher.HashPassword(request.Password, out string salt);
+
             var userData = new UserData(
                 firstName: request.FirstName,
                 lastName: request.LastName,
-                username: request.Username,
-                email: request.Email,
-                password: request.Password,
+                username: normalizedUsername,
+                email: normalizedEmail,
+                passwordHash: passwordHash,
+                salt: salt,
                 role: Role.Customer);
 
             var user = User.CreateNew(userData);

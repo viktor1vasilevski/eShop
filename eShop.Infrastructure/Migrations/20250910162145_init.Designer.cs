@@ -12,8 +12,8 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250909213737_add_VO_Image")]
-    partial class add_VO_Image
+    [Migration("20250910162145_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -254,15 +254,8 @@ namespace eShop.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ImageType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2500)
+                        .HasColumnType("nvarchar(2500)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -275,7 +268,8 @@ namespace eShop.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<Guid>("SubcategoryId")
                         .HasColumnType("uniqueidentifier");
@@ -309,14 +303,6 @@ namespace eShop.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ImageType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -328,11 +314,15 @@ namespace eShop.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Subcategories");
                 });
@@ -429,12 +419,10 @@ namespace eShop.Infrastructure.Migrations
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<byte[]>("Bytes")
-                                .IsRequired()
                                 .HasColumnType("varbinary(max)")
                                 .HasColumnName("Image");
 
                             b1.Property<string>("Type")
-                                .IsRequired()
                                 .HasMaxLength(32)
                                 .HasColumnType("nvarchar(32)")
                                 .HasColumnName("ImageType");
@@ -508,6 +496,33 @@ namespace eShop.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.OwnsOne("eShop.Domain.ValueObjects.Image", "Image", b1 =>
+                        {
+                            b1.Property<Guid>("ProductId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<byte[]>("Bytes")
+                                .IsRequired()
+                                .HasColumnType("varbinary(max)")
+                                .HasColumnName("Image");
+
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("nvarchar(32)")
+                                .HasColumnName("ImageType");
+
+                            b1.HasKey("ProductId");
+
+                            b1.ToTable("Products");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
+                        });
+
+                    b.Navigation("Image")
+                        .IsRequired();
+
                     b.Navigation("Subcategory");
                 });
 
@@ -519,7 +534,32 @@ namespace eShop.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.OwnsOne("eShop.Domain.ValueObjects.Image", "Image", b1 =>
+                        {
+                            b1.Property<Guid>("SubcategoryId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<byte[]>("Bytes")
+                                .HasColumnType("varbinary(max)")
+                                .HasColumnName("Image");
+
+                            b1.Property<string>("Type")
+                                .HasMaxLength(32)
+                                .HasColumnType("nvarchar(32)")
+                                .HasColumnName("ImageType");
+
+                            b1.HasKey("SubcategoryId");
+
+                            b1.ToTable("Subcategories");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubcategoryId");
+                        });
+
                     b.Navigation("Category");
+
+                    b.Navigation("Image")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("eShop.Domain.Entities.Basket", b =>

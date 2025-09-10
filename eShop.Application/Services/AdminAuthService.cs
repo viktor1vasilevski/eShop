@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services;
 
-public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration) : IAuthService
+public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration, IPasswordHasher _passwordHasher) : IAuthService
 {
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
 
@@ -23,7 +23,7 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration) :
         var response = await _userRepository.GetAsync(x => x.Username == normalizedUsername);
         var user = response?.FirstOrDefault();
 
-        if (user is null || user?.Role != Role.Admin || user.IsDeleted || !user.VerifyPassword(request.Password))
+        if (user is null || user?.Role != Role.Admin || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
             return new ApiResponse<LoginDTO>
             {
                 Message = AuthConstants.INVALID_CREDENTIAL,
