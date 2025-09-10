@@ -1,5 +1,4 @@
 ﻿using eShop.Application.Constants;
-using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Product;
 using eShop.Application.DTOs.Subcategory;
 using eShop.Application.Enums;

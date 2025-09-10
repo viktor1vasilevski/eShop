@@ -1,5 +1,4 @@
-﻿using eShop.Application.DTOs.Category;
-using eShop.Application.DTOs.Comment;
+﻿using eShop.Application.DTOs.Comment;
 using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Comment;

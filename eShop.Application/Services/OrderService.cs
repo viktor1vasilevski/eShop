@@ -8,7 +8,6 @@ using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace eShop.Application.Services;
 
