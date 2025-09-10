@@ -4,7 +4,7 @@ namespace eShop.Application.Helpers;
 
 public static class ImageHelper
 {
-    public static string? BuildImageDataUrl(byte[]? bytes, string? imageType)
+    private static string? BuildImageDataUrl(byte[]? bytes, string? imageType)
     {
         if (bytes == null || bytes.Length == 0 || string.IsNullOrWhiteSpace(imageType))
             return null;
