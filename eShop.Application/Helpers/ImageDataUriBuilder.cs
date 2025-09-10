@@ -2,9 +2,9 @@
 
 namespace eShop.Application.Helpers;
 
-public static class ImageHelper
+public static class ImageDataUriBuilder
 {
-    private static string? BuildImageDataUrl(byte[]? bytes, string? imageType)
+    private static string? Build(byte[]? bytes, string? imageType)
     {
         if (bytes == null || bytes.Length == 0 || string.IsNullOrWhiteSpace(imageType))
             return null;
@@ -15,6 +15,6 @@ public static class ImageHelper
         return $"data:{mime};base64,{base64}";
     }
 
-    public static string? BuildImageDataUrl(Image? image)
-        => image is null ? null : BuildImageDataUrl(image.Bytes, image.Type);
+    public static string? FromImage(Image? image)
+        => image is null ? null : Build(image.Bytes, image.Type);
 }

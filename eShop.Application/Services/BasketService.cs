@@ -43,7 +43,7 @@ namespace eShop.Application.Services
                     Quantity = i.Quantity,
                     Price = i.Product?.UnitPrice ?? 0,
                     UnitQuantity = i.Product?.UnitQuantity ?? 0,
-                    Image = ImageHelper.BuildImageDataUrl(i.Product?.Image)
+                    Image = ImageDataUriBuilder.FromImage(i.Product?.Image)
                 }).ToList()
             };
 

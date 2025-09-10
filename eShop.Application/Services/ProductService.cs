@@ -73,7 +73,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Description = x.Description,
             UnitPrice = x.UnitPrice,
             UnitQuantity = x.UnitQuantity,
-            Image = ImageHelper.BuildImageDataUrl(x.Image),
+            Image = ImageDataUriBuilder.FromImage(x.Image),
             Category = x.Subcategory.Category.Name,
             Subcategory = x.Subcategory.Name,
             SubcategoryId = x.SubcategoryId,
@@ -124,7 +124,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             LastModified = product.LastModified,
             Created = product.Created,
             CanComment = canComment,
-            Image = ImageHelper.BuildImageDataUrl(product.Image),
+            Image = ImageDataUriBuilder.FromImage(product.Image),
             Comments = product.Comments?
             .OrderByDescending(x => x.Created)
             .Select(x => new CommentDTO
@@ -302,7 +302,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             CategoryId = product.Subcategory.Category.Id,
             LastModified = product.LastModified,
             Created = product.Created,
-            Image = ImageHelper.BuildImageDataUrl(product.Image),
+            Image = ImageDataUriBuilder.FromImage(product.Image),
             Comments = product.Comments?
             .OrderByDescending(x => x.Created)
             .Select(x => new CommentDTO

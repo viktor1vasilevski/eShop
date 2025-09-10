@@ -94,7 +94,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
                 Name = category.Name,
                 Created = category.Created,
                 LastModified = category.LastModified,
-                Image = ImageHelper.BuildImageDataUrl(category.Image),
+                Image = ImageDataUriBuilder.FromImage(category.Image),
                 Subcategories = category.Subcategories?
                     .Select(sc => new SubcategoryRefDTO
                     {
