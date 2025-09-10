@@ -1,6 +1,7 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Enums;
 using eShop.Domain.Exceptions;
+using eShop.Domain.Helpers;
 
 namespace eShop.Domain.Entities;
 
@@ -35,12 +36,12 @@ public class User : AuditableBaseEntity
 
     private void ApplyUserData(UserData user)
     {
-        ValidateRequired(user.FirstName, nameof(user.FirstName));
-        ValidateRequired(user.LastName, nameof(user.LastName));
-        ValidateRequired(user.Username, nameof(user.Username));
-        ValidateRequired(user.Email, nameof(user.Email));
-        ValidateRequired(user.PasswordHash, nameof(user.PasswordHash));
-        ValidateRequired(user.Salt, nameof(user.Salt));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.FirstName, nameof(user.FirstName));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.LastName, nameof(user.LastName));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Username, nameof(user.Username));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Email, nameof(user.Email));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.PasswordHash, nameof(user.PasswordHash));
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Salt, nameof(user.Salt));
 
         if (!Enum.IsDefined(typeof(Role), user.Role))
             throw new DomainValidationException("Invalid user role specified.");
@@ -52,12 +53,6 @@ public class User : AuditableBaseEntity
         Role = user.Role;
         PasswordHash = user.PasswordHash;
         SaltKey = user.Salt;
-    }
-
-    private static void ValidateRequired(string value, string fieldName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new DomainValidationException($"{fieldName} cannot be empty.");
     }
 }
 
