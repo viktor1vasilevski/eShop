@@ -4,12 +4,14 @@ using eShop.Application.DTOs.Product;
 using eShop.Application.DTOs.Subcategory;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Subcategory;
 using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces;
+using eShop.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services;
@@ -110,6 +112,8 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
     public ApiResponse<SubcategoryDetailsDTO> CreateSubcategory(CreateUpdateSubcategoryRequest request)
     {
+        var normalizedName = (request.Name ?? string.Empty).Trim();
+
         if (!_categoryRepository.Exists(x => x.Id == request.CategoryId))
             return new ApiResponse<SubcategoryDetailsDTO>()
             {
@@ -117,7 +121,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
                 Status = ResponseStatus.NotFound,
             };
 
-        if (_subcategoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower()))
+        if (_subcategoryRepository.Exists(x => x.Name.ToLower() == normalizedName))
             return new ApiResponse<SubcategoryDetailsDTO>()
             {
                 Message = SubcategoryConstants.SUBCATEGORY_EXISTS,
@@ -126,7 +130,10 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
         try
         {
-            var subcategory = Subcategory.Create(request.CategoryId, request.Name, request.Image);
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
+            var subcategory = Subcategory.Create(normalizedName, request.CategoryId, image);
             _subcategoryRepository.Insert(subcategory);
             _uow.SaveChanges();
 
@@ -156,7 +163,7 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     public ApiResponse<SubcategoryDTO> DeleteSubcategory(Guid id)
     {
         var subcategory = _subcategoryRepository.GetAsQueryable(
-                        filter: x => x.Id == id && x.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && !x.IsDeleted,
+                        filter: x => x.Id == id && x.Name != SystemConstants.UncategorizedSubcategoryName && !x.IsDeleted,
                         include: x => x.Include(x => x.Products)).FirstOrDefault();
 
         if (subcategory is null)
@@ -201,7 +208,8 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
                 Message = CategoryConstants.CategoryDoesNotExist
             };
 
-        if (_subcategoryRepository.Exists(x => x.Name.ToLower() == request.Name.ToLower() && x.Id != id))
+        var normalizedName = (request.Name ?? string.Empty).Trim();
+        if (_subcategoryRepository.Exists(x => x.Name.ToLower() == normalizedName && x.Id != id))
             return new ApiResponse<SubcategoryDTO>
             {
                 Status = ResponseStatus.Conflict,
@@ -210,7 +218,10 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
 
         try
         {
-            subcategory.Update(request.CategoryId, request.Name, null);
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
+            subcategory.Update(normalizedName, request.CategoryId, image);
             _uow.SaveChanges();
 
             return new ApiResponse<SubcategoryDTO>
@@ -250,12 +261,12 @@ public class SubcategoryService(IUnitOfWork _uow) : ISubcategoryService
     public ApiResponse<List<SelectSubcategoryListItemDTO>> GetSubcategoriesWithCategoriesDropdownList()
     {
         var uncategorizedCategoryId = _categoryRepository
-                        .Get(x => x.Name == SystemConstants.UNCATEGORIZED_CATEGORY_NAME && !x.IsDeleted)
+                        .Get(x => x.Name == SystemConstants.UncategorizedCategoryName && !x.IsDeleted)
                         .Select(x => x.Id)
                         .FirstOrDefault();
 
         var uncategorizedSubcategoryId = _subcategoryRepository
-            .Get(x => x.Name == SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && x.CategoryId == uncategorizedCategoryId)
+            .Get(x => x.Name == SystemConstants.UncategorizedSubcategoryName && x.CategoryId == uncategorizedCategoryId)
             .Select(x => x.Id)
             .FirstOrDefault();
 

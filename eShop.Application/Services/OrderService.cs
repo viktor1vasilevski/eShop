@@ -33,7 +33,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
                 ProductName = item.Product!.Name,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                Image = ImageHelper.BuildImageDataUrl(item.Product.Image, item.Product.ImageType)
+                Image = ImageHelper.BuildImageDataUrl(item.Product.Image)
             }).ToList()
         }).ToList();
        
@@ -72,7 +72,7 @@ public class OrderService(IUnitOfWork _uow) : IOrderService
                 ProductName = item.Product!.Name,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                Image = ImageHelper.BuildImageDataUrl(item.Product.Image, item.Product.ImageType)
+                Image = ImageHelper.BuildImageDataUrl(item.Product.Image)
             }).ToList()
         }).ToList();
 

@@ -118,7 +118,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         if (_categoryRepository.Exists(x => x.Name.ToLower() == normalizedName.ToLower()))
             return new ApiResponse<CategoryDetailsDTO>
             {
-                Message = CategoryConstants.CATEGORY_EXISTS,
+                Message = CategoryConstants.CategoryExist,
                 Status = ResponseStatus.Conflict
             };
 
@@ -134,7 +134,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Status = ResponseStatus.Created,
-                Message = CategoryConstants.CATEGORY_SUCCESSFULLY_CREATED,
+                Message = CategoryConstants.CategorySuccessfullyCreated,
                 Data = new CategoryDetailsDTO { Id = category.Id, Name = category.Name, Created = category.Created }
             };
         }
@@ -162,7 +162,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             return new ApiResponse<CategoryDetailsDTO>
             {
                 Status = ResponseStatus.Conflict,
-                Message = CategoryConstants.CATEGORY_EXISTS
+                Message = CategoryConstants.CategoryExist
             };
 
         try
@@ -193,7 +193,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
     public ApiResponse<CategoryDetailsDTO> DeleteCategory(Guid id)
     {
         var category = _categoryRepository.GetAsQueryable(
-              filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME,
+              filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UncategorizedCategoryName,
               include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
 
         if (category is null)
@@ -242,13 +242,13 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
     {
         var result = _categoryRepository
             .GetAsQueryable(
-                filter: c => c.Name != SystemConstants.UNCATEGORIZED_CATEGORY_NAME && !c.IsDeleted
+                filter: c => c.Name != SystemConstants.UncategorizedCategoryName && !c.IsDeleted
             )
             .Select(c => new
             {
                 Category = c,
                 ValidSubcategories = c.Subcategories
-                    .Where(sc => sc.Name != SystemConstants.UNCATEGORIZED_SUBCATEGORY_NAME && !sc.IsDeleted && sc.Products.Any())
+                    .Where(sc => sc.Name != SystemConstants.UncategorizedSubcategoryName && !sc.IsDeleted && sc.Products.Any())
                     .Select(sc => new { sc.Id, sc.Name })
                     .ToList()
             })

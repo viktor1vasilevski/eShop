@@ -10,6 +10,7 @@ using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces;
+using eShop.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services;
@@ -65,14 +66,14 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var productsDTO = sortedQuery.Select(x => new ProductDetailsDTO
+        var productsDTO = sortedQuery.AsNoTracking().Select(x => new ProductDetailsDTO
         {
             Id = x.Id,
             Name = x.Name,
             Description = x.Description,
             UnitPrice = x.UnitPrice,
             UnitQuantity = x.UnitQuantity,
-            Image = ImageHelper.BuildImageDataUrl(x.Image, x.ImageType),
+            Image = ImageHelper.BuildImageDataUrl(x.Image),
             Category = x.Subcategory.Category.Name,
             Subcategory = x.Subcategory.Name,
             SubcategoryId = x.SubcategoryId,
@@ -123,9 +124,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             LastModified = product.LastModified,
             Created = product.Created,
             CanComment = canComment,
-            Image = product.Image != null
-                ? $"data:{product.ImageType};base64,{Convert.ToBase64String(product.Image)}"
-                : null,
+            Image = ImageHelper.BuildImageDataUrl(product.Image),
             Comments = product.Comments?
             .OrderByDescending(x => x.Created)
             .Select(x => new CommentDTO
@@ -156,13 +155,16 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         try
         {
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
             var productData = new ProductData(
                 name: request.Name,
                 description: request.Description,
                 unitPrice: request.Price,
                 unitQuantity: request.Quantity,
                 subcategoryId: request.SubcategoryId,
-                base64Image: request.Image);
+                image: image);
 
             var product = Product.Create(productData);
             _productRepository.Insert(product);
@@ -223,13 +225,16 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         try
         {
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
             var productData = new ProductData(
                 name: request.Name,
                 description: request.Description,
                 unitPrice: request.Price,
                 unitQuantity: request.Quantity,
                 subcategoryId: request.SubcategoryId,
-                base64Image: request.Image);
+                image: image);
 
             product.Update(productData);
             _productRepository.Update(product);
@@ -297,7 +302,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             CategoryId = product.Subcategory.Category.Id,
             LastModified = product.LastModified,
             Created = product.Created,
-            Image = ImageHelper.BuildImageDataUrl(product.Image, product.ImageType),
+            Image = ImageHelper.BuildImageDataUrl(product.Image),
             Comments = product.Comments?
             .OrderByDescending(x => x.Created)
             .Select(x => new CommentDTO
