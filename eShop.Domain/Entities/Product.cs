@@ -1,6 +1,7 @@
 ﻿using eShop.Domain.Entities.Base;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Entities;
 
@@ -10,8 +11,7 @@ public class Product : AuditableBaseEntity
     public string Description { get; private set; } = string.Empty;
     public decimal UnitPrice { get; private set; } 
     public int UnitQuantity { get; private set; }
-    public byte[] Image { get; private set; } = [];
-    public string ImageType { get; private set; } = string.Empty;
+    public Image Image { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 
     public Guid SubcategoryId { get; private set; }
@@ -54,21 +54,17 @@ public class Product : AuditableBaseEntity
 
     private void ApplyProductData(ProductData product)
     {
-        var imageBytes = ImageHelper.ConvertBase64ToBytes(product.Base64Image);
-        var imageType = ImageHelper.ExtractImageType(product.Base64Image);
-
-        Validate(product, imageBytes, imageType);
+        Validate(product);
 
         Name = product.Name;
         Description = product.Description;
         UnitPrice = product.UnitPrice;
         UnitQuantity = product.UnitQuantity;
         SubcategoryId = product.SubcategoryId;
-        Image = imageBytes;
-        ImageType = imageType;
+        Image = product.Image;
     }
 
-    private void Validate(ProductData product, byte[] imageBytes, string imageType)
+    private void Validate(ProductData product)
     {
         DomainValidatorHelper.ThrowIfEmptyGuid(product.SubcategoryId, nameof(product.SubcategoryId));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(product.Name, nameof(product.Name));
@@ -85,8 +81,6 @@ public class Product : AuditableBaseEntity
 
         if (product.UnitQuantity <= 0)
             throw new DomainValidationException("Unit quantity must be greater than zero.");
-
-        ImageHelper.ValidateImage(imageBytes, imageType);
     }
 }
 
@@ -97,7 +91,7 @@ public class ProductData
     public decimal UnitPrice { get; }
     public int UnitQuantity { get; }
     public Guid SubcategoryId { get; }
-    public string Base64Image { get; }
+    public Image Image { get; }
 
     public ProductData(
         string name,
@@ -105,13 +99,13 @@ public class ProductData
         decimal unitPrice,
         int unitQuantity,
         Guid subcategoryId,
-        string base64Image)
+        Image image)
     {
         Name = name;
         Description = description;
         UnitPrice = unitPrice;
         UnitQuantity = unitQuantity;
         SubcategoryId = subcategoryId;
-        Base64Image = base64Image;
+        Image = image;
     }
 }
