@@ -13,12 +13,7 @@ namespace eShop.AdminAPI.Controllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
 public class ProductController(IProductService _productService, IProductDescriptionGenerator _descriptionGenerator) : BaseController
 {
-    [HttpGet("generate")]
-    public async Task<IActionResult> Generate(string productName, string category, string subcategory, string? additionalContext = null)
-    {
-        var response = await _descriptionGenerator.GenerateDescriptionAsync(productName, category, subcategory, additionalContext);
-        return HandleResponse(response);
-    }
+
 
     [HttpGet]
     public IActionResult Get([FromQuery] ProductRequest request)
@@ -64,6 +59,13 @@ public class ProductController(IProductService _productService, IProductDescript
     public IActionResult Delete([FromRoute] Guid id)
     {
         var response = _productService.DeleteProduct(id);
+        return HandleResponse(response);
+    }
+
+    [HttpGet("generate")]
+    public async Task<IActionResult> Generate(string productName, string category, string subcategory, string? additionalContext = null)
+    {
+        var response = await _descriptionGenerator.GenerateDescriptionAsync(productName, category, subcategory, additionalContext);
         return HandleResponse(response);
     }
 }

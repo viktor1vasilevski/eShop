@@ -14,6 +14,7 @@ namespace eShop.AdminAPI.Controllers;
 public class SubcategoryController(ISubcategoryService _subcategoryService) : BaseController
 {
 
+
     [HttpGet]
     public IActionResult Get([FromQuery] SubcategoryRequest request)
     {
