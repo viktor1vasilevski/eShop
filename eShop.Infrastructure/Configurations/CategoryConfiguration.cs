@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace eShop.Infrastructure.Persistence.Configurations;
+namespace eShop.Infrastructure.Configurations;
 
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
@@ -32,4 +32,3 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Navigation(x => x.Image);
     }
 }
-
