@@ -1,17 +1,6 @@
-﻿using eShop.Application.Constants;
-using eShop.Application.DTOs.Comment;
+﻿using eShop.Application.DTOs.Comment;
 using eShop.Application.DTOs.Product;
-using eShop.Application.Enums;
-using eShop.Application.Extensions;
-using eShop.Application.Helpers;
-using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
-using eShop.Application.Responses;
-using eShop.Domain.Entities;
-using eShop.Domain.Exceptions;
-using eShop.Domain.Interfaces;
-using eShop.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services;
 

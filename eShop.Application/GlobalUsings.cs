@@ -1,0 +1,13 @@
+﻿global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Logging;
+global using eShop.Application.Constants;
+global using eShop.Application.Enums;
+global using eShop.Application.Helpers;
+global using eShop.Application.Interfaces;
+global using eShop.Application.Responses;
+global using eShop.Application.Extensions;
+global using eShop.Domain.Entities;
+global using eShop.Domain.Interfaces;
+global using eShop.Domain.Enums;
+global using eShop.Domain.Exceptions;
+global using eShop.Domain.ValueObjects;

@@ -1,13 +1,6 @@
 ﻿using eShop.Application.DTOs.Order;
 using eShop.Application.DTOs.OrderItem;
-using eShop.Application.Enums;
-using eShop.Application.Helpers;
-using eShop.Application.Interfaces;
 using eShop.Application.Requests.Order;
-using eShop.Application.Responses;
-using eShop.Domain.Entities;
-using eShop.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services;
 

@@ -1,13 +1,5 @@
-﻿using eShop.Application.Constants;
-using eShop.Application.DTOs.Basket;
-using eShop.Application.Enums;
-using eShop.Application.Helpers;
-using eShop.Application.Interfaces;
+﻿using eShop.Application.DTOs.Basket;
 using eShop.Application.Requests.Basket;
-using eShop.Application.Responses;
-using eShop.Domain.Entities;
-using eShop.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services
 {
