@@ -12,9 +12,6 @@ public class Category : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
-    private readonly List<Subcategory> _subcategories = [];
-    public IReadOnlyCollection<Subcategory>? Subcategories => _subcategories.AsReadOnly();
-
 
 
     private Category() { }
@@ -41,9 +38,4 @@ public class Category : AuditableBaseEntity
     }
 
     public void SoftDelete() => IsDeleted = true;
-
-    public bool HasRelatedSubcategories()
-    {
-        return _subcategories.Any(x => !x.IsDeleted);
-    }
 }

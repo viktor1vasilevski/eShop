@@ -7,140 +7,136 @@ namespace eShop.Application.Services;
 public class ProductService(IUnitOfWork _uow) : IProductService
 {
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
-    private readonly IRepositoryBase<Subcategory> _subcategoryRepository = _uow.GetRepository<Subcategory>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
     public ApiResponse<List<ProductDetailsDTO>> GetProducts(ProductRequest request)
     {
-        var query = _productRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.Subcategory.Category.Id == request.CategoryId)
-                          .WhereIf(!String.IsNullOrEmpty(request.SubcategoryId.ToString()), x => x.Subcategory.Id == request.SubcategoryId)
-                          .WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
-                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower()))
-                     .Where(x => x.UnitQuantity > 0 && !x.IsDeleted),
-            include: x => x.Include(x => x.Subcategory).ThenInclude(sc => sc.Category));
+        //var query = _productRepository.GetAsQueryableWhereIf(
+        //    filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.Subcategory.Category.Id == request.CategoryId)
+        //                  .WhereIf(!String.IsNullOrEmpty(request.SubcategoryId.ToString()), x => x.Subcategory.Id == request.SubcategoryId)
+        //                  .WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
+        //                  .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower()))
+        //             .Where(x => x.UnitQuantity > 0 && !x.IsDeleted),
+        //    include: x => x.Include(x => x.Subcategory).ThenInclude(sc => sc.Category));
 
-        var totalCount = query.Count();
+        //var totalCount = query.Count();
 
-        var sortedQuery = query;
-        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
-        {
-            if (request.SortDirection.ToLower() == "asc")
-            {
-                sortedQuery = request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderBy(x => x.Created),
-                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
-                    "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
-                    "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
-                    _ => sortedQuery.OrderBy(x => x.Created)
-                };
-            }
-            else if (request.SortDirection.ToLower() == "desc")
-            {
-                sortedQuery = request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderByDescending(x => x.Created),
-                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
-                    "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
-                    "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
-                    _ => sortedQuery.OrderByDescending(x => x.Created)
-                };
-            }
-        }
+        //var sortedQuery = query;
+        //if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
+        //{
+        //    if (request.SortDirection.ToLower() == "asc")
+        //    {
+        //        sortedQuery = request.SortBy.ToLower() switch
+        //        {
+        //            "created" => sortedQuery.OrderBy(x => x.Created),
+        //            "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
+        //            "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
+        //            "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
+        //            _ => sortedQuery.OrderBy(x => x.Created)
+        //        };
+        //    }
+        //    else if (request.SortDirection.ToLower() == "desc")
+        //    {
+        //        sortedQuery = request.SortBy.ToLower() switch
+        //        {
+        //            "created" => sortedQuery.OrderByDescending(x => x.Created),
+        //            "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
+        //            "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
+        //            "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
+        //            _ => sortedQuery.OrderByDescending(x => x.Created)
+        //        };
+        //    }
+        //}
 
-        if (request.Skip.HasValue)
-            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+        //if (request.Skip.HasValue)
+        //    sortedQuery = sortedQuery.Skip(request.Skip.Value);
 
-        if (request.Take.HasValue)
-            sortedQuery = sortedQuery.Take(request.Take.Value);
+        //if (request.Take.HasValue)
+        //    sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var productsDTO = sortedQuery.AsNoTracking().Select(x => new ProductDetailsDTO
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Description = x.Description,
-            UnitPrice = x.UnitPrice,
-            UnitQuantity = x.UnitQuantity,
-            Image = ImageDataUriBuilder.FromImage(x.Image),
-            Category = x.Subcategory.Category.Name,
-            Subcategory = x.Subcategory.Name,
-            SubcategoryId = x.SubcategoryId,
-            Created = x.Created,
-            LastModified = x.LastModified,
-        }).ToList();
+        //var productsDTO = sortedQuery.AsNoTracking().Select(x => new ProductDetailsDTO
+        //{
+        //    Id = x.Id,
+        //    Name = x.Name,
+        //    Description = x.Description,
+        //    UnitPrice = x.UnitPrice,
+        //    UnitQuantity = x.UnitQuantity,
+        //    Image = ImageDataUriBuilder.FromImage(x.Image),
+        //    Created = x.Created,
+        //    LastModified = x.LastModified,
+        //}).ToList();
 
         return new ApiResponse<List<ProductDetailsDTO>>()
         {
-            Data = productsDTO,
-            TotalCount = totalCount,
+            //Data = productsDTO,
+            //TotalCount = totalCount,
             Status = ResponseStatus.Success
         };
     }
 
     public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
     {
-        var product = _productRepository.Get(
-            filter: x => x.Id == id && !x.IsDeleted,
-            include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category)).FirstOrDefault();
+        //var product = _productRepository.Get(
+        //    filter: x => x.Id == id && !x.IsDeleted,
+        //    include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category)).FirstOrDefault();
 
-        if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = ProductConstants.ProductDoesNotExist
-            };
+        //if (product is null)
+        //    return new ApiResponse<ProductDetailsDTO>
+        //    {
+        //        Status = ResponseStatus.NotFound,
+        //        Message = ProductConstants.ProductDoesNotExist
+        //    };
 
-        bool canComment = false;
+        //bool canComment = false;
 
-        if (userId.HasValue)
-        {
-            canComment = _orderRepository.Exists(o =>
-                o.UserId == userId.Value &&
-                o.OrderItems.Any(oi => oi.ProductId == id));
-        }
+        //if (userId.HasValue)
+        //{
+        //    canComment = _orderRepository.Exists(o =>
+        //        o.UserId == userId.Value &&
+        //        o.OrderItems.Any(oi => oi.ProductId == id));
+        //}
 
-        var productDto = new ProductDetailsDTO()
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            UnitPrice = product.UnitPrice,
-            UnitQuantity = product.UnitQuantity,
-            SubcategoryId = product.SubcategoryId,
-            Subcategory = product.Subcategory?.Name,
-            Category = product.Subcategory?.Category?.Name,
-            LastModified = product.LastModified,
-            Created = product.Created,
-            CanComment = canComment,
-            Image = ImageDataUriBuilder.FromImage(product.Image),
-            Comments = product.Comments?
-            .OrderByDescending(x => x.Created)
-            .Select(x => new CommentDTO
-            {
-                CommentText = x.CommentText,
-                CreatedBy = x.CreatedBy,
-                Created = x.Created,
-                Rating = x.Rating,
-            }).ToList()
+        //var productDto = new ProductDetailsDTO()
+        //{
+        //    Id = product.Id,
+        //    Name = product.Name,
+        //    Description = product.Description,
+        //    UnitPrice = product.UnitPrice,
+        //    UnitQuantity = product.UnitQuantity,
+        //    SubcategoryId = product.SubcategoryId,
+        //    Subcategory = product.Subcategory?.Name,
+        //    Category = product.Subcategory?.Category?.Name,
+        //    LastModified = product.LastModified,
+        //    Created = product.Created,
+        //    CanComment = canComment,
+        //    Image = ImageDataUriBuilder.FromImage(product.Image),
+        //    Comments = product.Comments?
+        //    .OrderByDescending(x => x.Created)
+        //    .Select(x => new CommentDTO
+        //    {
+        //        CommentText = x.CommentText,
+        //        CreatedBy = x.CreatedBy,
+        //        Created = x.Created,
+        //        Rating = x.Rating,
+        //    }).ToList()
 
-        };
+        //};
 
         return new ApiResponse<ProductDetailsDTO>
         {
             Status = ResponseStatus.Success,
-            Data = productDto
+            //Data = productDto
         };
     }
 
     public ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request)
     {
-        if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-                Status = ResponseStatus.NotFound
-            };
+        //if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
+        //    return new ApiResponse<ProductDetailsDTO>
+        //    {
+        //        Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
+        //        Status = ResponseStatus.NotFound
+        //    };
 
         try
         {
@@ -170,7 +166,6 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                     Description = product.Description,
                     UnitPrice = product.UnitPrice,
                     UnitQuantity = product.UnitQuantity,
-                    SubcategoryId = product.SubcategoryId,
                     Created = product.Created,
                 }
             };
@@ -197,12 +192,12 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 Message = ProductConstants.ProductDoesNotExist
             };
 
-        if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-            };
+        //if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
+        //    return new ApiResponse<ProductDetailsDTO>
+        //    {
+        //        Status = ResponseStatus.NotFound,
+        //        Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
+        //    };
 
 
         if (product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
@@ -267,47 +262,47 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
     public async Task<ApiResponse<ProductDetailsDTO>> GetProductByIdAsync(Guid id)
     {
-        var product = (await _productRepository.GetAsync(
-            filter: x => !x.IsDeleted && x.Id == id,
-            include: x => x.Include(c => c.Comments).Include(s => s.Subcategory).ThenInclude(c => c.Category))).FirstOrDefault();
+        //var product = (await _productRepository.GetAsync(
+        //    filter: x => !x.IsDeleted && x.Id == id,
+        //    include: x => x.Include(s => s.Subcategory).ThenInclude(c => c.Category))).FirstOrDefault();
 
-        if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = ProductConstants.ProductDoesNotExist
-            };
+        //if (product is null)
+        //    return new ApiResponse<ProductDetailsDTO>
+        //    {
+        //        Status = ResponseStatus.NotFound,
+        //        Message = ProductConstants.ProductDoesNotExist
+        //    };
 
-        var productDto = new ProductDetailsDTO()
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            UnitPrice = product.UnitPrice,
-            UnitQuantity = product.UnitQuantity,
-            Subcategory = product.Subcategory?.Name,
-            SubcategoryId = product.SubcategoryId,
-            Category = product.Subcategory?.Category?.Name,
-            CategoryId = product.Subcategory.Category.Id,
-            LastModified = product.LastModified,
-            Created = product.Created,
-            Image = ImageDataUriBuilder.FromImage(product.Image),
-            Comments = product.Comments?
-            .OrderByDescending(x => x.Created)
-            .Select(x => new CommentDTO
-            {
-                CommentText = x.CommentText,
-                CreatedBy = x.CreatedBy,
-                Created = x.Created,
-                Rating = x.Rating,
-            }).ToList()
+        //var productDto = new ProductDetailsDTO()
+        //{
+        //    Id = product.Id,
+        //    Name = product.Name,
+        //    Description = product.Description,
+        //    UnitPrice = product.UnitPrice,
+        //    UnitQuantity = product.UnitQuantity,
+        //    Subcategory = product.Subcategory?.Name,
+        //    SubcategoryId = product.SubcategoryId,
+        //    Category = product.Subcategory?.Category?.Name,
+        //    CategoryId = product.Subcategory.Category.Id,
+        //    LastModified = product.LastModified,
+        //    Created = product.Created,
+        //    Image = ImageDataUriBuilder.FromImage(product.Image),
+        //    Comments = product.Comments?
+        //    .OrderByDescending(x => x.Created)
+        //    .Select(x => new CommentDTO
+        //    {
+        //        CommentText = x.CommentText,
+        //        CreatedBy = x.CreatedBy,
+        //        Created = x.Created,
+        //        Rating = x.Rating,
+        //    }).ToList()
 
-        };
+        //};
 
         return new ApiResponse<ProductDetailsDTO>
         {
             Status = ResponseStatus.Success,
-            Data = productDto
+            //Data = productDto
         };
     }
 }

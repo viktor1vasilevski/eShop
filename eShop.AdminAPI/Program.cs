@@ -4,7 +4,6 @@ using eShop.Application.Interfaces;
 using eShop.Application.Validations.Category;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
-using eShop.Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -58,7 +57,6 @@ using (var scope = app.Services.CreateScope())
         AppDbContextSeed.SeedTestUser(dbContext, _passwordHasher);
 
         AppDbContextSeed.SeedUncategorizedCategory(dbContext);
-        AppDbContextSeed.SeedUncategorizedSubcategory(dbContext);
     }
     catch (Exception ex)
     {

@@ -25,11 +25,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.UnitQuantity)
                .IsRequired();
 
-        builder.HasOne(x => x.Subcategory)
-               .WithMany(sc => sc.Products)
-               .HasForeignKey(x => x.SubcategoryId)
-               .OnDelete(DeleteBehavior.Restrict);
-
         builder.OwnsOne(x => x.Image, img =>
         {
             img.Property(i => i.Bytes)

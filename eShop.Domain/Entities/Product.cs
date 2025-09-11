@@ -14,20 +14,17 @@ public class Product : AuditableBaseEntity
     public Image Image { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 
-    public Guid SubcategoryId { get; private set; }
-    public virtual Subcategory? Subcategory { get; set; }
+
+    //private readonly List<BasketItem> _basketItems = [];
+    //public virtual ICollection<BasketItem>? BasketItems => _basketItems.AsReadOnly();
 
 
-    private readonly List<BasketItem> _basketItems = [];
-    public virtual ICollection<BasketItem>? BasketItems => _basketItems.AsReadOnly();
+    //private readonly List<OrderItem> _orderItems = [];
+    //public virtual ICollection<OrderItem>? OrderItems => _orderItems.AsReadOnly();
 
 
-    private readonly List<OrderItem> _orderItems = [];
-    public virtual ICollection<OrderItem>? OrderItems => _orderItems.AsReadOnly();
-
-
-    private readonly List<Comment> _comments = [];
-    public virtual ICollection<Comment>? Comments => _comments.AsReadOnly();
+    //private readonly List<Comment> _comments = [];
+    //public virtual ICollection<Comment>? Comments => _comments.AsReadOnly();
 
 
     private Product() { }
@@ -60,7 +57,6 @@ public class Product : AuditableBaseEntity
         Description = product.Description;
         UnitPrice = product.UnitPrice;
         UnitQuantity = product.UnitQuantity;
-        SubcategoryId = product.SubcategoryId;
         Image = product.Image;
     }
 

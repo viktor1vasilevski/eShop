@@ -14,7 +14,6 @@ public static class DependencyContainer
         // Application.Services
         services.AddScoped<IAuthService, AdminAuthService>();
         services.AddScoped<ICategoryService, CategoryService>();
-        services.AddScoped<ISubcategoryService, SubcategoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IBasketService, BasketService>();
         services.AddScoped<ICustomerAuthService, CustomerAuthService>();

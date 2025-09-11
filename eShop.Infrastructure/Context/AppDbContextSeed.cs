@@ -70,19 +70,4 @@ public static class AppDbContextSeed
         context.Categories.Add(uncategorizedCategory);
         context.SaveChanges();
     }
-
-    public static void SeedUncategorizedSubcategory(AppDbContext context)
-    {
-        context.Database.Migrate();
-
-        if (context.Subcategories.Any(x => x.Name == SystemConstants.UncategorizedSubcategoryName))
-            return;
-
-        var category = context.Categories.Where(x => x.Name == SystemConstants.UncategorizedCategoryName).First();
-
-        var uncategorizedSubcategory = Subcategory.Create(SystemConstants.UncategorizedSubcategoryName,category.Id, null);
-
-        context.Subcategories.Add(uncategorizedSubcategory);
-        context.SaveChanges();
-    }
 }

@@ -1,6 +1,4 @@
 ﻿using eShop.Application.DTOs.Category;
-using eShop.Application.DTOs.Product;
-using eShop.Application.DTOs.Subcategory;
 using eShop.Application.Requests.Category;
 
 namespace eShop.Application.Services;
@@ -63,41 +61,44 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public async Task<ApiResponse<CategoryDetailsDTO>> GetCategoryByIdAsync(Guid id)
     {
-        var category = (await _categoryRepository.GetAsync(
-            filter: x => x.Id == id && !x.IsDeleted,
-            include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)))?.FirstOrDefault();
+        //var category = (await _categoryRepository.GetAsync(
+        //    filter: x => x.Id == id && !x.IsDeleted,
+        //    include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)))?.FirstOrDefault();
 
-        if (category is null)
-            return new ApiResponse<CategoryDetailsDTO>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CategoryDoesNotExist
-            };
+        //if (category is null)
+        //    return new ApiResponse<CategoryDetailsDTO>
+        //    {
+        //        Status = ResponseStatus.NotFound,
+        //        Message = CategoryConstants.CategoryDoesNotExist
+        //    };
 
-        return new ApiResponse<CategoryDetailsDTO>
-        {
-            Status = ResponseStatus.Success,
-            Data = new CategoryDetailsDTO
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Created = category.Created,
-                LastModified = category.LastModified,
-                Image = ImageDataUriBuilder.FromImage(category.Image),
-                Subcategories = category.Subcategories?
-                    .Select(sc => new SubcategoryRefDTO
-                    {
-                        Id = sc.Id,
-                        Name = sc.Name,
-                        Products = sc.Products?
-                            .Select(p => new ProductRefDTO
-                            {
-                                Id = p.Id,
-                                Name = p.Name
-                            }).ToList()
-                    }).ToList()
-            }
-        };
+        //return new ApiResponse<CategoryDetailsDTO>
+        //{
+        //    Status = ResponseStatus.Success,
+        //    Data = new CategoryDetailsDTO
+        //    {
+        //        Id = category.Id,
+        //        Name = category.Name,
+        //        Created = category.Created,
+        //        LastModified = category.LastModified,
+        //        Image = ImageDataUriBuilder.FromImage(category.Image),
+        //        Subcategories = category.Subcategories?
+        //            .Select(sc => new SubcategoryRefDTO
+        //            {
+        //                Id = sc.Id,
+        //                Name = sc.Name,
+        //                Products = sc.Products?
+        //                    .Select(p => new ProductRefDTO
+        //                    {
+        //                        Id = p.Id,
+        //                        Name = p.Name
+        //                    }).ToList()
+        //            }).ToList()
+        //    }
+        //};
+
+
+        return new ApiResponse<CategoryDetailsDTO> { };
 
     }
 
@@ -181,26 +182,26 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public ApiResponse<CategoryDetailsDTO> DeleteCategory(Guid id)
     {
-        var category = _categoryRepository.GetAsQueryable(
-              filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UncategorizedCategoryName,
-              include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
+        //var category = _categoryRepository.GetAsQueryable(
+        //      filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UncategorizedCategoryName,
+        //      include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
 
-        if (category is null)
-            return new ApiResponse<CategoryDetailsDTO>
-            {
-                Message = CategoryConstants.CategoryDoesNotExist,
-                Status = ResponseStatus.NotFound
-            };
+        //if (category is null)
+        //    return new ApiResponse<CategoryDetailsDTO>
+        //    {
+        //        Message = CategoryConstants.CategoryDoesNotExist,
+        //        Status = ResponseStatus.NotFound
+        //    };
 
-        if(category.HasRelatedSubcategories())
-            return new ApiResponse<CategoryDetailsDTO>
-            {
-                Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,
-                Status = ResponseStatus.Conflict
-            };
+        //if(category.HasRelatedSubcategories())
+        //    return new ApiResponse<CategoryDetailsDTO>
+        //    {
+        //        Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,
+        //        Status = ResponseStatus.Conflict
+        //    };
 
-        category.SoftDelete();
-        _uow.SaveChanges();
+        //category.SoftDelete();
+        //_uow.SaveChanges();
 
         return new ApiResponse<CategoryDetailsDTO>
         {
@@ -229,34 +230,34 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
 
     public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
     {
-        var result = _categoryRepository
-            .GetAsQueryable(
-                filter: c => c.Name != SystemConstants.UncategorizedCategoryName && !c.IsDeleted
-            )
-            .Select(c => new
-            {
-                Category = c,
-                ValidSubcategories = c.Subcategories
-                    .Where(sc => sc.Name != SystemConstants.UncategorizedSubcategoryName && !sc.IsDeleted && sc.Products.Any())
-                    .Select(sc => new { sc.Id, sc.Name })
-                    .ToList()
-            })
-            .Where(x => x.ValidSubcategories.Any())
-            .Select(x => new CategoryWithSubcategoriesDTO
-            {
-                CategoryId = x.Category.Id,
-                Name = x.Category.Name,
-                Subcategories = x.ValidSubcategories
-                    .Select(sc => new SelectSubcategoryListItemDTO
-                    {
-                        SubcategoryId = sc.Id,
-                        Name = sc.Name
-                    }).ToList()
-            }).ToList();
+        //var result = _categoryRepository
+        //    .GetAsQueryable(
+        //        filter: c => c.Name != SystemConstants.UncategorizedCategoryName && !c.IsDeleted
+        //    )
+        //    .Select(c => new
+        //    {
+        //        Category = c,
+        //        ValidSubcategories = c.Subcategories
+        //            .Where(sc => sc.Name != SystemConstants.UncategorizedSubcategoryName && !sc.IsDeleted && sc.Products.Any())
+        //            .Select(sc => new { sc.Id, sc.Name })
+        //            .ToList()
+        //    })
+        //    .Where(x => x.ValidSubcategories.Any())
+        //    .Select(x => new CategoryWithSubcategoriesDTO
+        //    {
+        //        CategoryId = x.Category.Id,
+        //        Name = x.Category.Name,
+        //        Subcategories = x.ValidSubcategories
+        //            .Select(sc => new SelectSubcategoryListItemDTO
+        //            {
+        //                SubcategoryId = sc.Id,
+        //                Name = sc.Name
+        //            }).ToList()
+        //    }).ToList();
 
         return new ApiResponse<List<CategoryWithSubcategoriesDTO>>
         {
-            Data = result
+            //Data = result
         };
     }
 }
