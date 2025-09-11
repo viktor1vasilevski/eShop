@@ -63,11 +63,12 @@ public class Product : AuditableBaseEntity
         UnitPrice = product.UnitPrice;
         UnitQuantity = product.UnitQuantity;
         Image = product.Image;
+        CategoryId = product.CategoryId;
     }
 
     private void Validate(ProductData product)
     {
-        DomainValidatorHelper.ThrowIfEmptyGuid(product.SubcategoryId, nameof(product.SubcategoryId));
+        DomainValidatorHelper.ThrowIfEmptyGuid(product.CategoryId, nameof(product.CategoryId));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(product.Name, nameof(product.Name));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(product.Description, nameof(product.Description));
 
@@ -91,7 +92,7 @@ public class ProductData
     public string Description { get; }
     public decimal UnitPrice { get; }
     public int UnitQuantity { get; }
-    public Guid SubcategoryId { get; }
+    public Guid CategoryId { get; }
     public Image Image { get; }
 
     public ProductData(
@@ -99,14 +100,14 @@ public class ProductData
         string description,
         decimal unitPrice,
         int unitQuantity,
-        Guid subcategoryId,
+        Guid categoryId,
         Image image)
     {
         Name = name;
         Description = description;
         UnitPrice = unitPrice;
         UnitQuantity = unitQuantity;
-        SubcategoryId = subcategoryId;
+        CategoryId = categoryId;
         Image = image;
     }
 }

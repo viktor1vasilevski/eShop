@@ -11,7 +11,7 @@ public class CreateUpdateProductRequestValidator : AbstractValidator<CreateUpdat
             .NotEmpty().WithMessage("Product name is required.")
             .MaximumLength(100).WithMessage("Product name cannot exceed 100 characters.");
 
-        RuleFor(x => x.SubcategoryId)
+        RuleFor(x => x.CategoryId)
             .NotEmpty().WithMessage("Subcategory id is required.")
             .Must(id => id != Guid.Empty).WithMessage("Subcategory id must be a valid guid");
 

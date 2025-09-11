@@ -12,11 +12,14 @@ public class Category : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
+
     public Guid? ParentCategoryId { get; private set; }
     public virtual Category? ParentCategory { get; private set; }
 
+
     private readonly List<Category> _children = new();
     public IReadOnlyCollection<Category> Children => _children.AsReadOnly();
+
 
     private readonly List<Product> _products = new();
     public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
@@ -29,8 +32,7 @@ public class Category : AuditableBaseEntity
 
     public static Category Create(string name, Image image, Guid? parentCategoryId)
     {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
-        DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
+        Validate(name, parentCategoryId);
 
         return new Category 
         { 
@@ -42,12 +44,19 @@ public class Category : AuditableBaseEntity
         };
     }
 
-    public void Update(string name, Image image)
+    public void Update(string name, Image image, Guid? parentCategoryId)
     {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        Validate(name, parentCategoryId);
 
         Name = name;
+        ParentCategoryId = parentCategoryId;
         Image = image;
+    }
+
+    private static void Validate(string name, Guid? parentCategoryId)
+    {
+        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
     }
 
     public void SoftDelete() => IsDeleted = true;

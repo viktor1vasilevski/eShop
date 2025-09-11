@@ -9,67 +9,63 @@ public class ProductService(IUnitOfWork _uow) : IProductService
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
-    public ApiResponse<List<ProductDetailsDTO>> GetProducts(ProductRequest request)
+    public ApiResponse<List<ProductDto>> GetProducts(ProductRequest request)
     {
-        //var query = _productRepository.GetAsQueryableWhereIf(
-        //    filter: x => x.WhereIf(!String.IsNullOrEmpty(request.CategoryId.ToString()), x => x.Subcategory.Category.Id == request.CategoryId)
-        //                  .WhereIf(!String.IsNullOrEmpty(request.SubcategoryId.ToString()), x => x.Subcategory.Id == request.SubcategoryId)
-        //                  .WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
-        //                  .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower()))
-        //             .Where(x => x.UnitQuantity > 0 && !x.IsDeleted),
-        //    include: x => x.Include(x => x.Subcategory).ThenInclude(sc => sc.Category));
+        var query = _productRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
+                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
 
-        //var totalCount = query.Count();
+        var totalCount = query.Count();
 
-        //var sortedQuery = query;
-        //if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
-        //{
-        //    if (request.SortDirection.ToLower() == "asc")
-        //    {
-        //        sortedQuery = request.SortBy.ToLower() switch
-        //        {
-        //            "created" => sortedQuery.OrderBy(x => x.Created),
-        //            "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
-        //            "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
-        //            "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
-        //            _ => sortedQuery.OrderBy(x => x.Created)
-        //        };
-        //    }
-        //    else if (request.SortDirection.ToLower() == "desc")
-        //    {
-        //        sortedQuery = request.SortBy.ToLower() switch
-        //        {
-        //            "created" => sortedQuery.OrderByDescending(x => x.Created),
-        //            "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
-        //            "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
-        //            "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
-        //            _ => sortedQuery.OrderByDescending(x => x.Created)
-        //        };
-        //    }
-        //}
-
-        //if (request.Skip.HasValue)
-        //    sortedQuery = sortedQuery.Skip(request.Skip.Value);
-
-        //if (request.Take.HasValue)
-        //    sortedQuery = sortedQuery.Take(request.Take.Value);
-
-        //var productsDTO = sortedQuery.AsNoTracking().Select(x => new ProductDetailsDTO
-        //{
-        //    Id = x.Id,
-        //    Name = x.Name,
-        //    Description = x.Description,
-        //    UnitPrice = x.UnitPrice,
-        //    UnitQuantity = x.UnitQuantity,
-        //    Image = ImageDataUriBuilder.FromImage(x.Image),
-        //    Created = x.Created,
-        //    LastModified = x.LastModified,
-        //}).ToList();
-
-        return new ApiResponse<List<ProductDetailsDTO>>()
+        var sortedQuery = query;
+        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
-            //Data = productsDTO,
-            //TotalCount = totalCount,
+            if (request.SortDirection.ToLower() == "asc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
+                    "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
+                    "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
+                    _ => sortedQuery.OrderBy(x => x.Created)
+                };
+            }
+            else if (request.SortDirection.ToLower() == "desc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
+                    "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
+                    "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
+                };
+            }
+        }
+
+        if (request.Skip.HasValue)
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+
+        if (request.Take.HasValue)
+            sortedQuery = sortedQuery.Take(request.Take.Value);
+
+        var productsDTO = sortedQuery.AsNoTracking().Select(x => new ProductDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Description = x.Description,
+            UnitPrice = x.UnitPrice,
+            UnitQuantity = x.UnitQuantity,
+            Image = ImageDataUriBuilder.FromImage(x.Image),
+            Created = x.Created,
+            LastModified = x.LastModified,
+        }).ToList();
+
+        return new ApiResponse<List<ProductDto>>()
+        {
+            Data = productsDTO,
+            TotalCount = totalCount,
             Status = ResponseStatus.Success
         };
     }
@@ -148,7 +144,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 description: request.Description,
                 unitPrice: request.Price,
                 unitQuantity: request.Quantity,
-                subcategoryId: request.SubcategoryId,
+                categoryId: request.CategoryId,
                 image: image);
 
             var product = Product.Create(productData);
@@ -217,7 +213,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 description: request.Description,
                 unitPrice: request.Price,
                 unitQuantity: request.Quantity,
-                subcategoryId: request.SubcategoryId,
+                categoryId: request.CategoryId,
                 image: image);
 
             product.Update(productData);

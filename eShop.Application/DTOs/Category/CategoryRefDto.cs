@@ -1,6 +1,6 @@
-﻿namespace eShop.Application.DTOs.Product;
+﻿namespace eShop.Application.DTOs.Category;
 
-public class ProductRefDto
+public class CategoryRefDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
