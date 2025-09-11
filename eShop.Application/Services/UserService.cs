@@ -9,10 +9,10 @@ public class UserService(IUnitOfWork _uow) : IUserService
 
     public ApiResponse<UserDetailsDTO> GetUserDetailsById(Guid userId)
     {
-        var query = _userRepository.GetAsQueryable(
-            filter: x => x.Id == userId,
-            include: x => x.Include(x => x.Orders)
-            );
+        //var query = _userRepository.GetAsQueryable(
+        //    filter: x => x.Id == userId,
+        //    include: x => x.Include(x => x.Orders)
+        //    );
 
         return new ApiResponse<UserDetailsDTO>
         {

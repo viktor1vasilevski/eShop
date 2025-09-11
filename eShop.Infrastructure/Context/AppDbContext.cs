@@ -58,12 +58,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        modelBuilder.Entity<User>()
-            .HasOne(u => u.Basket)
-            .WithOne(b => b.User)
-            .HasForeignKey<Basket>(b => b.UserId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+
+
+
+        //modelBuilder.Entity<User>()
+        //    .HasOne(u => u.Basket)
+        //    .WithOne(b => b.User)
+        //    .HasForeignKey<Basket>(b => b.UserId)
+        //    .IsRequired()
+        //    .OnDelete(DeleteBehavior.Cascade);
 
         //modelBuilder.Entity<Basket>()
         //    .HasMany(b => b.Items)

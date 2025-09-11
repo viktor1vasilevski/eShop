@@ -57,17 +57,4 @@ public static class AppDbContextSeed
         context.Users.Add(adminUser);
         context.SaveChanges();
     }
-
-    public static void SeedUncategorizedCategory(AppDbContext context)
-    {
-        context.Database.Migrate();
-
-        if (context.Categories.Any(x => x.Name == SystemConstants.UncategorizedCategoryName))
-            return;
-
-        var uncategorizedCategory = Category.Create(SystemConstants.UncategorizedCategoryName, null);
-
-        context.Categories.Add(uncategorizedCategory);
-        context.SaveChanges();
-    }
 }

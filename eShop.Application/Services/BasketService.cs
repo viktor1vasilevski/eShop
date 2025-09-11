@@ -125,21 +125,21 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
         {
-            var userQuery = await _userRepository.GetAsync(
-                filter: x => x.Id == userId,
-                include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
+            //var userQuery = await _userRepository.GetAsync(
+            //    filter: x => x.Id == userId,
+            //    include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
 
-            var user = userQuery.FirstOrDefault();
-            if (user is null)
-                return new ApiResponse<BasketDTO>
-                {
-                    Status = ResponseStatus.NotFound,
-                    Message = UserConstants.USER_NOT_FOUND,
-                };
+            //var user = userQuery.FirstOrDefault();
+            //if (user is null)
+            //    return new ApiResponse<BasketDTO>
+            //    {
+            //        Status = ResponseStatus.NotFound,
+            //        Message = UserConstants.USER_NOT_FOUND,
+            //    };
 
-            user?.ClearBasket();
+            //user?.ClearBasket();
 
-            await _uow.SaveChangesAsync();
+            //await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {
@@ -150,41 +150,41 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> RemoveItemAsync(Guid userId, Guid productId)
         {
-            var userQuery = await _userRepository.GetAsync(
-                filter: x => x.Id == userId,
-                include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
+            //var userQuery = await _userRepository.GetAsync(
+            //    filter: x => x.Id == userId,
+            //    include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
 
-            var user = userQuery.FirstOrDefault();
-            if (user is null)
-                return new ApiResponse<BasketDTO>
-                {
-                    Status = ResponseStatus.NotFound,
-                    Message = UserConstants.USER_NOT_FOUND,
-                };
+            //var user = userQuery.FirstOrDefault();
+            //if (user is null)
+            //    return new ApiResponse<BasketDTO>
+            //    {
+            //        Status = ResponseStatus.NotFound,
+            //        Message = UserConstants.USER_NOT_FOUND,
+            //    };
 
-            var basket = user.Basket;
-            if (basket == null)
-            {
-                return new ApiResponse<BasketDTO>
-                {
-                    Status = ResponseStatus.NotFound,
-                    Message = "Basket not found",
-                };
-            }
+            //var basket = user.Basket;
+            //if (basket == null)
+            //{
+            //    return new ApiResponse<BasketDTO>
+            //    {
+            //        Status = ResponseStatus.NotFound,
+            //        Message = "Basket not found",
+            //    };
+            //}
 
-            var itemToRemove = basket.Items.FirstOrDefault(x => x.ProductId == productId);
-            if (itemToRemove == null)
-            {
-                return new ApiResponse<BasketDTO>
-                {
-                    Status = ResponseStatus.NotFound,
-                    Message = "Item not found in basket",
-                };
-            }
+            //var itemToRemove = basket.Items.FirstOrDefault(x => x.ProductId == productId);
+            //if (itemToRemove == null)
+            //{
+            //    return new ApiResponse<BasketDTO>
+            //    {
+            //        Status = ResponseStatus.NotFound,
+            //        Message = "Item not found in basket",
+            //    };
+            //}
 
-            basket.RemoveItem(productId);
+            //basket.RemoveItem(productId);
 
-            await _uow.SaveChangesAsync();
+            //await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {

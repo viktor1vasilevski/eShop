@@ -63,4 +63,12 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
         var response = await _categoryService.GetCategoriesDropdownListAsync();
         return HandleResponse(response);
     }
+
+
+    [HttpGet("tree")]
+    public async Task<IActionResult> GetCategoryTree()
+    {
+        var response = await _categoryService.GetCategoryTreeAsync();
+        return HandleResponse(response);
+    }
 }

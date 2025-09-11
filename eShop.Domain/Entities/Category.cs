@@ -12,19 +12,32 @@ public class Category : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
+    public Guid? ParentCategoryId { get; private set; }
+    public virtual Category? ParentCategory { get; private set; }
+
+    private readonly List<Category> _children = new();
+    public IReadOnlyCollection<Category> Children => _children.AsReadOnly();
+
+    private readonly List<Product> _products = new();
+    public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
+
+
+
 
 
     private Category() { }
 
-    public static Category Create(string name, Image image)
+    public static Category Create(string name, Image image, Guid? parentCategoryId)
     {
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
 
         return new Category 
         { 
             Id = Guid.NewGuid(), 
             Name = name, 
             Image = image, 
+            ParentCategoryId = parentCategoryId,
             IsDeleted = false
         };
     }

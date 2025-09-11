@@ -15,6 +15,11 @@ public class Product : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
+    public Guid CategoryId { get; private set; }
+    public virtual Category Category { get; private set; } = null!;
+
+
+
     //private readonly List<BasketItem> _basketItems = [];
     //public virtual ICollection<BasketItem>? BasketItems => _basketItems.AsReadOnly();
 

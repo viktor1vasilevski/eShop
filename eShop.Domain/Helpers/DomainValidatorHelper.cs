@@ -10,7 +10,7 @@ public static class DomainValidatorHelper
             throw new DomainValidationException($"{fieldName} cannot be empty.");
     }
 
-    public static void ThrowIfEmptyGuid(Guid guid, string fieldName)
+    public static void ThrowIfEmptyGuid(Guid? guid, string fieldName)
     {
         if (guid == Guid.Empty)
             throw new DomainValidationException($"{fieldName} cannot be empty.");

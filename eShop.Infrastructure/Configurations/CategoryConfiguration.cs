@@ -30,5 +30,11 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         });
 
         builder.Navigation(x => x.Image);
+
+        // Recursive relationship
+        builder.HasOne(c => c.ParentCategory)
+               .WithMany(c => c.Children)
+               .HasForeignKey(c => c.ParentCategoryId)
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -39,5 +39,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         });
 
         builder.Navigation(x => x.Image).IsRequired();
+
+        builder.HasOne(p => p.Category)
+               .WithMany(c => c.Products)
+               .HasForeignKey(p => p.CategoryId)
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

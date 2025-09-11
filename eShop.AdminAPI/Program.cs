@@ -55,8 +55,6 @@ using (var scope = app.Services.CreateScope())
         var password = builder.Configuration["SeedAdmin:Password"];
         AppDbContextSeed.SeedAdminUser(dbContext, password, _passwordHasher);
         AppDbContextSeed.SeedTestUser(dbContext, _passwordHasher);
-
-        AppDbContextSeed.SeedUncategorizedCategory(dbContext);
     }
     catch (Exception ex)
     {

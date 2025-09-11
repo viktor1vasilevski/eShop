@@ -117,7 +117,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             var (bytes, type) = ImageParsing.FromBase64(request.Image);
             var image = Image.FromBytes(bytes, type);
 
-            var category = Category.Create(normalizedName, image);
+            var category = Category.Create(normalizedName, image, request.ParentCategoryId);
             _categoryRepository.Insert(category);
             _uow.SaveChanges();
 
@@ -125,7 +125,13 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             {
                 Status = ResponseStatus.Created,
                 Message = CategoryConstants.CategorySuccessfullyCreated,
-                Data = new CategoryDetailsDTO { Id = category.Id, Name = category.Name, Created = category.Created }
+                Data = new CategoryDetailsDTO 
+                { 
+                    Id = category.Id, 
+                    Name = category.Name, 
+                    ParentCategoryId = category.ParentCategoryId,
+                    Created = category.Created 
+                }
             };
         }
         catch (DomainValidationException ex)
@@ -210,17 +216,17 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-    public async Task<ApiResponse<List<SelectCategoryListItemDTO>>> GetCategoriesDropdownListAsync()
+    public async Task<ApiResponse<List<SelectCategoryListItemDto>>> GetCategoriesDropdownListAsync()
     {
         var categories = await _categoryRepository.GetAsync(x => !x.IsDeleted);
 
-        var categoriesDropdownDTO = categories.Select(x => new SelectCategoryListItemDTO
+        var categoriesDropdownDTO = categories.Select(x => new SelectCategoryListItemDto
         {
             CategoryId = x.Id,
             Name = x.Name
         }).ToList();
 
-        return new ApiResponse<List<SelectCategoryListItemDTO>>
+        return new ApiResponse<List<SelectCategoryListItemDto>>
         {
             Data = categoriesDropdownDTO
         };
@@ -260,4 +266,30 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             //Data = result
         };
     }
+
+    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
+    {
+        var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
+        var tree = BuildCategoryTree(allCategories);
+
+        return new ApiResponse<List<CategoryTreeDto>>
+        {
+            Data = tree,
+            Status = ResponseStatus.Success
+        };
+    }
+
+    private List<CategoryTreeDto> BuildCategoryTree(List<Category> categories, Guid? parentId = null)
+    {
+        return categories
+            .Where(c => c.ParentCategoryId == parentId)
+            .Select(c => new CategoryTreeDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Children = BuildCategoryTree(categories, c.Id)
+            })
+            .ToList();
+    }
+
 }
