@@ -1,7 +1,5 @@
-﻿using eShop.Application.DTOs.Comment;
-using eShop.Application.DTOs.Product;
+﻿using eShop.Application.DTOs.Product;
 using eShop.Application.Requests.Product;
-using System.Collections.Immutable;
 
 namespace eShop.Application.Services;
 
@@ -17,7 +15,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         var allCategories = _categoryRepository.Get();
 
         List<Guid> categoryIds = new();
-        if (request.CategoryId != Guid.Empty)
+        if (request.CategoryId is not null && request.CategoryId != Guid.Empty)
         {
             categoryIds = GetAllDescendantCategoryIds(allCategories, request.CategoryId ?? Guid.Empty);
         }
@@ -25,7 +23,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         var query = _productRepository.GetAsQueryableWhereIf(
             filter: x => x
                 .WhereIf(!string.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
-                .WhereIf(request.CategoryId != Guid.Empty, x => categoryIds.Contains(x.CategoryId))
+                .WhereIf(request.CategoryId is not null && request.CategoryId != Guid.Empty, x => categoryIds.Contains(x.CategoryId))
                 .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
             include: x => x.Include(x => x.Category)
         );

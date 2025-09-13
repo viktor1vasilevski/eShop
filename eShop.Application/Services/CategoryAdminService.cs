@@ -1,6 +1,7 @@
 ﻿using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Category.Admin;
 using eShop.Application.DTOs.Product;
+using eShop.Application.Extensions;
 using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 
@@ -11,36 +12,33 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
 
-    // ovde sme dobri. Taman e i AdminCategoryDto. Gi ima bash potrebnite podatoci samo za tabelata
     public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(true, x => !x.IsDeleted))
-                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower()));
+            filter: q => q.WhereIf(true, x => !x.IsDeleted)
+                          .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
 
         var totalCount = query.Count();
 
         var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
-            if (request.SortDirection.ToLower() == "asc")
+            sortedQuery = request.SortDirection.ToLower() switch
             {
-                sortedQuery = request.SortBy.ToLower() switch
+                "asc" => request.SortBy.ToLower() switch
                 {
                     "created" => sortedQuery.OrderBy(x => x.Created),
                     "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
                     _ => sortedQuery.OrderBy(x => x.Created)
-                };
-            }
-            else if (request.SortDirection.ToLower() == "desc")
-            {
-                sortedQuery = request.SortBy.ToLower() switch
+                },
+                "desc" => request.SortBy.ToLower() switch
                 {
                     "created" => sortedQuery.OrderByDescending(x => x.Created),
                     "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
                     _ => sortedQuery.OrderByDescending(x => x.Created)
-                };
-            }
+                },
+                _ => sortedQuery
+            };
         }
 
         if (request.Skip.HasValue)
@@ -49,12 +47,18 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var categoriesDTO = sortedQuery.Select(x => new AdminCategoryDto
+        var categories = sortedQuery.AsNoTracking().ToList();
+
+        var allCategories = _categoryRepository.GetAsQueryable().AsNoTracking().ToList();
+
+        var lookup = allCategories.ToDictionary(c => c.Id);
+
+        var categoriesDTO = categories.Select(c => new AdminCategoryDto
         {
-            Id = x.Id,
-            Name = x.Name,
-            Created = x.Created,
-            LastModified = x.LastModified,
+            Id = c.Id,
+            Name = BuildFullCategoryName(c.Id, lookup),
+            Created = c.Created,
+            LastModified = c.LastModified,
         }).ToList();
 
         return new ApiResponse<List<AdminCategoryDto>>()
@@ -65,9 +69,23 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         };
     }
 
+    private string BuildFullCategoryName(Guid id, Dictionary<Guid, Category> lookup)
+    {
+        var names = new List<string>();
+        var currentId = id;
 
+        while (lookup.TryGetValue(currentId, out var current))
+        {
+            names.Insert(0, current.Name);
+            if (current.ParentCategoryId == null)
+                break;
 
-    // i ovde mislam deka sme dobri
+            currentId = current.ParentCategoryId.Value;
+        }
+
+        return string.Join(" / ", names);
+    }
+
     public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
     {
         var category = (await _categoryRepository.GetAsync(
@@ -113,9 +131,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         };
     }
 
-
-    // ovde sme dobri, samo neznam dali da se koristi ova CategoryDto bidejki e od
-    // normalnoto Dto, ne e od Admin. Sega za sega neka sedi
     public ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request)
     {
         try
@@ -158,9 +173,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         }
     }
 
-
-
-
     public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
     {
         //var category = _categoryRepository.GetAsQueryable(
@@ -190,9 +202,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
             Status = ResponseStatus.Success
         };
     }
-
-
-
 
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
     {
@@ -274,7 +283,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
             };
         }
     }
-
 
     private List<CategoryTreeDto> BuildCategoryTree(List<Category> categories, Guid? parentId = null)
     {
