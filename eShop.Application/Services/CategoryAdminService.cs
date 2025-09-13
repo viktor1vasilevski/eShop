@@ -120,10 +120,18 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
     {
         try
         {
+            var trimmedName = request.Name.Trim();
+            if (_categoryRepository.Exists(x => x.Name.ToLower() == trimmedName.ToLower() && x.ParentCategoryId == request.ParentCategoryId && !x.IsDeleted))
+                return new ApiResponse<CategoryDto>
+                {
+                    Status = ResponseStatus.Conflict,
+                    Message = CategoryConstants.CategoryExist
+                };
+
             var (bytes, type) = ImageParsing.FromBase64(request.Image);
             var image = Image.FromBytes(bytes, type);
 
-            var category = Category.Create(request.Name.Trim(), image, request.ParentCategoryId);
+            var category = Category.Create(trimmedName, image, request.ParentCategoryId);
             _categoryRepository.Insert(category);
             _uow.SaveChanges();
 
@@ -151,7 +159,8 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
     }
 
 
-    
+
+
     public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
     {
         //var category = _categoryRepository.GetAsQueryable(
@@ -222,7 +231,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
         try
         {
-            // Handle optional image (don’t overwrite if no new image is provided)
             Image? image = null;
             if (!string.IsNullOrEmpty(request.Image))
             {
