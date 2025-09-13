@@ -1,22 +1,38 @@
 ﻿using eShop.Application.DTOs.Comment;
 using eShop.Application.DTOs.Product;
 using eShop.Application.Requests.Product;
+using System.Collections.Immutable;
 
 namespace eShop.Application.Services;
 
 public class ProductService(IUnitOfWork _uow) : IProductService
 {
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
+    private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
+
 
     public ApiResponse<List<ProductDto>> GetProducts(ProductRequest request)
     {
+        var allCategories = _categoryRepository.Get();
+
+        List<Guid> categoryIds = new();
+        if (request.CategoryId != Guid.Empty)
+        {
+            categoryIds = GetAllDescendantCategoryIds(allCategories, request.CategoryId ?? Guid.Empty);
+        }
+
         var query = _productRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(!String.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
-                          .WhereIf(!String.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
+            filter: x => x
+                .WhereIf(!string.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
+                .WhereIf(request.CategoryId != Guid.Empty, x => categoryIds.Contains(x.CategoryId))
+                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+            include: x => x.Include(x => x.Category)
+        );
 
         var totalCount = query.Count();
 
+        // Sorting
         var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
@@ -31,7 +47,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                     _ => sortedQuery.OrderBy(x => x.Created)
                 };
             }
-            else if (request.SortDirection.ToLower() == "desc")
+            else
             {
                 sortedQuery = request.SortBy.ToLower() switch
                 {
@@ -69,6 +85,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Status = ResponseStatus.Success
         };
     }
+
 
     public ApiResponse<ProductDetailsDTO> GetProductById(Guid id, Guid? userId = null)
     {
@@ -300,5 +317,19 @@ public class ProductService(IUnitOfWork _uow) : IProductService
             Status = ResponseStatus.Success,
             //Data = productDto
         };
+    }
+
+
+    private List<Guid> GetAllDescendantCategoryIds(IEnumerable<Category> allCategories, Guid parentId)
+    {
+        var result = new List<Guid> { parentId };
+
+        var children = allCategories.Where(c => c.ParentCategoryId == parentId).ToList();
+        foreach (var child in children)
+        {
+            result.AddRange(GetAllDescendantCategoryIds(allCategories, child.Id));
+        }
+
+        return result;
     }
 }

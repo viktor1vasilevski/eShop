@@ -1,15 +1,88 @@
 ﻿using eShop.Application.DTOs.Category;
+using eShop.Application.DTOs.Category.Admin;
 using eShop.Application.DTOs.Product;
 using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 
 namespace eShop.Application.Services;
 
-public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategoryCustomerService
+public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 {
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
-    public ApiResponse<List<CategoryDto>> GetCategories(CategoryRequest request)
+    public ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request)
+    {
+        var normalizedName = (request.Name ?? string.Empty).Trim();
+        //if (_categoryRepository.Exists(x => x.Name.ToLower() == normalizedName.ToLower()))
+        //    return new ApiResponse<CategoryDto>
+        //    {
+        //        Message = CategoryConstants.CategoryExist,
+        //        Status = ResponseStatus.Conflict
+        //    };
+
+        try
+        {
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
+
+            var category = Category.Create(normalizedName, image, request.ParentCategoryId);
+            _categoryRepository.Insert(category);
+            _uow.SaveChanges();
+
+            return new ApiResponse<CategoryDto>
+            {
+                Status = ResponseStatus.Created,
+                Message = CategoryConstants.CategorySuccessfullyCreated,
+                Data = new CategoryDto
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    ParentCategoryId = category.ParentCategoryId,
+                    Created = category.Created
+                }
+            };
+        }
+        catch (DomainValidationException ex)
+        {
+            return new ApiResponse<CategoryDto>
+            {
+                Status = ResponseStatus.BadRequest,
+                Message = ex.Message
+            };
+        }
+    }
+
+    public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
+    {
+        //var category = _categoryRepository.GetAsQueryable(
+        //      filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UncategorizedCategoryName,
+        //      include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
+
+        //if (category is null)
+        //    return new ApiResponse<CategoryDetailsDTO>
+        //    {
+        //        Message = CategoryConstants.CategoryDoesNotExist,
+        //        Status = ResponseStatus.NotFound
+        //    };
+
+        //if(category.HasRelatedSubcategories())
+        //    return new ApiResponse<CategoryDetailsDTO>
+        //    {
+        //        Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,
+        //        Status = ResponseStatus.Conflict
+        //    };
+
+        //category.SoftDelete();
+        //_uow.SaveChanges();
+
+        return new ApiResponse<CategoryDetailsDto>
+        {
+            Message = CategoryConstants.CATEGORY_SUCCESSFULLY_DELETED,
+            Status = ResponseStatus.Success
+        };
+    }
+
+    public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(true, x => !x.IsDeleted))
@@ -46,7 +119,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategor
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var categoriesDTO = sortedQuery.Select(x => new CategoryDto
+        var categoriesDTO = sortedQuery.Select(x => new AdminCategoryDto
         {
             Id = x.Id,
             Name = x.Name,
@@ -54,7 +127,7 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategor
             LastModified = x.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<CategoryDto>>()
+        return new ApiResponse<List<AdminCategoryDto>>()
         {
             Data = categoriesDTO,
             TotalCount = totalCount,
@@ -106,46 +179,16 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategor
         };
     }
 
-    public ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request)
+    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
     {
-        var normalizedName = (request.Name ?? string.Empty).Trim();
-        //if (_categoryRepository.Exists(x => x.Name.ToLower() == normalizedName.ToLower()))
-        //    return new ApiResponse<CategoryDto>
-        //    {
-        //        Message = CategoryConstants.CategoryExist,
-        //        Status = ResponseStatus.Conflict
-        //    };
+        var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
+        var tree = BuildCategoryTree(allCategories);
 
-        try
+        return new ApiResponse<List<CategoryTreeDto>>
         {
-            var (bytes, type) = ImageParsing.FromBase64(request.Image);
-            var image = Image.FromBytes(bytes, type);
-
-            var category = Category.Create(normalizedName, image, request.ParentCategoryId);
-            _categoryRepository.Insert(category);
-            _uow.SaveChanges();
-
-            return new ApiResponse<CategoryDto>
-            {
-                Status = ResponseStatus.Created,
-                Message = CategoryConstants.CategorySuccessfullyCreated,
-                Data = new CategoryDto
-                { 
-                    Id = category.Id, 
-                    Name = category.Name, 
-                    ParentCategoryId = category.ParentCategoryId,
-                    Created = category.Created 
-                }
-            };
-        }
-        catch (DomainValidationException ex)
-        {
-            return new ApiResponse<CategoryDto>
-            {
-                Status = ResponseStatus.BadRequest,
-                Message = ex.Message
-            };
-        }
+            Data = tree,
+            Status = ResponseStatus.Success
+        };
     }
 
     public ApiResponse<CategoryDetailsDto> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
@@ -190,48 +233,6 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategor
         }
     }
 
-    public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
-    {
-        //var category = _categoryRepository.GetAsQueryable(
-        //      filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UncategorizedCategoryName,
-        //      include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
-
-        //if (category is null)
-        //    return new ApiResponse<CategoryDetailsDTO>
-        //    {
-        //        Message = CategoryConstants.CategoryDoesNotExist,
-        //        Status = ResponseStatus.NotFound
-        //    };
-
-        //if(category.HasRelatedSubcategories())
-        //    return new ApiResponse<CategoryDetailsDTO>
-        //    {
-        //        Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,
-        //        Status = ResponseStatus.Conflict
-        //    };
-
-        //category.SoftDelete();
-        //_uow.SaveChanges();
-
-        return new ApiResponse<CategoryDetailsDto>
-        {
-            Message = CategoryConstants.CATEGORY_SUCCESSFULLY_DELETED,
-            Status = ResponseStatus.Success
-        };
-    }
-
-    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
-    {
-        var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
-        var tree = BuildCategoryTree(allCategories);
-
-        return new ApiResponse<List<CategoryTreeDto>>
-        {
-            Data = tree,
-            Status = ResponseStatus.Success
-        };
-    }
-
     private List<CategoryTreeDto> BuildCategoryTree(List<Category> categories, Guid? parentId = null)
     {
         return categories
@@ -243,52 +244,5 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategor
                 Children = BuildCategoryTree(categories, c.Id)
             })
             .ToList();
-    }
-
-    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync()
-    {
-        var allCategories = (await _categoryRepository.GetAsync(
-            filter: x => !x.IsDeleted,
-            include: q => q
-                .Include(c => c.Products)
-                .Include(c => c.Children)
-        )).ToList();
-
-        var tree = BuildCustomerCategoryTree(allCategories);
-
-        return new ApiResponse<List<CategoryTreeDto>>
-        {
-            Data = tree,
-            Status = ResponseStatus.Success
-        };
-    }
-
-    private List<CategoryTreeDto> BuildCustomerCategoryTree(List<Category> categories, Guid? parentId = null)
-    {
-        return categories
-            .Where(c => c.ParentCategoryId == parentId)
-            .Select(c =>
-            {
-                var children = BuildCustomerCategoryTree(categories, c.Id);
-
-                bool isLeaf = !children.Any();
-                bool hasProducts = c.Products != null && c.Products.Any();
-
-                // Filter logic for customers
-                if (isLeaf && !hasProducts)
-                    return null;
-
-                if (!isLeaf && !children.Any())
-                    return null;
-
-                return new CategoryTreeDto
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Children = children
-                };
-            })
-            .Where(x => x != null)
-            .ToList()!;
     }
 }
