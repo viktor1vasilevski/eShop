@@ -14,7 +14,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
                .HasMaxLength(200)
                .IsRequired();
 
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(x => x.Name);
 
         builder.OwnsOne(x => x.Image, img =>
         {

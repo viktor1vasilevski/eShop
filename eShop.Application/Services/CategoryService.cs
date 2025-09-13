@@ -1,10 +1,11 @@
 ﻿using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Product;
+using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 
 namespace eShop.Application.Services;
 
-public class CategoryService(IUnitOfWork _uow) : ICategoryService
+public class CategoryService(IUnitOfWork _uow) : ICategoryAdminService, ICategoryCustomerService
 {
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
@@ -105,17 +106,15 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-
-
     public ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request)
     {
         var normalizedName = (request.Name ?? string.Empty).Trim();
-        if (_categoryRepository.Exists(x => x.Name.ToLower() == normalizedName.ToLower()))
-            return new ApiResponse<CategoryDto>
-            {
-                Message = CategoryConstants.CategoryExist,
-                Status = ResponseStatus.Conflict
-            };
+        //if (_categoryRepository.Exists(x => x.Name.ToLower() == normalizedName.ToLower()))
+        //    return new ApiResponse<CategoryDto>
+        //    {
+        //        Message = CategoryConstants.CategoryExist,
+        //        Status = ResponseStatus.Conflict
+        //    };
 
         try
         {
@@ -221,57 +220,6 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
         };
     }
 
-    public async Task<ApiResponse<List<SelectCategoryListItemDto>>> GetCategoriesDropdownListAsync()
-    {
-        var categories = await _categoryRepository.GetAsync(x => !x.IsDeleted);
-
-        var categoriesDropdownDTO = categories.Select(x => new SelectCategoryListItemDto
-        {
-            CategoryId = x.Id,
-            Name = x.Name
-        }).ToList();
-
-        return new ApiResponse<List<SelectCategoryListItemDto>>
-        {
-            Data = categoriesDropdownDTO
-        };
-    }
-
-
-
-    public ApiResponse<List<CategoryWithSubcategoriesDTO>> GetCategoriesWithSubcategoriesForMenu()
-    {
-        //var result = _categoryRepository
-        //    .GetAsQueryable(
-        //        filter: c => c.Name != SystemConstants.UncategorizedCategoryName && !c.IsDeleted
-        //    )
-        //    .Select(c => new
-        //    {
-        //        Category = c,
-        //        ValidSubcategories = c.Subcategories
-        //            .Where(sc => sc.Name != SystemConstants.UncategorizedSubcategoryName && !sc.IsDeleted && sc.Products.Any())
-        //            .Select(sc => new { sc.Id, sc.Name })
-        //            .ToList()
-        //    })
-        //    .Where(x => x.ValidSubcategories.Any())
-        //    .Select(x => new CategoryWithSubcategoriesDTO
-        //    {
-        //        CategoryId = x.Category.Id,
-        //        Name = x.Category.Name,
-        //        Subcategories = x.ValidSubcategories
-        //            .Select(sc => new SelectSubcategoryListItemDTO
-        //            {
-        //                SubcategoryId = sc.Id,
-        //                Name = sc.Name
-        //            }).ToList()
-        //    }).ToList();
-
-        return new ApiResponse<List<CategoryWithSubcategoriesDTO>>
-        {
-            //Data = result
-        };
-    }
-
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
     {
         var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
@@ -297,4 +245,50 @@ public class CategoryService(IUnitOfWork _uow) : ICategoryService
             .ToList();
     }
 
+    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync()
+    {
+        var allCategories = (await _categoryRepository.GetAsync(
+            filter: x => !x.IsDeleted,
+            include: q => q
+                .Include(c => c.Products)
+                .Include(c => c.Children)
+        )).ToList();
+
+        var tree = BuildCustomerCategoryTree(allCategories);
+
+        return new ApiResponse<List<CategoryTreeDto>>
+        {
+            Data = tree,
+            Status = ResponseStatus.Success
+        };
+    }
+
+    private List<CategoryTreeDto> BuildCustomerCategoryTree(List<Category> categories, Guid? parentId = null)
+    {
+        return categories
+            .Where(c => c.ParentCategoryId == parentId)
+            .Select(c =>
+            {
+                var children = BuildCustomerCategoryTree(categories, c.Id);
+
+                bool isLeaf = !children.Any();
+                bool hasProducts = c.Products != null && c.Products.Any();
+
+                // Filter logic for customers
+                if (isLeaf && !hasProducts)
+                    return null;
+
+                if (!isLeaf && !children.Any())
+                    return null;
+
+                return new CategoryTreeDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Children = children
+                };
+            })
+            .Where(x => x != null)
+            .ToList()!;
+    }
 }

@@ -1,17 +1,18 @@
 ﻿using eShop.Application.Interfaces;
+using eShop.Application.Interfaces.Category;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(ICategoryService _categoryService) : BaseController
+public class CategoryController(ICategoryCustomerService _categoryCustomerService) : BaseController
 {
 
-    [HttpGet("CategoriesWithSubcategoriesForMenu")]
-    public IActionResult GetCategoriesWithSubcategories()
+    [HttpGet("CategoryTreeForMenu")]
+    public async Task<IActionResult> GetCategoryTreeForMenu()
     {
-        var response = _categoryService.GetCategoriesWithSubcategoriesForMenu();
+        var response = await _categoryCustomerService.GetCategoryTreeForMenuAsync();
         return HandleResponse(response);
     }
 }

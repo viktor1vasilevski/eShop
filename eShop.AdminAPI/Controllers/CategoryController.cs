@@ -1,5 +1,5 @@
 ﻿using eShop.Application.Enums;
-using eShop.Application.Interfaces;
+using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,27 +11,27 @@ namespace eShop.AdminAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class CategoryController(ICategoryService _categoryService) : BaseController
+public class CategoryController(ICategoryAdminService _categoryAdminService) : BaseController
 {
 
     [HttpGet]
     public IActionResult Get([FromQuery] CategoryRequest request)
     {
-        var response = _categoryService.GetCategories(request);
+        var response = _categoryAdminService.GetCategories(request);
         return HandleResponse(response);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
     {
-        var response = await _categoryService.GetCategoryByIdAsync(id);
+        var response = await _categoryAdminService.GetCategoryByIdAsync(id);
         return HandleResponse(response);
     }
 
     [HttpPost]
     public IActionResult Create([FromBody] CreateUpdateCategoryRequest request)
     {
-        var response = _categoryService.CreateCategory(request);
+        var response = _categoryAdminService.CreateCategory(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
             var locationUri = Url.Action(nameof(GetByIdAsync), nameof(Category), new { id = response.Data.Id }, Request.Scheme);
@@ -44,31 +44,21 @@ public class CategoryController(ICategoryService _categoryService) : BaseControl
     [HttpPut("{id}")]
     public IActionResult Update([FromRoute] Guid id, [FromBody] CreateUpdateCategoryRequest request)
     {
-        var response = _categoryService.UpdateCategory(id, request);
+        var response = _categoryAdminService.UpdateCategory(id, request);
         return HandleResponse(response);
     }
-
-
 
     [HttpDelete("{id}")]
     public IActionResult Delete([FromRoute] Guid id)
     {
-        var response = _categoryService.DeleteCategory(id);
+        var response = _categoryAdminService.DeleteCategory(id);
         return HandleResponse(response);
     }
-
-    [HttpGet("GetCategoriesDropdownList")]
-    public async Task<IActionResult> GetCategoriesDropdownListAsync()
-    {
-        var response = await _categoryService.GetCategoriesDropdownListAsync();
-        return HandleResponse(response);
-    }
-
 
     [HttpGet("tree")]
     public async Task<IActionResult> GetCategoryTree()
     {
-        var response = await _categoryService.GetCategoryTreeAsync();
+        var response = await _categoryAdminService.GetCategoryTreeAsync();
         return HandleResponse(response);
     }
 }
