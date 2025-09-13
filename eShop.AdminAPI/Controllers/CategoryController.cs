@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Enums;
+using eShop.Application.Interfaces;
 using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 using eShop.Domain.Entities;
@@ -46,6 +47,13 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
     {
         var response = _categoryAdminService.UpdateCategory(id, request);
         return HandleResponse(response);
+    }
+
+    [HttpGet("{id}/edit")]
+    public async Task<IActionResult> GetCategoryForEdit(Guid id)
+    {
+        var response = await _categoryAdminService.GetCategoryForEditAsync(id);
+        return Ok(response);
     }
 
     [HttpDelete("{id}")]

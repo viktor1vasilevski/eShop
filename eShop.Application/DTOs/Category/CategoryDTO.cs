@@ -7,5 +7,4 @@ public class CategoryDto
     public Guid? ParentCategoryId { get; set; }
     public DateTime Created { get; set; }
     public DateTime? LastModified { get; set; }
-    public int Depth { get; set; }
 }

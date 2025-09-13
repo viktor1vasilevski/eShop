@@ -10,6 +10,7 @@ public interface ICategoryAdminService
     ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request);
     ApiResponse<CategoryDetailsDto> UpdateCategory(Guid id, CreateUpdateCategoryRequest request);
     ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id);
-    Task<ApiResponse<CategoryDetailsDto>> GetCategoryByIdAsync(Guid id);
+    Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id);
+    Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id);
     Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync();
 }

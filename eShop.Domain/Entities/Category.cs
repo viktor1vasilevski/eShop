@@ -50,7 +50,10 @@ public class Category : AuditableBaseEntity
 
         Name = name;
         ParentCategoryId = parentCategoryId;
-        Image = image;
+        if (image != null)
+        {
+            Image = image;
+        }
     }
 
     private static void Validate(string name, Guid? parentCategoryId)
