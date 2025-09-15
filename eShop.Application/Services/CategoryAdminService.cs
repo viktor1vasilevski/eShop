@@ -6,7 +6,7 @@ using eShop.Application.Requests.Category;
 
 namespace eShop.Application.Services;
 
-public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
+public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService> _logger) : ICategoryAdminService
 {
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
@@ -111,12 +111,21 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         try
         {
             var trimmedName = request.Name.Trim();
-            if (_categoryRepository.Exists(x => x.Name.ToLower() == trimmedName.ToLower() && x.ParentCategoryId == request.ParentCategoryId && !x.IsDeleted))
+            var normalizedName = trimmedName.ToUpperInvariant();
+
+            bool categoryExists = _categoryRepository.Exists(x =>
+                x.Name.ToUpper() == normalizedName &&
+                x.ParentCategoryId == request.ParentCategoryId &&
+                !x.IsDeleted);
+
+            if (categoryExists)
+            {
                 return new ApiResponse<CategoryDto>
                 {
                     Status = ResponseStatus.Conflict,
                     Message = CategoryConstants.CategoryExist
                 };
+            }
 
             var (bytes, type) = ImageParsing.FromBase64(request.Image);
             var image = Image.FromBytes(bytes, type);
@@ -137,6 +146,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
                     Created = category.Created
                 }
             };
+
         }
         catch (DomainValidationException ex)
         {
@@ -146,7 +156,13 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
                 Message = ex.Message
             };
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while creating category");
+            throw;
+        }
     }
+
 
     public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
     {
