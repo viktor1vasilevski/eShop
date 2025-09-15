@@ -60,51 +60,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-    public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
-    {
-        var category = (await _categoryRepository.GetAsync(
-            filter: x => x.Id == id && !x.IsDeleted,
-            include: x => x
-                .Include(x => x.Products)
-                .Include(x => x.Children)))
-            ?.FirstOrDefault();
-
-        if (category is null)
-            return new ApiResponse<AdminCategoryDetailsDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CategoryDoesNotExist
-            };
-
-        var categoryDetaislDto = new AdminCategoryDetailsDto
-        {
-            Id = category.Id,
-            Name = category.Name,
-            Image = ImageDataUriBuilder.FromImage(category.Image),
-            ParentCategoryId = category.ParentCategoryId,
-            Created = category.Created,
-            LastModified = category.LastModified,
-            Products = category.Products?
-                .Select(p => new ProductRefDto
-                {
-                    Id = p.Id,
-                    Name = p.Name
-                }).ToList() ?? new List<ProductRefDto>(),
-            Children = category.Children?
-                .Select(c => new CategoryRefDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                }).ToList() ?? new List<CategoryRefDto>()
-        };
-
-        return new ApiResponse<AdminCategoryDetailsDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = categoryDetaislDto
-        };
-    }
-
     public ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request)
     {
         try
@@ -160,8 +115,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
     }
 
-
-    public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
+    public ApiResponse<AdminCategoryDto> DeleteCategory(Guid id)
     {
         var allCategories = _categoryRepository
             .GetAsQueryable(c => !c.IsDeleted)
@@ -171,7 +125,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         var categoryToDelete = allCategories.FirstOrDefault(c => c.Id == id);
         if (categoryToDelete is null)
         {
-            return new ApiResponse<CategoryDetailsDto>
+            return new ApiResponse<AdminCategoryDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
@@ -180,15 +134,15 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         var idsToDelete = Category.GetDescendantIds(allCategories, id);
 
-        if (_productRepository.Exists(p => idsToDelete.Contains(p.CategoryId)))
-        {
-            var total = _productRepository
-                .GetAsQueryable(p => idsToDelete.Contains(p.CategoryId))
-                .Count();
+        var total = _productRepository
+            .GetAsQueryable(p => idsToDelete.Contains(p.CategoryId))
+            .Count();
 
-            return new ApiResponse<CategoryDetailsDto>
+        if (total > 0)
+        {
+            return new ApiResponse<AdminCategoryDto>
             {
-                Status = ResponseStatus.Conflict,
+                Status = ResponseStatus.Info,
                 Message = string.Format(CategoryConstants.CategoryHasProducts, total)
             };
         }
@@ -197,41 +151,25 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             .GetAsQueryable(c => idsToDelete.Contains(c.Id))
             .ToList();
 
-        foreach (var cat in categoriesToDelete)
-        {
-            cat.SoftDelete();
-        }
+        Category.SoftDeleteRange(categoriesToDelete);
 
         _uow.SaveChanges();
 
         var pluralSuffix = categoriesToDelete.Count == 1 ? "y" : "ies";
 
-        return new ApiResponse<CategoryDetailsDto>
+        return new ApiResponse<AdminCategoryDto>
         {
             Status = ResponseStatus.Success,
-            Message = string.Format(CategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix)
+            Message = string.Format(CategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix),
         };
     }
 
-
-    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
-    {
-        var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
-        var tree = BuildCategoryTree(allCategories);
-
-        return new ApiResponse<List<CategoryTreeDto>>
-        {
-            Data = tree,
-            Status = ResponseStatus.Success
-        };
-    }
-
-    public ApiResponse<CategoryDetailsDto> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
+    public ApiResponse<CategoryDto> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
     {
         var category = _categoryRepository.GetById(id);
         if (category is null)
         {
-            return new ApiResponse<CategoryDetailsDto>
+            return new ApiResponse<CategoryDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
@@ -239,10 +177,11 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
 
         var trimmedName = request.Name?.Trim() ?? string.Empty;
+        var normalizedName = trimmedName.ToUpperInvariant();
 
-        if (_categoryRepository.Exists(x => x.Name.ToLower() == trimmedName.ToLower() && x.Id != id))
+        if (_categoryRepository.Exists(x => x.Name.ToUpper() == normalizedName && x.Id != id))
         {
-            return new ApiResponse<CategoryDetailsDto>
+            return new ApiResponse<CategoryDto>
             {
                 Status = ResponseStatus.Conflict,
                 Message = CategoryConstants.CategoryExist
@@ -258,41 +197,85 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 image = Image.FromBytes(bytes, type);
             }
 
-            // Prevent setting parent to itself
             if (request.ParentCategoryId.HasValue && request.ParentCategoryId == id)
             {
-                return new ApiResponse<CategoryDetailsDto>
+                return new ApiResponse<CategoryDto>
                 {
                     Status = ResponseStatus.BadRequest,
-                    Message = "A category cannot be its own parent."
+                    Message = CategoryConstants.CategoryCannotBeOwnParent
                 };
             }
 
             category.Update(trimmedName, image, request.ParentCategoryId);
             _uow.SaveChanges();
 
-            return new ApiResponse<CategoryDetailsDto>
+            return new ApiResponse<CategoryDto>
             {
                 Status = ResponseStatus.Success,
-                Message = CategoryConstants.CATEGORY_SUCCESSFULLY_UPDATE,
-                Data = new CategoryDetailsDto
+                Message = CategoryConstants.CategorySuccessfullyUpdated,
+                Data = new CategoryDto
                 {
                     Id = category.Id,
                     Name = category.Name,
-                    Image = ImageDataUriBuilder.FromImage(category.Image),
                     Created = category.Created,
-                    LastModified = category.LastModified
+                    LastModified = category.LastModified,
+                    ParentCategoryId = category.ParentCategoryId
                 }
             };
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<CategoryDetailsDto>
+            return new ApiResponse<CategoryDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
         }
+    }
+
+    public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
+    {
+        var category = (await _categoryRepository.GetAsync(
+            filter: x => x.Id == id && !x.IsDeleted,
+            include: x => x
+                .Include(x => x.Products)
+                .Include(x => x.Children)))
+            ?.FirstOrDefault();
+
+        if (category is null)
+            return new ApiResponse<AdminCategoryDetailsDto>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = CategoryConstants.CategoryDoesNotExist
+            };
+
+        var categoryDetaislDto = new AdminCategoryDetailsDto
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Image = ImageDataUriBuilder.FromImage(category.Image),
+            ParentCategoryId = category.ParentCategoryId,
+            Created = category.Created,
+            LastModified = category.LastModified,
+            Products = category.Products?
+                .Select(p => new ProductRefDto
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                }).ToList() ?? new List<ProductRefDto>(),
+            Children = category.Children?
+                .Select(c => new CategoryRefDto
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                }).ToList() ?? new List<CategoryRefDto>()
+        };
+
+        return new ApiResponse<AdminCategoryDetailsDto>
+        {
+            Status = ResponseStatus.Success,
+            Data = categoryDetaislDto
+        };
     }
 
     public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
@@ -331,6 +314,21 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             Data = category
         };
     }
+
+    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
+    {
+        var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
+        var tree = BuildCategoryTree(allCategories);
+
+        return new ApiResponse<List<CategoryTreeDto>>
+        {
+            Data = tree,
+            Status = ResponseStatus.Success
+        };
+    }
+
+
+
 
     #region private methods
 

@@ -64,6 +64,16 @@ public class Category : AuditableBaseEntity
 
     public void SoftDelete() => IsDeleted = true;
 
+    public static void SoftDeleteRange(IEnumerable<Category> categories)
+    {
+        if (categories is null) return;
+
+        foreach (var category in categories)
+        {
+            category.SoftDelete();
+        }
+    }
+
     public static List<Guid> GetDescendantIds(IEnumerable<Category> allCategories, Guid rootId)
     {
         var result = new List<Guid> { rootId };

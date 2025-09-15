@@ -9,7 +9,7 @@ public static class CategoryConstants
     public const string ERROR_GET_CATEGORY = "An error occurred while geting category.";
 
     public const string CategorySuccessfullyCreated = "Category was successfully created.";
-    public const string CATEGORY_SUCCESSFULLY_UPDATE = "Category was successfully updated.";
+    public const string CategorySuccessfullyUpdated = "Category was successfully updated.";
     public const string CATEGORY_SUCCESSFULLY_DELETED = "Category successfully deleted.";
 
     public const string CategoryExist = "Category with that name already exists.";
@@ -19,6 +19,8 @@ public static class CategoryConstants
 
     public const string CategoryHasProducts = "Cannot delete. {0} product(s) are assigned to this category or its subcategories. Move or remove them first.";
     public const string CategoriesDeletedMessage = "Deleted {0} categor{1}.";
+    public const string CategoryCannotBeOwnParent = "A category cannot be its own parent.";
+
 
 
 
