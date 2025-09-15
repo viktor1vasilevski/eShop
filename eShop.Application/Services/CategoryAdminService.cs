@@ -347,23 +347,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             .ToList();
     }
 
-    private string BuildFullCategoryName(Guid id, Dictionary<Guid, Category> lookup)
-    {
-        var names = new List<string>();
-        var currentId = id;
-
-        while (lookup.TryGetValue(currentId, out var current))
-        {
-            names.Insert(0, current.Name);
-            if (current.ParentCategoryId == null)
-                break;
-
-            currentId = current.ParentCategoryId.Value;
-        }
-
-        return string.Join(" / ", names);
-    }
-
     private List<Guid> GetAllDescendantCategoryIds(IEnumerable<Category> allCategories, Guid parentId)
     {
         var result = new List<Guid> { parentId };
