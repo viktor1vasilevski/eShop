@@ -1,5 +1,4 @@
 ﻿namespace eShop.Application.Requests.Category;
-#nullable enable
 
 public class CreateUpdateCategoryRequest
 {

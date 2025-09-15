@@ -60,7 +60,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-
     public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
     {
         var category = (await _categoryRepository.GetAsync(
@@ -119,13 +118,11 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 !x.IsDeleted);
 
             if (categoryExists)
-            {
                 return new ApiResponse<CategoryDto>
                 {
                     Status = ResponseStatus.Conflict,
                     Message = CategoryConstants.CategoryExist
                 };
-            }
 
             var (bytes, type) = ImageParsing.FromBase64(request.Image);
             var image = Image.FromBytes(bytes, type);
