@@ -82,4 +82,22 @@ public class Category : AuditableBaseEntity
         return result;
     }
 
+    public static string BuildFullName(Guid id, Dictionary<Guid, Category> lookup)
+    {
+        var names = new List<string>();
+        var currentId = id;
+
+        while (lookup.TryGetValue(currentId, out var current))
+        {
+            names.Insert(0, current.Name);
+            if (current.ParentCategoryId == null)
+                break;
+
+            currentId = current.ParentCategoryId.Value;
+        }
+
+        return string.Join(" / ", names);
+    }
+
+
 }

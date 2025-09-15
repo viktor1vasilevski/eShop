@@ -1,7 +1,6 @@
 ﻿using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Category.Admin;
 using eShop.Application.DTOs.Product;
-using eShop.Application.Extensions;
 using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 
@@ -15,60 +14,52 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
     {
-        var query = _categoryRepository.GetAsQueryableWhereIf(
-            filter: q => q.WhereIf(true, x => !x.IsDeleted)
-                          .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())));
+        var allCategories = _categoryRepository.GetAsQueryable(c => !c.IsDeleted).AsNoTracking().ToList();
 
-        var totalCount = query.Count();
+        var filtered = allCategories.Where(c => string.IsNullOrEmpty(request.Name) || c.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        var sortedQuery = query;
-        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
+        var totalCount = filtered.Count;
+
+        var sortKeySelector = new Dictionary<string, Func<Category, object>>(StringComparer.OrdinalIgnoreCase)
         {
-            sortedQuery = request.SortDirection.ToLower() switch
+            ["created"] = c => c.Created,
+            ["lastmodified"] = c => c.LastModified
+        };
+
+        if (!string.IsNullOrEmpty(request.SortBy) &&
+            sortKeySelector.TryGetValue(request.SortBy, out var keySelector))
+        {
+            filtered = (request.SortDirection?.ToLower()) switch
             {
-                "asc" => request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderBy(x => x.Created),
-                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
-                    _ => sortedQuery.OrderBy(x => x.Created)
-                },
-                "desc" => request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderByDescending(x => x.Created),
-                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
-                    _ => sortedQuery.OrderByDescending(x => x.Created)
-                },
-                _ => sortedQuery
+                "desc" => filtered.OrderByDescending(keySelector).ToList(),
+                _ => filtered.OrderBy(keySelector).ToList()
             };
         }
 
         if (request.Skip.HasValue)
-            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+            filtered = filtered.Skip(request.Skip.Value).ToList();
 
         if (request.Take.HasValue)
-            sortedQuery = sortedQuery.Take(request.Take.Value);
-
-        var categories = sortedQuery.AsNoTracking().ToList();
-
-        var allCategories = _categoryRepository.GetAsQueryable().AsNoTracking().ToList();
+            filtered = filtered.Take(request.Take.Value).ToList();
 
         var lookup = allCategories.ToDictionary(c => c.Id);
 
-        var categoriesDTO = categories.Select(c => new AdminCategoryDto
+        var categoriesDTO = filtered.Select(c => new AdminCategoryDto
         {
             Id = c.Id,
-            Name = BuildFullCategoryName(c.Id, lookup),
+            Name = Category.BuildFullName(c.Id, lookup),
             Created = c.Created,
             LastModified = c.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<AdminCategoryDto>>()
+        return new ApiResponse<List<AdminCategoryDto>>
         {
             Data = categoriesDTO,
             TotalCount = totalCount,
-            Status = ResponseStatus.Success,
+            Status = ResponseStatus.Success
         };
     }
+
 
     public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
     {
