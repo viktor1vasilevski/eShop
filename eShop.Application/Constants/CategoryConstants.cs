@@ -16,4 +16,10 @@ public static class CategoryConstants
     public const string CategoryDoesNotExist = "Category doesn't exist.";
     public const string CATEGORY_HAS_RELATED_ENTITIES = "Category cannot be deleted because it has related subcategories or products";
 
+
+    public const string CategoryHasProducts = "Cannot delete. {0} product(s) are assigned to this category or its subcategories. Move or remove them first.";
+    public const string CategoriesDeletedMessage = "Deleted {0} categor{1}.";
+
+
+
 }

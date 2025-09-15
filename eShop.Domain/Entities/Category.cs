@@ -63,4 +63,23 @@ public class Category : AuditableBaseEntity
     }
 
     public void SoftDelete() => IsDeleted = true;
+
+    public static List<Guid> GetDescendantIds(IEnumerable<Category> allCategories, Guid rootId)
+    {
+        var result = new List<Guid> { rootId };
+        var lookup = allCategories.ToLookup(c => c.ParentCategoryId);
+
+        void Traverse(Guid parentId)
+        {
+            foreach (var child in lookup[parentId])
+            {
+                result.Add(child.Id);
+                Traverse(child.Id);
+            }
+        }
+
+        Traverse(rootId);
+        return result;
+    }
+
 }

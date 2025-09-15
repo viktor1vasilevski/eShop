@@ -10,6 +10,7 @@ namespace eShop.Application.Services;
 public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 {
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
+    private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
 
 
     public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
@@ -67,23 +68,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
             TotalCount = totalCount,
             Status = ResponseStatus.Success,
         };
-    }
-
-    private string BuildFullCategoryName(Guid id, Dictionary<Guid, Category> lookup)
-    {
-        var names = new List<string>();
-        var currentId = id;
-
-        while (lookup.TryGetValue(currentId, out var current))
-        {
-            names.Insert(0, current.Name);
-            if (current.ParentCategoryId == null)
-                break;
-
-            currentId = current.ParentCategoryId.Value;
-        }
-
-        return string.Join(" / ", names);
     }
 
     public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
@@ -175,33 +159,56 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public ApiResponse<CategoryDetailsDto> DeleteCategory(Guid id)
     {
-        //var category = _categoryRepository.GetAsQueryable(
-        //      filter: x => x.Id == id && !x.IsDeleted && x.Name != SystemConstants.UncategorizedCategoryName,
-        //      include: x => x.Include(x => x.Subcategories).ThenInclude(x => x.Products)).FirstOrDefault();
+        var allCategories = _categoryRepository
+            .GetAsQueryable(c => !c.IsDeleted)
+            .AsNoTracking()
+            .ToList();
 
-        //if (category is null)
-        //    return new ApiResponse<CategoryDetailsDTO>
-        //    {
-        //        Message = CategoryConstants.CategoryDoesNotExist,
-        //        Status = ResponseStatus.NotFound
-        //    };
+        var categoryToDelete = allCategories.FirstOrDefault(c => c.Id == id);
+        if (categoryToDelete is null)
+        {
+            return new ApiResponse<CategoryDetailsDto>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = CategoryConstants.CategoryDoesNotExist
+            };
+        }
 
-        //if(category.HasRelatedSubcategories())
-        //    return new ApiResponse<CategoryDetailsDTO>
-        //    {
-        //        Message = CategoryConstants.CATEGORY_HAS_RELATED_ENTITIES,
-        //        Status = ResponseStatus.Conflict
-        //    };
+        var idsToDelete = Category.GetDescendantIds(allCategories, id);
 
-        //category.SoftDelete();
-        //_uow.SaveChanges();
+        if (_productRepository.Exists(p => idsToDelete.Contains(p.CategoryId)))
+        {
+            var total = _productRepository
+                .GetAsQueryable(p => idsToDelete.Contains(p.CategoryId))
+                .Count();
+
+            return new ApiResponse<CategoryDetailsDto>
+            {
+                Status = ResponseStatus.Conflict,
+                Message = string.Format(CategoryConstants.CategoryHasProducts, total)
+            };
+        }
+
+        var categoriesToDelete = _categoryRepository
+            .GetAsQueryable(c => idsToDelete.Contains(c.Id))
+            .ToList();
+
+        foreach (var cat in categoriesToDelete)
+        {
+            cat.SoftDelete();
+        }
+
+        _uow.SaveChanges();
+
+        var pluralSuffix = categoriesToDelete.Count == 1 ? "y" : "ies";
 
         return new ApiResponse<CategoryDetailsDto>
         {
-            Message = CategoryConstants.CATEGORY_SUCCESSFULLY_DELETED,
-            Status = ResponseStatus.Success
+            Status = ResponseStatus.Success,
+            Message = string.Format(CategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix)
         };
     }
+
 
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
     {
@@ -284,19 +291,6 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         }
     }
 
-    private List<CategoryTreeDto> BuildCategoryTree(List<Category> categories, Guid? parentId = null)
-    {
-        return categories
-            .Where(c => c.ParentCategoryId == parentId)
-            .Select(c => new CategoryTreeDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Children = BuildCategoryTree(categories, c.Id)
-            })
-            .ToList();
-    }
-
     public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
     {
         var category = await _categoryRepository
@@ -333,5 +327,49 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
             Data = category
         };
     }
+
+    #region private methods
+
+    private List<CategoryTreeDto> BuildCategoryTree(List<Category> categories, Guid? parentId = null)
+    {
+        return categories
+            .Where(c => c.ParentCategoryId == parentId)
+            .Select(c => new CategoryTreeDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Children = BuildCategoryTree(categories, c.Id)
+            })
+            .ToList();
+    }
+
+    private string BuildFullCategoryName(Guid id, Dictionary<Guid, Category> lookup)
+    {
+        var names = new List<string>();
+        var currentId = id;
+
+        while (lookup.TryGetValue(currentId, out var current))
+        {
+            names.Insert(0, current.Name);
+            if (current.ParentCategoryId == null)
+                break;
+
+            currentId = current.ParentCategoryId.Value;
+        }
+
+        return string.Join(" / ", names);
+    }
+
+    private List<Guid> GetAllDescendantCategoryIds(IEnumerable<Category> allCategories, Guid parentId)
+    {
+        var result = new List<Guid> { parentId };
+        foreach (var child in allCategories.Where(c => c.ParentCategoryId == parentId))
+        {
+            result.AddRange(GetAllDescendantCategoryIds(allCategories, child.Id));
+        }
+        return result;
+    }
+
+    #endregion
 
 }
