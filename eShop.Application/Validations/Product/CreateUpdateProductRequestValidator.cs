@@ -25,7 +25,7 @@ public class CreateUpdateProductRequestValidator : AbstractValidator<CreateUpdat
 
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description is required.")
-            .MaximumLength(500).WithMessage("Description cannot exceed 1500 characters.");
+            .MaximumLength(2500).WithMessage("Description cannot exceed 2500 characters.");
 
         RuleFor(x => x.Image)
             .NotEmpty().WithMessage("Product name is required.");

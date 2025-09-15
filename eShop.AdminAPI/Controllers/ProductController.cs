@@ -1,6 +1,8 @@
-﻿using eShop.Application.Enums;
+﻿using Azure;
+using eShop.Application.Enums;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Product;
+using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -63,9 +65,16 @@ public class ProductController(IProductService _productService, IProductDescript
     }
 
     [HttpGet("generate")]
-    public async Task<IActionResult> Generate(string productName, string category, string subcategory, string? additionalContext = null)
+    public async Task<IActionResult> GenerateDescription([FromQuery] string productName, [FromQuery] string categories, [FromQuery] string? additionalContext = null)
     {
-        var response = await _descriptionGenerator.GenerateDescriptionAsync(productName, category, subcategory, additionalContext);
+        var response = await _descriptionGenerator.GenerateDescriptionAsync(productName, categories, additionalContext);
         return HandleResponse(response);
     }
+
+    public class GenerateDescriptionRequest
+    {
+        public string Prompt { get; set; } = string.Empty;
+    }
+
+
 }

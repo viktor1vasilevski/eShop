@@ -273,47 +273,33 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
     public async Task<ApiResponse<ProductDetailsDTO>> GetProductByIdAsync(Guid id)
     {
-        //var product = (await _productRepository.GetAsync(
-        //    filter: x => !x.IsDeleted && x.Id == id,
-        //    include: x => x.Include(s => s.Subcategory).ThenInclude(c => c.Category))).FirstOrDefault();
+        var product = (await _productRepository.GetAsync(
+            filter: x => !x.IsDeleted && x.Id == id)).FirstOrDefault();
 
-        //if (product is null)
-        //    return new ApiResponse<ProductDetailsDTO>
-        //    {
-        //        Status = ResponseStatus.NotFound,
-        //        Message = ProductConstants.ProductDoesNotExist
-        //    };
+        if (product is null)
+            return new ApiResponse<ProductDetailsDTO>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = ProductConstants.ProductDoesNotExist
+            };
 
-        //var productDto = new ProductDetailsDTO()
-        //{
-        //    Id = product.Id,
-        //    Name = product.Name,
-        //    Description = product.Description,
-        //    UnitPrice = product.UnitPrice,
-        //    UnitQuantity = product.UnitQuantity,
-        //    Subcategory = product.Subcategory?.Name,
-        //    SubcategoryId = product.SubcategoryId,
-        //    Category = product.Subcategory?.Category?.Name,
-        //    CategoryId = product.Subcategory.Category.Id,
-        //    LastModified = product.LastModified,
-        //    Created = product.Created,
-        //    Image = ImageDataUriBuilder.FromImage(product.Image),
-        //    Comments = product.Comments?
-        //    .OrderByDescending(x => x.Created)
-        //    .Select(x => new CommentDTO
-        //    {
-        //        CommentText = x.CommentText,
-        //        CreatedBy = x.CreatedBy,
-        //        Created = x.Created,
-        //        Rating = x.Rating,
-        //    }).ToList()
+        var productDto = new ProductDetailsDTO()
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            LastModified = product.LastModified,
+            Created = product.Created,
+            Image = ImageDataUriBuilder.FromImage(product.Image)
 
-        //};
+        };
 
         return new ApiResponse<ProductDetailsDTO>
         {
             Status = ResponseStatus.Success,
-            //Data = productDto
+            Data = productDto
         };
     }
 

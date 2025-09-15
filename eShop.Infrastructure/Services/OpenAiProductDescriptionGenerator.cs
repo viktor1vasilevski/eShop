@@ -12,18 +12,22 @@ public class OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfigura
     private readonly HttpClient _httpClient = httpClient;
     private readonly string _apiKey = configuration["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI API key is missing in configuration.");
 
-    public async Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null)
-    {
-        var prompt = BuildPrompt(productName, category, subcategory, additionalContext);
 
+    public async Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string categories, string? additionalContext = null)
+    {
         var requestBody = new
         {
             model = "gpt-4o-mini",
             messages = new[]
             {
                 new { role = "system", content = "You write natural, concise product descriptions for ecommerce." },
-                new { role = "user", content = $"Write a short product description (3–5 sentences) for '{productName}' in " +
-                $"{category}/{subcategory}. Do not include a title, heading, or tagline—only the description text. Additional context: {additionalContext ?? "n/a"}" }
+                new
+                {
+                    role = "user",
+                    content = $"Write a short product description (max 2500 characters) for a product named \"{productName}\" in the category path \"{categories}\". " +
+                              "Do not include a title or heading—only the description text." +
+                              (string.IsNullOrWhiteSpace(additionalContext) ? "" : $" Additional context: {additionalContext}")
+                }
             }
         };
 
@@ -64,7 +68,6 @@ public class OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfigura
         }
 
         using var doc = JsonDocument.Parse(responseContent);
-
         var description = doc.RootElement
             .GetProperty("choices")[0]
             .GetProperty("message")
@@ -83,17 +86,9 @@ public class OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfigura
         return new ApiResponse<string>
         {
             Status = ResponseStatus.Success,
-            Data = description,
+            Data = description.Trim()
         };
     }
 
-    private string BuildPrompt(string productName, string category, string subcategory, string? additionalContext)
-    {
-        var context = string.IsNullOrWhiteSpace(additionalContext) ? "" : $" Additional details: {additionalContext}.";
-        return $"Generate a concise, attractive product description for a product.\n\n" +
-               $"Product: {productName}\n" +
-               $"Category: {category}\n" +
-               $"Subcategory: {subcategory}\n" +
-               $"{context}";
-    }
+
 }

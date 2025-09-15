@@ -12,5 +12,5 @@ public interface IProductDescriptionGenerator
     /// <param name="subcategory">The subcategory the product belongs to.</param>
     /// <param name="additionalContext">Optional details like features, style, or target audience.</param>
     /// <returns>The generated description text.</returns>
-    Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string category, string subcategory, string? additionalContext = null);
+    Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string categories, string? additionalContext = null);
 }

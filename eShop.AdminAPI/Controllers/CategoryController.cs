@@ -1,5 +1,4 @@
 ﻿using eShop.Application.Enums;
-using eShop.Application.Interfaces;
 using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
 using eShop.Domain.Entities;
