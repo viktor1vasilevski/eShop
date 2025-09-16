@@ -15,8 +15,8 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(!string.IsNullOrEmpty(request.Name), c => c.Name.Contains(request.Name!, StringComparison.OrdinalIgnoreCase))
-                          .WhereIf(true, x => !x.IsDeleted));
+            filter: x => x.WhereIf(true, x => !x.IsDeleted)
+                          .WhereIf(!string.IsNullOrEmpty(request.Name), c => c.Name.Contains(request.Name!, StringComparison.OrdinalIgnoreCase)));
 
         var totalCount = query.Count();
 
