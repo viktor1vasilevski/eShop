@@ -295,7 +295,9 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
     {
         var category = await _categoryRepository
-            .GetAsQueryable(x => x.Id == id && !x.IsDeleted)
+            .GetAsQueryable(
+                filter: x => x.Id == id && !x.IsDeleted, 
+                include: x => x.Include(x => x.Children))
             .Select(c => new CategoryEditDto
             {
                 Id = c.Id,

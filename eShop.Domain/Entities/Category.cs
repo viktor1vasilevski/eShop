@@ -17,11 +17,11 @@ public class Category : AuditableBaseEntity
     public virtual Category? ParentCategory { get; private set; }
 
 
-    private readonly List<Category> _children = new();
+    private readonly List<Category> _children = [];
     public IReadOnlyCollection<Category> Children => _children.AsReadOnly();
 
 
-    private readonly List<Product> _products = new();
+    private readonly List<Product> _products = [];
     public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
 
 
