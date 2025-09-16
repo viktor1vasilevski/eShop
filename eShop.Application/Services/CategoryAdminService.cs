@@ -14,37 +14,37 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
     public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
     {
-        var allCategories = _categoryRepository.GetAsQueryable(c => !c.IsDeleted).AsNoTracking().ToList();
+        var query = _categoryRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(!string.IsNullOrEmpty(request.Name), c => c.Name.Contains(request.Name!, StringComparison.OrdinalIgnoreCase))
+                          .WhereIf(true, x => !x.IsDeleted));
 
-        var filtered = allCategories.Where(c => string.IsNullOrEmpty(request.Name) || c.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+        var totalCount = query.Count();
 
-        var totalCount = filtered.Count;
+        var sortBy = request.SortBy?.Trim().ToLower();
+        var sortDirection = request.SortDirection?.Trim().ToLower();
 
-        var sortKeySelector = new Dictionary<string, Func<Category, object>>(StringComparer.OrdinalIgnoreCase)
+        if (!string.IsNullOrEmpty(sortBy) && !string.IsNullOrEmpty(sortDirection))
         {
-            ["created"] = c => c.Created,
-            ["lastmodified"] = c => c.LastModified
-        };
-
-        if (!string.IsNullOrEmpty(request.SortBy) &&
-            sortKeySelector.TryGetValue(request.SortBy, out var keySelector))
-        {
-            filtered = (request.SortDirection?.ToLower()) switch
+            var sortMap = new Dictionary<string, Func<IQueryable<Category>, IOrderedQueryable<Category>>>
             {
-                "desc" => filtered.OrderByDescending(keySelector).ToList(),
-                _ => filtered.OrderBy(keySelector).ToList()
+                ["created"] = q => sortDirection == "asc" ? q.OrderBy(x => x.Created) : q.OrderByDescending(x => x.Created),
+                ["lastmodified"] = q => sortDirection == "asc" ? q.OrderBy(x => x.LastModified) : q.OrderByDescending(x => x.LastModified)
             };
+
+            query = sortMap.TryGetValue(sortBy, out var sorter)
+                ? sorter(query)
+                : (sortDirection == "asc" ? query.OrderBy(x => x.Created) : query.OrderByDescending(x => x.Created));
         }
 
         if (request.Skip.HasValue)
-            filtered = filtered.Skip(request.Skip.Value).ToList();
+            query = query.Skip(request.Skip.Value);
 
         if (request.Take.HasValue)
-            filtered = filtered.Take(request.Take.Value).ToList();
+            query = query.Take(request.Take.Value);
 
-        var lookup = allCategories.ToDictionary(c => c.Id);
+        var lookup = query.ToDictionary(c => c.Id);
 
-        var categoriesDTO = filtered.Select(c => new AdminCategoryDto
+        var categoriesDTO = query.Select(c => new AdminCategoryDto
         {
             Id = c.Id,
             Name = Category.BuildFullName(c.Id, lookup),
