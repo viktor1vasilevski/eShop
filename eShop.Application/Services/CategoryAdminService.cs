@@ -235,21 +235,24 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
     public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
     {
-        var category = (await _categoryRepository.GetAsync(
-            filter: x => x.Id == id && !x.IsDeleted,
-            include: x => x
-                .Include(x => x.Products)
-                .Include(x => x.Children)))
-            ?.FirstOrDefault();
+        var category = await _categoryRepository
+            .GetAsQueryable(c => c.Id == id && !c.IsDeleted,
+                include: q => q
+                    .Include(c => c.Products)
+                    .Include(c => c.Children))
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
 
         if (category is null)
+        {
             return new ApiResponse<AdminCategoryDetailsDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
             };
+        }
 
-        var categoryDetaislDto = new AdminCategoryDetailsDto
+        var dto = new AdminCategoryDetailsDto
         {
             Id = category.Id,
             Name = category.Name,
@@ -258,25 +261,20 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             Created = category.Created,
             LastModified = category.LastModified,
             Products = category.Products?
-                .Select(p => new ProductRefDto
-                {
-                    Id = p.Id,
-                    Name = p.Name
-                }).ToList() ?? new List<ProductRefDto>(),
+                .Select(p => new ProductRefDto { Id = p.Id, Name = p.Name })
+                .ToList() ?? new(),
             Children = category.Children?
-                .Select(c => new CategoryRefDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                }).ToList() ?? new List<CategoryRefDto>()
+                .Select(c => new CategoryRefDto { Id = c.Id, Name = c.Name })
+                .ToList() ?? new()
         };
 
         return new ApiResponse<AdminCategoryDetailsDto>
         {
             Status = ResponseStatus.Success,
-            Data = categoryDetaislDto
+            Data = dto
         };
     }
+
 
     public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
     {
