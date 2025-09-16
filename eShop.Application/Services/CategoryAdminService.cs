@@ -142,7 +142,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         {
             return new ApiResponse<AdminCategoryDto>
             {
-                Status = ResponseStatus.Info,
+                Status = ResponseStatus.Conflict,
                 Message = string.Format(CategoryConstants.CategoryHasProducts, total)
             };
         }
@@ -179,7 +179,8 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         var trimmedName = request.Name?.Trim() ?? string.Empty;
         var normalizedName = trimmedName.ToUpperInvariant();
 
-        if (_categoryRepository.Exists(x => x.Name.ToUpper() == normalizedName && x.Id != id))
+        if (_categoryRepository.Exists(x => x.Id != id && x.ParentCategoryId == request.ParentCategoryId 
+                && x.Name.ToUpper() == normalizedName && !x.IsDeleted))
         {
             return new ApiResponse<CategoryDto>
             {
@@ -204,6 +205,20 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                     Status = ResponseStatus.BadRequest,
                     Message = CategoryConstants.CategoryCannotBeOwnParent
                 };
+            }
+
+            if (request.ParentCategoryId.HasValue)
+            {
+                var all = _categoryRepository.GetAsQueryable(c => !c.IsDeleted).AsNoTracking().ToList();
+                var descendants = Category.GetDescendantIds(all, id);
+                if (descendants.Contains(request.ParentCategoryId.Value))
+                {
+                    return new ApiResponse<CategoryDto>
+                    {
+                        Status = ResponseStatus.BadRequest,
+                        Message = CategoryConstants.CategoryCannotBeMovedUnderDescendant
+                    };
+                }
             }
 
             category.Update(trimmedName, image, request.ParentCategoryId);
@@ -261,9 +276,11 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             Created = category.Created,
             LastModified = category.LastModified,
             Products = category.Products?
+                .OrderBy(p => p.Name)
                 .Select(p => new ProductRefDto { Id = p.Id, Name = p.Name })
                 .ToList() ?? new(),
             Children = category.Children?
+                .OrderBy(p => p.Name)
                 .Select(c => new CategoryRefDto { Id = c.Id, Name = c.Name })
                 .ToList() ?? new()
         };
@@ -275,12 +292,10 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-
     public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
     {
         var category = await _categoryRepository
             .GetAsQueryable(x => x.Id == id && !x.IsDeleted)
-            .Include(x => x.Children)
             .Select(c => new CategoryEditDto
             {
                 Id = c.Id,
@@ -334,6 +349,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     {
         return categories
             .Where(c => c.ParentCategoryId == parentId)
+            .OrderBy(c => c.Name)
             .Select(c => new CategoryTreeDto
             {
                 Id = c.Id,
