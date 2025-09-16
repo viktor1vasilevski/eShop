@@ -361,16 +361,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             .ToList();
     }
 
-    private List<Guid> GetAllDescendantCategoryIds(IEnumerable<Category> allCategories, Guid parentId)
-    {
-        var result = new List<Guid> { parentId };
-        foreach (var child in allCategories.Where(c => c.ParentCategoryId == parentId))
-        {
-            result.AddRange(GetAllDescendantCategoryIds(allCategories, child.Id));
-        }
-        return result;
-    }
-
     #endregion
 
 }
