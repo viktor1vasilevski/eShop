@@ -7,12 +7,11 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 {
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
-    private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
 
     public ApiResponse<List<ProductDto>> GetProducts(ProductRequest request)
     {
-        var allCategories = _categoryRepository.Get();
+        var allCategories = _categoryRepository.GetAsQueryable(x => x.IsDeleted);
 
         List<Guid> categoryIds = new();
         if (request.CategoryId is not null && request.CategoryId != Guid.Empty)
@@ -21,16 +20,14 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         }
 
         var query = _productRepository.GetAsQueryableWhereIf(
-            filter: x => x
-                .WhereIf(!string.IsNullOrEmpty(request.Description), x => x.Description.ToLower().Contains(request.Description.ToLower()))
+            filter: x => x.Where(x => !x.IsDeleted)
+                .WhereIf(!string.IsNullOrEmpty(request.Description), x => x.Description.ToLowerInvariant().Contains(request.Description.ToLowerInvariant()))             
                 .WhereIf(request.CategoryId is not null && request.CategoryId != Guid.Empty, x => categoryIds.Contains(x.CategoryId))
-                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
-            include: x => x.Include(x => x.Category)
-        );
+                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLowerInvariant().Contains(request.Name.ToLowerInvariant())),
+            include: x => x.Include(x => x.Category)).AsNoTracking();
 
         var totalCount = query.Count();
 
-        // Sorting
         var sortedQuery = query;
         if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
         {
@@ -64,7 +61,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var productsDTO = sortedQuery.AsNoTracking().Select(x => new ProductDto
+        var productsDTO = sortedQuery.Select(x => new ProductDto
         {
             Id = x.Id,
             Name = x.Name,
@@ -304,11 +301,15 @@ public class ProductService(IUnitOfWork _uow) : IProductService
     }
 
 
-    private List<Guid> GetAllDescendantCategoryIds(IEnumerable<Category> allCategories, Guid parentId)
+
+
+    #region private methods
+
+    private List<Guid> GetAllDescendantCategoryIds(IQueryable<Category> allCategories, Guid parentId)
     {
         var result = new List<Guid> { parentId };
 
-        var children = allCategories.Where(c => c.ParentCategoryId == parentId).ToList();
+        var children = allCategories.Where(c => c.ParentCategoryId == parentId);
         foreach (var child in children)
         {
             result.AddRange(GetAllDescendantCategoryIds(allCategories, child.Id));
@@ -316,4 +317,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
 
         return result;
     }
+
+    #endregion
+
 }

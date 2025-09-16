@@ -74,7 +74,9 @@ public class Category : AuditableBaseEntity
         }
     }
 
-    public static List<Guid> GetDescendantIds(IEnumerable<Category> allCategories, Guid rootId)
+    public record CategoryNode(Guid Id, Guid? ParentCategoryId);
+
+    public static List<Guid> GetDescendantIds(IEnumerable<CategoryNode> allCategories, Guid rootId)
     {
         var result = new List<Guid> { rootId };
         var lookup = allCategories.ToLookup(c => c.ParentCategoryId);

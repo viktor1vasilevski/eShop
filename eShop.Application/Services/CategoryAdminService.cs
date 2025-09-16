@@ -3,6 +3,7 @@ using eShop.Application.DTOs.Category.Admin;
 using eShop.Application.DTOs.Product;
 using eShop.Application.Interfaces.Category;
 using eShop.Application.Requests.Category;
+using static eShop.Domain.Entities.Category;
 
 namespace eShop.Application.Services;
 
@@ -65,10 +66,10 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         try
         {
             var trimmedName = request.Name.Trim();
-            var normalizedName = trimmedName.ToUpperInvariant();
+            var normalizedName = trimmedName.ToLowerInvariant();
 
             bool categoryExists = _categoryRepository.Exists(x =>
-                x.Name.ToUpper() == normalizedName &&
+                x.Name.ToLower() == normalizedName &&
                 x.ParentCategoryId == request.ParentCategoryId &&
                 !x.IsDeleted);
 
@@ -117,13 +118,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
     public ApiResponse<AdminCategoryDto> DeleteCategory(Guid id)
     {
-        var allCategories = _categoryRepository
-            .GetAsQueryable(c => !c.IsDeleted)
-            .AsNoTracking()
-            .ToList();
-
-        var categoryToDelete = allCategories.FirstOrDefault(c => c.Id == id);
-        if (categoryToDelete is null)
+        if (!_categoryRepository.Exists(c => !c.IsDeleted && c.Id == id))
         {
             return new ApiResponse<AdminCategoryDto>
             {
@@ -132,26 +127,33 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             };
         }
 
-        var idsToDelete = Category.GetDescendantIds(allCategories, id);
+        var allCategories = _categoryRepository
+            .GetAsQueryable(c => !c.IsDeleted)
+            .AsNoTracking()
+            .Select(c => new CategoryNode(c.Id, c.ParentCategoryId))
+            .ToList();
 
-        var total = _productRepository
+        var idsToDelete = GetDescendantIds(allCategories, id);
+
+        var productCount = _productRepository
             .GetAsQueryable(p => idsToDelete.Contains(p.CategoryId))
             .Count();
 
-        if (total > 0)
+        if (productCount > 0)
         {
             return new ApiResponse<AdminCategoryDto>
             {
                 Status = ResponseStatus.Conflict,
-                Message = string.Format(CategoryConstants.CategoryHasProducts, total)
+                Message = string.Format(CategoryConstants.CategoryHasProducts, productCount)
             };
         }
 
+        // Step 5: Load categories to soft-delete
         var categoriesToDelete = _categoryRepository
             .GetAsQueryable(c => idsToDelete.Contains(c.Id))
             .ToList();
 
-        Category.SoftDeleteRange(categoriesToDelete);
+        SoftDeleteRange(categoriesToDelete);
 
         _uow.SaveChanges();
 
@@ -163,6 +165,8 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             Message = string.Format(CategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix),
         };
     }
+
+
 
     public ApiResponse<CategoryDto> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
     {
@@ -209,7 +213,8 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
             if (request.ParentCategoryId.HasValue)
             {
-                var all = _categoryRepository.GetAsQueryable(c => !c.IsDeleted).AsNoTracking().ToList();
+                var all = _categoryRepository.GetAsQueryable(c => !c.IsDeleted)
+                    .Select(c => new CategoryNode(c.Id, c.ParentCategoryId)).AsNoTracking().ToList();
                 var descendants = Category.GetDescendantIds(all, id);
                 if (descendants.Contains(request.ParentCategoryId.Value))
                 {
