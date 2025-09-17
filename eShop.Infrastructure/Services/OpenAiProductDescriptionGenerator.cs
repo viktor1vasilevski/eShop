@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
+using eShop.Application.Requests.AI;
 using eShop.Application.Responses;
 using Microsoft.Extensions.Configuration;
 using System.Text;
@@ -7,13 +8,13 @@ using System.Text.Json;
 
 namespace eShop.Infrastructure.Services;
 
-public class OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfiguration configuration) : IProductDescriptionGenerator
+public class OpenAIProductDescriptionGenerator(HttpClient httpClient, IConfiguration configuration) : IOpenAIProductDescriptionGenerator
 {
     private readonly HttpClient _httpClient = httpClient;
     private readonly string _apiKey = configuration["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI API key is missing in configuration.");
 
 
-    public async Task<ApiResponse<string>> GenerateDescriptionAsync(string productName, string categories, string? additionalContext = null)
+    public async Task<ApiResponse<string>> GenerateDescriptionAsync(GenerateProductDescriptionRequest request)
     {
         var requestBody = new
         {
@@ -24,21 +25,20 @@ public class OpenAiProductDescriptionGenerator(HttpClient httpClient, IConfigura
                 new
                 {
                     role = "user",
-                    content = $"Write a short product description (max 2500 characters) for a product named \"{productName}\" in the category path \"{categories}\". " +
-                              "Do not include a title or heading—only the description text." +
-                              (string.IsNullOrWhiteSpace(additionalContext) ? "" : $" Additional context: {additionalContext}")
+                    content = $"Write a short product description (max 2500 characters) for a product named \"{request.ProductName}\" in the category path \"{request.Categories}\". " +
+                              "Do not include a title or heading—only the description text."
                 }
             }
         };
 
         var json = JsonSerializer.Serialize(requestBody);
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions")
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions")
         {
             Headers = { { "Authorization", $"Bearer {_apiKey}" } },
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
 
-        var response = await _httpClient.SendAsync(request);
+        var response = await _httpClient.SendAsync(httpRequest);
         var responseContent = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)

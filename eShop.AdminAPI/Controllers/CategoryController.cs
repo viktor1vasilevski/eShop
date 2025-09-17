@@ -42,9 +42,9 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update([FromRoute] Guid id, [FromBody] CreateUpdateCategoryRequest request)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CreateUpdateCategoryRequest request)
     {
-        var response = _categoryAdminService.UpdateCategory(id, request);
+        var response = await _categoryAdminService.UpdateCategory(id, request);
         return HandleResponse(response);
     }
 

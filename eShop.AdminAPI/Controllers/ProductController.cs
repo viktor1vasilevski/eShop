@@ -1,6 +1,7 @@
 ﻿using Azure;
 using eShop.Application.Enums;
 using eShop.Application.Interfaces;
+using eShop.Application.Requests.AI;
 using eShop.Application.Requests.Product;
 using eShop.Application.Responses;
 using eShop.Domain.Entities;
@@ -13,7 +14,7 @@ namespace eShop.AdminAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class ProductController(IProductService _productService, IProductDescriptionGenerator _descriptionGenerator) : BaseController
+public class ProductController(IProductService _productService, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : BaseController
 {
 
 
@@ -65,16 +66,9 @@ public class ProductController(IProductService _productService, IProductDescript
     }
 
     [HttpGet("generate")]
-    public async Task<IActionResult> GenerateDescription([FromQuery] string productName, [FromQuery] string categories, [FromQuery] string? additionalContext = null)
+    public async Task<IActionResult> GenerateDescription([FromQuery] GenerateProductDescriptionRequest request)
     {
-        var response = await _descriptionGenerator.GenerateDescriptionAsync(productName, categories, additionalContext);
+        var response = await _openAIProductDescriptionGenerator.GenerateDescriptionAsync(request);
         return HandleResponse(response);
     }
-
-    public class GenerateDescriptionRequest
-    {
-        public string Prompt { get; set; } = string.Empty;
-    }
-
-
 }

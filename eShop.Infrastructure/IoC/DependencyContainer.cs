@@ -27,7 +27,7 @@ public static class DependencyContainer
 
         // Infrastructure.Services
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddHttpClient<IProductDescriptionGenerator, OpenAiProductDescriptionGenerator>();
+        services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;
