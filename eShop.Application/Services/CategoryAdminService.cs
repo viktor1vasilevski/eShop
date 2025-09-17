@@ -148,7 +148,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             };
         }
 
-        // Step 5: Load categories to soft-delete
         var categoriesToDelete = _categoryRepository
             .GetAsQueryable(c => idsToDelete.Contains(c.Id))
             .ToList();
@@ -166,9 +165,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-
-
-    public ApiResponse<CategoryDto> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
+    public async Task<ApiResponse<CategoryDto>> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
     {
         var category = _categoryRepository.GetById(id);
         if (category is null)
@@ -181,10 +178,10 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
 
         var trimmedName = request.Name?.Trim() ?? string.Empty;
-        var normalizedName = trimmedName.ToUpperInvariant();
+        var normalizedName = trimmedName.ToLowerInvariant();
 
-        if (_categoryRepository.Exists(x => x.Id != id && x.ParentCategoryId == request.ParentCategoryId 
-                && x.Name.ToUpper() == normalizedName && !x.IsDeleted))
+        if (await _categoryRepository.ExistsAsync(x => x.Id != id && x.ParentCategoryId == request.ParentCategoryId 
+                && x.Name.ToLowerInvariant() == normalizedName && !x.IsDeleted))
         {
             return new ApiResponse<CategoryDto>
             {
@@ -215,7 +212,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             {
                 var all = _categoryRepository.GetAsQueryable(c => !c.IsDeleted)
                     .Select(c => new CategoryNode(c.Id, c.ParentCategoryId)).AsNoTracking().ToList();
-                var descendants = Category.GetDescendantIds(all, id);
+                var descendants = GetDescendantIds(all, id);
                 if (descendants.Contains(request.ParentCategoryId.Value))
                 {
                     return new ApiResponse<CategoryDto>
@@ -227,7 +224,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             }
 
             category.Update(trimmedName, image, request.ParentCategoryId);
-            _uow.SaveChanges();
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<CategoryDto>
             {
