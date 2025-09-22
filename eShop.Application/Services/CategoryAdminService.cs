@@ -66,14 +66,12 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         try
         {
             var trimmedName = request.Name.Trim();
-            var normalizedName = trimmedName.ToLowerInvariant();
+            var normalizedName = trimmedName.ToLower();
 
-            bool categoryExists = _categoryRepository.Exists(x =>
+            if (_categoryRepository.Exists(x =>
                 x.Name.ToLower() == normalizedName &&
                 x.ParentCategoryId == request.ParentCategoryId &&
-                !x.IsDeleted);
-
-            if (categoryExists)
+                !x.IsDeleted))
                 return new ApiResponse<CategoryDto>
                 {
                     Status = ResponseStatus.Conflict,
@@ -178,10 +176,14 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
 
         var trimmedName = request.Name?.Trim() ?? string.Empty;
-        var normalizedName = trimmedName.ToLowerInvariant();
+        var normalizedName = trimmedName.ToLower();
 
-        if (await _categoryRepository.ExistsAsync(x => x.Id != id && x.ParentCategoryId == request.ParentCategoryId 
-                && x.Name.ToLowerInvariant() == normalizedName && !x.IsDeleted))
+        if (await _categoryRepository.ExistsAsync(x =>
+            x.Id != id &&
+            x.ParentCategoryId == request.ParentCategoryId &&
+            x.Name.ToLower() == normalizedName &&
+            !x.IsDeleted))
+
         {
             return new ApiResponse<CategoryDto>
             {
