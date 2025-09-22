@@ -1,9 +1,10 @@
 ﻿using eShop.Application.DTOs.Product;
 using eShop.Application.Requests.Product;
+using eShop.Domain.Entities;
 
 namespace eShop.Application.Services;
 
-public class ProductService(IUnitOfWork _uow) : IProductService
+public class ProductService(IUnitOfWork _uow, ILogger<ProductService> _logger) : IProductService
 {
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
@@ -137,36 +138,75 @@ public class ProductService(IUnitOfWork _uow) : IProductService
         };
     }
 
-    public ApiResponse<ProductDetailsDTO> CreateProduct(CreateUpdateProductRequest request)
+    public async Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateUpdateProductRequest request)
     {
-        //if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
-        //    return new ApiResponse<ProductDetailsDTO>
-        //    {
-        //        Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-        //        Status = ResponseStatus.NotFound
-        //    };
-
         try
         {
-            var (bytes, type) = ImageParsing.FromBase64(request.Image);
-            var image = Image.FromBytes(bytes, type);
+            var trimmedName = request.Name.Trim();
+            var normalized = trimmedName.ToLower();
+
+            var categoryExists = await _categoryRepository.ExistsAsync(c =>
+                c.Id == request.CategoryId && !c.IsDeleted);
+
+            if (!categoryExists)
+            {
+                return new ApiResponse<ProductDetailsDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = CategoryConstants.CategoryDoesNotExist
+                };
+            }
+
+            var hasChildren = await _categoryRepository.ExistsAsync(c =>
+                c.ParentCategoryId == request.CategoryId && !c.IsDeleted);
+
+            if (hasChildren)
+            {
+                return new ApiResponse<ProductDetailsDTO>
+                {
+                    Status = ResponseStatus.BadRequest,
+                    Message = "Products are allowed only on leaf categories"
+                };
+            }
+
+            var nameTaken = await _productRepository.ExistsAsync(x =>
+                x.CategoryId == request.CategoryId &&
+                !x.IsDeleted &&
+                x.Name.ToLower() == normalized);
+
+            if (nameTaken)
+            {
+                return new ApiResponse<ProductDetailsDTO>
+                {
+                    Status = ResponseStatus.Conflict,
+                    Message = "Product exist"
+                };
+            }
+
+            Image? image = null;
+            if (!string.IsNullOrWhiteSpace(request.Image))
+            {
+                var (bytes, type) = ImageParsing.FromBase64(request.Image);
+                image = Image.FromBytes(bytes, type);
+            }
 
             var productData = new ProductData(
-                name: request.Name,
-                description: request.Description,
+                name: trimmedName,
+                description: request.Description?.Trim(),
                 unitPrice: request.Price,
                 unitQuantity: request.Quantity,
                 categoryId: request.CategoryId,
-                image: image);
+                image: image
+            );
 
             var product = Product.Create(productData);
             _productRepository.Insert(product);
-            _uow.SaveChanges();
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<ProductDetailsDTO>
             {
-                Message = ProductConstants.PRODUCT_SUCCESSFULLY_CREATED,
                 Status = ResponseStatus.Created,
+                Message = ProductConstants.PRODUCT_SUCCESSFULLY_CREATED,
                 Data = new ProductDetailsDTO
                 {
                     Id = product.Id,
@@ -174,7 +214,7 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                     Description = product.Description,
                     UnitPrice = product.UnitPrice,
                     UnitQuantity = product.UnitQuantity,
-                    Created = product.Created,
+                    Created = product.Created
                 }
             };
         }
@@ -186,9 +226,15 @@ public class ProductService(IUnitOfWork _uow) : IProductService
                 Message = ex.Message
             };
         }
-
-
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while creating product");
+            throw;
+        }
     }
+
+
+
 
     public ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request)
     {

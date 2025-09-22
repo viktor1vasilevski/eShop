@@ -40,9 +40,9 @@ public class ProductController(IProductService _productService, IOpenAIProductDe
     }
 
     [HttpPost]
-    public IActionResult Create([FromBody] CreateUpdateProductRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateUpdateProductRequest request)
     {
-        var response = _productService.CreateProduct(request);
+        var response = await _productService.CreateProduct(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
         {
             var locationUri = Url.Action(nameof(GetByIdAsync), nameof(Product), new { id = response.Data.Id }, Request.Scheme);
