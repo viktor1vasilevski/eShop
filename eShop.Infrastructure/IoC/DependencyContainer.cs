@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Interfaces;
-using eShop.Application.Interfaces.Category;
+using eShop.Application.Interfaces.Admin;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Services;
 using eShop.Domain.Interfaces;
 using eShop.Infrastructure.Repositories;

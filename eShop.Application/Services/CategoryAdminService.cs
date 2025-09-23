@@ -1,8 +1,10 @@
-﻿using eShop.Application.DTOs.Category;
+﻿using eShop.Application.DTOs.Admin.Category;
+using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Category.Admin;
 using eShop.Application.DTOs.Product;
-using eShop.Application.Interfaces.Category;
+using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Category;
+using eShop.Application.Responses.Admin.Category;
 using static eShop.Domain.Entities.Category;
 
 namespace eShop.Application.Services;
@@ -13,7 +15,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
 
 
-    public ApiResponse<List<AdminCategoryDto>> GetCategories(CategoryRequest request)
+    public ApiResponse<List<CategoryAdminResponse>> GetCategories(CategoryRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(true, x => !x.IsDeleted)
@@ -45,7 +47,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         var lookup = query.ToDictionary(c => c.Id);
 
-        var categoriesDTO = query.Select(c => new AdminCategoryDto
+        var categoriesDTO = query.Select(c => new CategoryAdminResponse
         {
             Id = c.Id,
             Name = Category.BuildFullName(c.Id, lookup),
@@ -53,7 +55,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             LastModified = c.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<AdminCategoryDto>>
+        return new ApiResponse<List<CategoryAdminResponse>>
         {
             Data = categoriesDTO,
             TotalCount = totalCount,
@@ -131,7 +133,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             .Select(c => new CategoryNode(c.Id, c.ParentCategoryId))
             .ToList();
 
-        var idsToDelete = GetDescendantIds(allCategories, id);
+        var idsToDelete = Category.GetDescendantIds(allCategories, id);
 
         var productCount = _productRepository
             .GetAsQueryable(p => idsToDelete.Contains(p.CategoryId))
@@ -214,7 +216,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             {
                 var all = _categoryRepository.GetAsQueryable(c => !c.IsDeleted)
                     .Select(c => new CategoryNode(c.Id, c.ParentCategoryId)).AsNoTracking().ToList();
-                var descendants = GetDescendantIds(all, id);
+                var descendants = Category.GetDescendantIds(all, id);
                 if (descendants.Contains(request.ParentCategoryId.Value))
                 {
                     return new ApiResponse<CategoryDto>
@@ -252,7 +254,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
     }
 
-    public async Task<ApiResponse<AdminCategoryDetailsDto>> GetCategoryByIdAsync(Guid id)
+    public async Task<ApiResponse<CategoryDetailsAdminResponse>> GetCategoryByIdAsync(Guid id)
     {
         var category = await _categoryRepository
             .GetAsQueryable(c => c.Id == id && !c.IsDeleted,
@@ -264,14 +266,14 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         if (category is null)
         {
-            return new ApiResponse<AdminCategoryDetailsDto>
+            return new ApiResponse<CategoryDetailsAdminResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
             };
         }
 
-        var dto = new AdminCategoryDetailsDto
+        var dto = new CategoryDetailsAdminResponse
         {
             Id = category.Id,
             Name = category.Name,
@@ -289,7 +291,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 .ToList() ?? new()
         };
 
-        return new ApiResponse<AdminCategoryDetailsDto>
+        return new ApiResponse<CategoryDetailsAdminResponse>
         {
             Status = ResponseStatus.Success,
             Data = dto
@@ -298,27 +300,24 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
     public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
     {
-        var category = await _categoryRepository
-            .GetAsQueryable(
-                filter: x => x.Id == id && !x.IsDeleted, 
-                include: x => x.Include(x => x.Children))
-            .Select(c => new CategoryEditDto
+        // 1. Get all categories (lightweight, no images) for building the tree
+        var allCategories = await _categoryRepository
+            .GetAsQueryable(x => !x.IsDeleted)
+            .Select(c => new CategoryFlatDto
             {
                 Id = c.Id,
                 Name = c.Name,
                 ParentCategoryId = c.ParentCategoryId,
-                Image = ImageDataUriBuilder.FromImage(c.Image),
-                Children = c.Children.Select(ch => new CategoryRefDto
-                {
-                    Id = ch.Id,
-                    Name = ch.Name
-                }).ToList()
+                ProductCount = c.Products.Count
             })
-            .AsNoTracking()
+            .ToListAsync();
+
+        // 2. Load the full entity for the category being edited (includes Image VO)
+        var entity = await _categoryRepository
+            .GetAsQueryable(x => x.Id == id && !x.IsDeleted)
             .FirstOrDefaultAsync();
 
-
-        if (category is null)
+        if (entity == null)
         {
             return new ApiResponse<CategoryEditDto>
             {
@@ -327,16 +326,82 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             };
         }
 
+        // 3. Collect IDs to exclude (self + descendants)
+        var excludedIds = new HashSet<Guid>();
+        CollectDescendantIds(allCategories.First(c => c.Id == id), allCategories, excludedIds);
+        excludedIds.Add(id);
+
+        // 4. Filter valid parent categories (exclude self/descendants & product-holding categories)
+        var validCategories = allCategories
+            .Where(c => !excludedIds.Contains(c.Id) && c.ProductCount == 0)
+            .ToList();
+
+        var validTree = BuildCategoryTree(validCategories);
+
+        // 5. Build DTO with the Image from VO
+        var dto = new CategoryEditDto
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            ParentCategoryId = entity.ParentCategoryId,
+            Image = ImageDataUriBuilder.FromImage(entity.Image), // 👈 works with VO
+            ValidParentTree = validTree
+        };
+
         return new ApiResponse<CategoryEditDto>
         {
             Status = ResponseStatus.Success,
-            Data = category
+            Data = dto
         };
     }
 
+
+
+
+    // helper to collect descendants
+    private void CollectDescendantIds(CategoryFlatDto category, List<CategoryFlatDto> all, HashSet<Guid> ids)
+    {
+        var children = all.Where(c => c.ParentCategoryId == category.Id);
+        foreach (var child in children)
+        {
+            ids.Add(child.Id);
+            CollectDescendantIds(child, all, ids);
+        }
+    }
+
+
+
+
+    private List<Guid> GetDescendantIds(Category category)
+    {
+        var ids = new List<Guid>();
+
+        if (category.Children == null)
+            return ids;
+
+        foreach (var child in category.Children)
+        {
+            ids.Add(child.Id);
+            ids.AddRange(GetDescendantIds(child));
+        }
+
+        return ids;
+    }
+
+
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
     {
-        var allCategories = (await _categoryRepository.GetAsync(x => !x.IsDeleted)).ToList();
+        var allCategories = await _categoryRepository
+            .GetAsQueryable(x => !x.IsDeleted)
+            .Select(c => new CategoryFlatDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                ParentCategoryId = c.ParentCategoryId,
+                ProductCount = c.Products.Count
+            })
+            .ToListAsync();
+
         var tree = BuildCategoryTree(allCategories);
 
         return new ApiResponse<List<CategoryTreeDto>>
@@ -347,20 +412,24 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     }
 
 
-
-
     #region private methods
 
-    private List<CategoryTreeDto> BuildCategoryTree(List<Category> categories, Guid? parentId = null)
+    private List<CategoryTreeDto> BuildCategoryTree(List<CategoryFlatDto> categories, Guid? parentId = null)
     {
         return categories
             .Where(c => c.ParentCategoryId == parentId)
             .OrderBy(c => c.Name)
-            .Select(c => new CategoryTreeDto
+            .Select(c =>
             {
-                Id = c.Id,
-                Name = c.Name,
-                Children = BuildCategoryTree(categories, c.Id)
+                var children = BuildCategoryTree(categories, c.Id);
+                return new CategoryTreeDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    SubcategoryCount = children.Count,
+                    ProductCount = c.ProductCount,
+                    Children = children
+                };
             })
             .ToList();
     }

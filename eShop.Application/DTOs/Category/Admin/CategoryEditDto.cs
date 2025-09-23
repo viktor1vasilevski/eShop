@@ -8,5 +8,5 @@ public class CategoryEditDto
     public string? Image { get; set; }
 
 
-    public List<CategoryRefDto> Children { get; set; } = new();
+    public List<CategoryTreeDto> ValidParentTree { get; set; } = new();
 }

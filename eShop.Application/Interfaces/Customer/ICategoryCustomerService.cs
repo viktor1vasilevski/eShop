@@ -1,6 +1,6 @@
 ﻿using eShop.Application.DTOs.Category;
 
-namespace eShop.Application.Interfaces.Category;
+namespace eShop.Application.Interfaces.Customer;
 
 public interface ICategoryCustomerService
 {

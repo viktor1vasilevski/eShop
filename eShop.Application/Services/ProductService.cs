@@ -1,6 +1,5 @@
 ﻿using eShop.Application.DTOs.Product;
 using eShop.Application.Requests.Product;
-using eShop.Domain.Entities;
 
 namespace eShop.Application.Services;
 

@@ -1,4 +1,4 @@
-﻿using eShop.Application.Interfaces.Category;
+﻿using eShop.Application.Interfaces.Customer;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers;

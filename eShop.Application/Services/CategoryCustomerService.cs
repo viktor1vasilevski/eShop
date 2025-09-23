@@ -1,5 +1,5 @@
 ﻿using eShop.Application.DTOs.Category;
-using eShop.Application.Interfaces.Category;
+using eShop.Application.Interfaces.Customer;
 
 namespace eShop.Application.Services;
 

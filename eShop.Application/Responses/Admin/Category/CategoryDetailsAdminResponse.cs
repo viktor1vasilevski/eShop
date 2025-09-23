@@ -1,8 +1,9 @@
-﻿using eShop.Application.DTOs.Product;
+﻿using eShop.Application.DTOs.Category;
+using eShop.Application.DTOs.Product;
 
-namespace eShop.Application.DTOs.Category.Admin;
+namespace eShop.Application.Responses.Admin.Category;
 
-public class AdminCategoryDetailsDto
+public class CategoryDetailsAdminResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
