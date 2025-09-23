@@ -322,11 +322,11 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             };
         }
 
+        var nodes = allCategories
+            .Select(c => new CategoryNode(c.Id, c.ParentCategoryId))
+            .ToList();
 
-        var excludedIds = new HashSet<Guid>();
-        CollectDescendantIds(allCategories.First(c => c.Id == id), allCategories, excludedIds);
-        excludedIds.Add(id);
-
+        var excludedIds = GetDescendantIds(nodes, id);
 
         var validCategories = allCategories
             .Where(c => !excludedIds.Contains(c.Id) && c.ProductCount == 0)
@@ -348,34 +348,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             Status = ResponseStatus.Success,
             Data = dto
         };
-    }
-
-
-    // helper to collect descendants
-    private void CollectDescendantIds(CategoryFlatDto category, List<CategoryFlatDto> all, HashSet<Guid> ids)
-    {
-        var children = all.Where(c => c.ParentCategoryId == category.Id);
-        foreach (var child in children)
-        {
-            ids.Add(child.Id);
-            CollectDescendantIds(child, all, ids);
-        }
-    }
-
-    private List<Guid> GetDescendantIds(Category category)
-    {
-        var ids = new List<Guid>();
-
-        if (category.Children == null)
-            return ids;
-
-        foreach (var child in category.Children)
-        {
-            ids.Add(child.Id);
-            ids.AddRange(GetDescendantIds(child));
-        }
-
-        return ids;
     }
 
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
