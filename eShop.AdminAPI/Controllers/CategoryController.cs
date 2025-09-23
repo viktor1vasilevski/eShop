@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Admin;
+using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Requests.Category;
 using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,7 +16,7 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
 {
 
     [HttpGet]
-    public IActionResult Get([FromQuery] CategoryRequest request)
+    public IActionResult Get([FromQuery] CategoryAdminRequest request)
     {
         var response = _categoryAdminService.GetCategories(request);
         return HandleResponse(response);

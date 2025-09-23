@@ -3,6 +3,7 @@ using eShop.Application.DTOs.Category;
 using eShop.Application.DTOs.Category.Admin;
 using eShop.Application.DTOs.Product;
 using eShop.Application.Interfaces.Admin;
+using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Requests.Category;
 using eShop.Application.Responses.Admin.Category;
 using static eShop.Domain.Entities.Category;
@@ -15,7 +16,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
 
 
-    public ApiResponse<List<CategoryAdminResponse>> GetCategories(CategoryRequest request)
+    public ApiResponse<List<CategoryAdminDto>> GetCategories(CategoryAdminRequest request)
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(true, x => !x.IsDeleted)
@@ -47,7 +48,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         var lookup = query.ToDictionary(c => c.Id);
 
-        var categoriesDTO = query.Select(c => new CategoryAdminResponse
+        var categoriesDTO = query.Select(c => new CategoryAdminDto
         {
             Id = c.Id,
             Name = Category.BuildFullName(c.Id, lookup),
@@ -55,7 +56,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             LastModified = c.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<CategoryAdminResponse>>
+        return new ApiResponse<List<CategoryAdminDto>>
         {
             Data = categoriesDTO,
             TotalCount = totalCount,
@@ -63,7 +64,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-    public ApiResponse<CategoryDto> CreateCategory(CreateUpdateCategoryRequest request)
+    public ApiResponse<CategoryAdminDto> CreateCategory(CreateUpdateCategoryRequest request)
     {
         try
         {
@@ -74,7 +75,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 x.Name.ToLower() == normalizedName &&
                 x.ParentCategoryId == request.ParentCategoryId &&
                 !x.IsDeleted))
-                return new ApiResponse<CategoryDto>
+                return new ApiResponse<CategoryAdminDto>
                 {
                     Status = ResponseStatus.Conflict,
                     Message = CategoryConstants.CategoryExist
@@ -83,15 +84,15 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             var (bytes, type) = ImageParsing.FromBase64(request.Image);
             var image = Image.FromBytes(bytes, type);
 
-            var category = Category.Create(trimmedName, image, request.ParentCategoryId);
+            var category = Create(trimmedName, image, request.ParentCategoryId);
             _categoryRepository.Insert(category);
             _uow.SaveChanges();
 
-            return new ApiResponse<CategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Created,
                 Message = CategoryConstants.CategorySuccessfullyCreated,
-                Data = new CategoryDto
+                Data = new CategoryAdminDto
                 {
                     Id = category.Id,
                     Name = category.Name,
@@ -103,7 +104,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<CategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
@@ -116,11 +117,11 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
     }
 
-    public ApiResponse<AdminCategoryDto> DeleteCategory(Guid id)
+    public ApiResponse<CategoryAdminDto> DeleteCategory(Guid id)
     {
         if (!_categoryRepository.Exists(c => !c.IsDeleted && c.Id == id))
         {
-            return new ApiResponse<AdminCategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
@@ -141,7 +142,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         if (productCount > 0)
         {
-            return new ApiResponse<AdminCategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Conflict,
                 Message = string.Format(CategoryConstants.CategoryHasProducts, productCount)
@@ -158,19 +159,19 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         var pluralSuffix = categoriesToDelete.Count == 1 ? "y" : "ies";
 
-        return new ApiResponse<AdminCategoryDto>
+        return new ApiResponse<CategoryAdminDto>
         {
             Status = ResponseStatus.Success,
             Message = string.Format(CategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix),
         };
     }
 
-    public async Task<ApiResponse<CategoryDto>> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
+    public async Task<ApiResponse<CategoryAdminDto>> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
     {
         var category = _categoryRepository.GetById(id);
         if (category is null)
         {
-            return new ApiResponse<CategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
@@ -187,7 +188,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             !x.IsDeleted))
 
         {
-            return new ApiResponse<CategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Conflict,
                 Message = CategoryConstants.CategoryExist
@@ -205,7 +206,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
             if (request.ParentCategoryId.HasValue && request.ParentCategoryId == id)
             {
-                return new ApiResponse<CategoryDto>
+                return new ApiResponse<CategoryAdminDto>
                 {
                     Status = ResponseStatus.BadRequest,
                     Message = CategoryConstants.CategoryCannotBeOwnParent
@@ -219,7 +220,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 var descendants = Category.GetDescendantIds(all, id);
                 if (descendants.Contains(request.ParentCategoryId.Value))
                 {
-                    return new ApiResponse<CategoryDto>
+                    return new ApiResponse<CategoryAdminDto>
                     {
                         Status = ResponseStatus.BadRequest,
                         Message = CategoryConstants.CategoryCannotBeMovedUnderDescendant
@@ -230,11 +231,11 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             category.Update(trimmedName, image, request.ParentCategoryId);
             await _uow.SaveChangesAsync();
 
-            return new ApiResponse<CategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Success,
                 Message = CategoryConstants.CategorySuccessfullyUpdated,
-                Data = new CategoryDto
+                Data = new CategoryAdminDto
                 {
                     Id = category.Id,
                     Name = category.Name,
@@ -246,7 +247,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<CategoryDto>
+            return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
@@ -254,7 +255,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         }
     }
 
-    public async Task<ApiResponse<CategoryDetailsAdminResponse>> GetCategoryByIdAsync(Guid id)
+    public async Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id)
     {
         var category = await _categoryRepository
             .GetAsQueryable(c => c.Id == id && !c.IsDeleted,
@@ -266,14 +267,14 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         if (category is null)
         {
-            return new ApiResponse<CategoryDetailsAdminResponse>
+            return new ApiResponse<CategoryDetailsAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
             };
         }
 
-        var dto = new CategoryDetailsAdminResponse
+        var dto = new CategoryDetailsAdminDto
         {
             Id = category.Id,
             Name = category.Name,
@@ -291,16 +292,15 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 .ToList() ?? new()
         };
 
-        return new ApiResponse<CategoryDetailsAdminResponse>
+        return new ApiResponse<CategoryDetailsAdminDto>
         {
             Status = ResponseStatus.Success,
             Data = dto
         };
     }
 
-    public async Task<ApiResponse<CategoryEditDto>> GetCategoryForEditAsync(Guid id)
+    public async Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id)
     {
-        // 1. Get all categories (lightweight, no images) for building the tree
         var allCategories = await _categoryRepository
             .GetAsQueryable(x => !x.IsDeleted)
             .Select(c => new CategoryFlatDto
@@ -312,50 +312,46 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             })
             .ToListAsync();
 
-        // 2. Load the full entity for the category being edited (includes Image VO)
         var entity = await _categoryRepository
             .GetAsQueryable(x => x.Id == id && !x.IsDeleted)
             .FirstOrDefaultAsync();
 
         if (entity == null)
         {
-            return new ApiResponse<CategoryEditDto>
+            return new ApiResponse<CategoryEditAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CategoryConstants.CategoryDoesNotExist
             };
         }
 
-        // 3. Collect IDs to exclude (self + descendants)
+
         var excludedIds = new HashSet<Guid>();
         CollectDescendantIds(allCategories.First(c => c.Id == id), allCategories, excludedIds);
         excludedIds.Add(id);
 
-        // 4. Filter valid parent categories (exclude self/descendants & product-holding categories)
+
         var validCategories = allCategories
             .Where(c => !excludedIds.Contains(c.Id) && c.ProductCount == 0)
             .ToList();
 
         var validTree = BuildCategoryTree(validCategories);
 
-        // 5. Build DTO with the Image from VO
-        var dto = new CategoryEditDto
+        var dto = new CategoryEditAdminDto
         {
             Id = entity.Id,
             Name = entity.Name,
             ParentCategoryId = entity.ParentCategoryId,
-            Image = ImageDataUriBuilder.FromImage(entity.Image), // 👈 works with VO
+            Image = ImageDataUriBuilder.FromImage(entity.Image),
             ValidParentTree = validTree
         };
 
-        return new ApiResponse<CategoryEditDto>
+        return new ApiResponse<CategoryEditAdminDto>
         {
             Status = ResponseStatus.Success,
             Data = dto
         };
     }
-
-
 
 
     // helper to collect descendants
@@ -368,9 +364,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             CollectDescendantIds(child, all, ids);
         }
     }
-
-
-
 
     private List<Guid> GetDescendantIds(Category category)
     {
@@ -387,7 +380,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
         return ids;
     }
-
 
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync()
     {
