@@ -1,6 +1,4 @@
-﻿using eShop.Application.DTOs.Category;
-using eShop.Application.DTOs.Category.Admin;
-using eShop.Application.Requests.Admin.Category;
+﻿using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Requests.Category;
 using eShop.Application.Responses.Admin.Category;
 

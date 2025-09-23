@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.DTOs.Category;
+﻿namespace eShop.Application.Responses.Admin.Category;
 
 public class CategoryTreeDto
 {
@@ -8,4 +8,3 @@ public class CategoryTreeDto
     public int ProductCount { get; set; }
     public List<CategoryTreeDto> Children { get; set; } = new();
 }
-

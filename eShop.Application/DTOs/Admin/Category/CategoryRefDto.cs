@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.DTOs.Category;
+﻿namespace eShop.Application.DTOs.Admin.Category;
 
 public class CategoryRefDto
 {

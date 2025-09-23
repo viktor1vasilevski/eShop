@@ -1,4 +1,6 @@
-﻿using eShop.Application.DTOs.Category;
+﻿
+
+using eShop.Application.Responses.Admin.Category;
 
 namespace eShop.Application.Interfaces.Customer;
 

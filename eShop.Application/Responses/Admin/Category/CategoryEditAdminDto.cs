@@ -1,6 +1,4 @@
-﻿using eShop.Application.DTOs.Category;
-
-namespace eShop.Application.Responses.Admin.Category;
+﻿namespace eShop.Application.Responses.Admin.Category;
 
 public class CategoryEditAdminDto
 {
