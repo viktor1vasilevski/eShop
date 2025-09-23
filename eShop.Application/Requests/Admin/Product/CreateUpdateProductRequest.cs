@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Requests.Product;
+﻿namespace eShop.Application.Requests.Admin.Product;
 
 public class CreateUpdateProductRequest
 {

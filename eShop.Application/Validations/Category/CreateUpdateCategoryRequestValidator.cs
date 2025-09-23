@@ -1,4 +1,5 @@
-﻿using eShop.Application.Requests.Category;
+﻿
+using eShop.Application.Requests.Admin.Category;
 using FluentValidation;
 
 namespace eShop.Application.Validations.Category;

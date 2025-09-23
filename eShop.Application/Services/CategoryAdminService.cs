@@ -1,8 +1,7 @@
 ﻿using eShop.Application.DTOs.Admin.Category;
-using eShop.Application.DTOs.Product;
+using eShop.Application.DTOs.Admin.Product;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Category;
-using eShop.Application.Requests.Category;
 using eShop.Application.Responses.Admin.Category;
 using static eShop.Domain.Entities.Category;
 

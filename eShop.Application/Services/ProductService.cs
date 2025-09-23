@@ -1,5 +1,5 @@
 ﻿using eShop.Application.DTOs.Product;
-using eShop.Application.Requests.Product;
+using eShop.Application.Requests.Admin.Product;
 
 namespace eShop.Application.Services;
 
@@ -9,7 +9,7 @@ public class ProductService(IUnitOfWork _uow, ILogger<ProductService> _logger) :
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
 
-    public ApiResponse<List<ProductDto>> GetProducts(ProductRequest request)
+    public ApiResponse<List<ProductDto>> GetProducts(ProductAdminRequest request)
     {
         var allCategories = _categoryRepository.GetAsQueryable(x => x.IsDeleted);
 

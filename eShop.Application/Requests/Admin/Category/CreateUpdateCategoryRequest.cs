@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Requests.Category;
+﻿namespace eShop.Application.Requests.Admin.Category;
 
 public class CreateUpdateCategoryRequest
 {
@@ -6,4 +6,3 @@ public class CreateUpdateCategoryRequest
     public Guid? ParentCategoryId { get; set; }
     public string? Image { get; set; } = null!;
 }
-

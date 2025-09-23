@@ -1,4 +1,5 @@
-﻿using eShop.Application.Requests.Product;
+﻿
+using eShop.Application.Requests.Admin.Product;
 using FluentValidation;
 
 namespace eShop.Application.Validations.Product;

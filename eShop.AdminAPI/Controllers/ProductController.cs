@@ -1,9 +1,7 @@
-﻿using Azure;
-using eShop.Application.Enums;
+﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces;
+using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Requests.AI;
-using eShop.Application.Requests.Product;
-using eShop.Application.Responses;
 using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +17,7 @@ public class ProductController(IProductService _productService, IOpenAIProductDe
 
 
     [HttpGet]
-    public IActionResult Get([FromQuery] ProductRequest request)
+    public IActionResult Get([FromQuery] ProductAdminRequest request)
     {
         var response = _productService.GetProducts(request);
         return HandleResponse(response);

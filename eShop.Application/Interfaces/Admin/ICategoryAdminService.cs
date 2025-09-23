@@ -1,5 +1,4 @@
 ﻿using eShop.Application.Requests.Admin.Category;
-using eShop.Application.Requests.Category;
 using eShop.Application.Responses.Admin.Category;
 
 namespace eShop.Application.Interfaces.Admin;

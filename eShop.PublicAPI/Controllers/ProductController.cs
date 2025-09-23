@@ -1,5 +1,5 @@
 ﻿using eShop.Application.Interfaces;
-using eShop.Application.Requests.Product;
+using eShop.Application.Requests.Admin.Product;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers;
@@ -10,7 +10,7 @@ public class ProductController(IProductService _productService) : BaseController
 {
 
     [HttpGet]
-    public IActionResult Get([FromQuery] ProductRequest request)
+    public IActionResult Get([FromQuery] ProductAdminRequest request)
     {
         var response = _productService.GetProducts(request);
         return HandleResponse(response);

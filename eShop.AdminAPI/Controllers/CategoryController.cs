@@ -1,7 +1,6 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Category;
-using eShop.Application.Requests.Category;
 using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

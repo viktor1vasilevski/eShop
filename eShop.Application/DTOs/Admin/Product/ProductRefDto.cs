@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.DTOs.Product;
+﻿namespace eShop.Application.DTOs.Admin.Product;
 
 public class ProductRefDto
 {
