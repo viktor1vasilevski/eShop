@@ -1,4 +1,4 @@
-﻿using eShop.Application.Interfaces;
+﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Auth;
 using Microsoft.AspNetCore.Mvc;
 

@@ -2,7 +2,7 @@
 using eShop.Application.Requests.Auth;
 using Microsoft.Extensions.Configuration;
 
-namespace eShop.Application.Services;
+namespace eShop.Application.Services.Admin;
 
 public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration, IPasswordHasher _passwordHasher) : IAuthService
 {

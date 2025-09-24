@@ -5,7 +5,7 @@ using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Responses.Admin.Category;
 using static eShop.Domain.Entities.Category;
 
-namespace eShop.Application.Services;
+namespace eShop.Application.Services.Admin;
 
 public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService> _logger) : ICategoryAdminService
 {

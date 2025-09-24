@@ -2,6 +2,8 @@
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Services;
+using eShop.Application.Services.Admin;
+using eShop.Application.Services.Customer;
 using eShop.Domain.Interfaces;
 using eShop.Infrastructure.Repositories;
 using eShop.Infrastructure.Services;
@@ -19,8 +21,11 @@ public static class DependencyContainer
         services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
 
-        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IProductAdminService, ProductAdminService>();
+
         services.AddScoped<IBasketService, BasketService>();
+
+
         services.AddScoped<ICustomerAuthService, CustomerAuthService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<ICommentService, CommentService>();

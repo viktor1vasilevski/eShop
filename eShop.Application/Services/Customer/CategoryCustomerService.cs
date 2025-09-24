@@ -1,7 +1,7 @@
 ﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Responses.Admin.Category;
 
-namespace eShop.Application.Services;
+namespace eShop.Application.Services.Customer;
 
 public class CategoryCustomerService(IUnitOfWork _uow) : ICategoryCustomerService
 {

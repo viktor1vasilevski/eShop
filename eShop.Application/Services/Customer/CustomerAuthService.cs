@@ -1,8 +1,10 @@
 ﻿using eShop.Application.DTOs.Auth;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Auth;
+using eShop.Application.Services.Admin;
 using Microsoft.Extensions.Configuration;
 
-namespace eShop.Application.Services;
+namespace eShop.Application.Services.Customer;
 
 public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration, ILogger<AdminAuthService> _logger,
     IPasswordHasher _passwordHasher) : ICustomerAuthService
