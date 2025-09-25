@@ -1,5 +1,4 @@
 ﻿using eShop.Application.Enums;
-using eShop.Application.Interfaces;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Requests.AI;
@@ -33,7 +32,7 @@ public class ProductController(IProductAdminService _productAdminService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateUpdateProductRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateProductRequest request)
     {
         var response = await _productAdminService.CreateProduct(request);
         if (response.Status == ResponseStatus.Created && response.Data?.Id != null)
@@ -45,10 +44,17 @@ public class ProductController(IProductAdminService _productAdminService,
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update([FromRoute] Guid id, [FromBody] CreateUpdateProductRequest request)
+    public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateProductRequest request)
     {
         var response = _productAdminService.UpdateProduct(id, request);
         return HandleResponse(response);
+    }
+
+    [HttpGet("{id}/edit")]
+    public async Task<IActionResult> GetProductForEdit(Guid id)
+    {
+        var response = await _productAdminService.GetProductForEditAsync(id);
+        return Ok(response);
     }
 
     [HttpDelete("{id}")]

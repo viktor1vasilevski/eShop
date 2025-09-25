@@ -36,7 +36,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddIoCService();
 
 // Fluent Validations
-builder.Services.AddValidatorsFromAssemblyContaining<CreateUpdateCategoryRequestValidator>(ServiceLifetime.Transient);
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>(ServiceLifetime.Transient);
 builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

@@ -13,8 +13,8 @@ public interface ICategoryAdminService
 
 
     // commands
-    ApiResponse<CategoryAdminDto> CreateCategory(CreateUpdateCategoryRequest request);
-    Task<ApiResponse<CategoryAdminDto>> UpdateCategory(Guid id, CreateUpdateCategoryRequest request);
+    ApiResponse<CategoryAdminDto> CreateCategory(CreateCategoryRequest request);
+    Task<ApiResponse<CategoryAdminDto>> UpdateCategory(Guid id, UpdateCategoryRequest request);
     ApiResponse<CategoryAdminDto> DeleteCategory(Guid id);
 
 }

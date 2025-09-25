@@ -17,7 +17,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     {
         var query = _categoryRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(true, x => !x.IsDeleted)
-                          .WhereIf(!string.IsNullOrEmpty(request.Name), c => c.Name.Contains(request.Name!, StringComparison.OrdinalIgnoreCase)));
+                          .WhereIf(!string.IsNullOrEmpty(request.Name), c => c.Name.ToLower().Contains(request.Name.ToLower())));
 
         var totalCount = query.Count();
 
@@ -61,7 +61,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-    public ApiResponse<CategoryAdminDto> CreateCategory(CreateUpdateCategoryRequest request)
+    public ApiResponse<CategoryAdminDto> CreateCategory(CreateCategoryRequest request)
     {
         try
         {
@@ -163,7 +163,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
-    public async Task<ApiResponse<CategoryAdminDto>> UpdateCategory(Guid id, CreateUpdateCategoryRequest request)
+    public async Task<ApiResponse<CategoryAdminDto>> UpdateCategory(Guid id, UpdateCategoryRequest request)
     {
         var category = _categoryRepository.GetById(id);
         if (category is null)

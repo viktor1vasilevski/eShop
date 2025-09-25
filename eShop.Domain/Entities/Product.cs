@@ -62,8 +62,14 @@ public class Product : AuditableBaseEntity
         Description = product.Description;
         UnitPrice = product.UnitPrice;
         UnitQuantity = product.UnitQuantity;
-        Image = product.Image;
+
+        if(product.Image != null)
+        {
+            Image = product.Image;
+        }
+
         CategoryId = product.CategoryId;
+        IsDeleted = false;
     }
 
     private void Validate(ProductData product)

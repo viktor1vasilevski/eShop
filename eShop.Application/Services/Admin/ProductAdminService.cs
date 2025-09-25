@@ -11,7 +11,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
-    public async Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateUpdateProductRequest request)
+    public async Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateProductRequest request)
     {
         try
         {
@@ -130,8 +130,6 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
     {
         var product = await _productRepository
             .GetAsQueryable(x => !x.IsDeleted && x.Id == id)
-            .Include(x => x.Category)
-                .ThenInclude(c => c.ParentCategory)
             .FirstOrDefaultAsync();
 
         if (product is null)
@@ -143,19 +141,14 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             };
         }
 
-        // Build category hierarchy
-        var categories = new List<CategoryRefDto>();
-        var current = product.Category;
-        while (current != null)
-        {
-            categories.Insert(0, new CategoryRefDto
-            {
-                Id = current.Id,
-                Name = current.Name
-            });
+        // Load all categories (only IDs and names)
+        var allCategories = await _categoryRepository
+            .GetAsQueryable(c => !c.IsDeleted)
+            .ToListAsync();
 
-            current = current.ParentCategory;
-        }
+        var lookup = allCategories.ToDictionary(c => c.Id, c => c);
+
+        var pathItems = Category.BuildPath(product.CategoryId, lookup);
 
         var productDto = new ProductDetailsAdminDto
         {
@@ -167,7 +160,11 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             LastModified = product.LastModified,
             Created = product.Created,
             Image = ImageDataUriBuilder.FromImage(product.Image),
-            Categories = categories
+            Categories = pathItems.Select(p => new CategoryRefDto
+            {
+                Id = p.Id,
+                Name = p.Name
+            }).ToList(),
         };
 
         return new ApiResponse<ProductDetailsAdminDto>
@@ -177,16 +174,41 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         };
     }
 
-    public ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request)
+    public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id)
     {
-        var allCategories = _categoryRepository.GetAsQueryable(x => x.IsDeleted);
+        var product = await _productRepository
+        .GetAsQueryable(p => !p.IsDeleted && p.Id == id)
+        .FirstOrDefaultAsync();
 
-        List<Guid> categoryIds = new();
-        if (request.CategoryId is not null && request.CategoryId != Guid.Empty)
+        if (product == null)
         {
-            categoryIds = GetAllDescendantCategoryIds(allCategories, request.CategoryId ?? Guid.Empty);
+            return new ApiResponse<ProductEditAdminDto>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = "Product does not exist"
+            };
         }
 
+        var dto = new ProductEditAdminDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            Image = ImageDataUriBuilder.FromImage(product.Image),
+            CategoryId = product.CategoryId
+        };
+
+        return new ApiResponse<ProductEditAdminDto>
+        {
+            Status = ResponseStatus.Success,
+            Data = dto
+        };
+    }
+
+    public ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request)
+    {
         var query = _productRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(true, x => !x.IsDeleted)
                           .WhereIf(!string.IsNullOrEmpty(request.Name), x=> x.Name.ToLower().Contains(request.Name.ToLower())),
@@ -248,7 +270,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         };
     }
 
-    public ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request)
+    public ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, UpdateProductRequest request)
     {
         var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
         if (product is null)
@@ -257,13 +279,6 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 Status = ResponseStatus.NotFound,
                 Message = ProductConstants.ProductDoesNotExist
             };
-
-        //if (!_subcategoryRepository.Exists(x => x.Id == request.SubcategoryId))
-        //    return new ApiResponse<ProductDetailsDTO>
-        //    {
-        //        Status = ResponseStatus.NotFound,
-        //        Message = SubcategoryConstants.SUBCATEGORY_DOESNT_EXIST,
-        //    };
 
 
         if (product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
@@ -275,8 +290,13 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
 
         try
         {
-            var (bytes, type) = ImageParsing.FromBase64(request.Image);
-            var image = Image.FromBytes(bytes, type);
+
+            Image? image = null;
+            if (!string.IsNullOrEmpty(request.Image))
+            {
+                var (bytes, type) = ImageParsing.FromBase64(request.Image);
+                image = Image.FromBytes(bytes, type);
+            }
 
             var productData = new ProductData(
                 name: request.Name,

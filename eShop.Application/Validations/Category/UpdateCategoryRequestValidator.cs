@@ -1,12 +1,11 @@
-﻿
-using eShop.Application.Requests.Admin.Category;
+﻿using eShop.Application.Requests.Admin.Category;
 using FluentValidation;
 
 namespace eShop.Application.Validations.Category;
 
-public class CreateUpdateCategoryRequestValidator : AbstractValidator<CreateUpdateCategoryRequest>
+public class UpdateCategoryRequestValidator : AbstractValidator<UpdateCategoryRequest>
 {
-    public CreateUpdateCategoryRequestValidator()
+    public UpdateCategoryRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Category name is required.")

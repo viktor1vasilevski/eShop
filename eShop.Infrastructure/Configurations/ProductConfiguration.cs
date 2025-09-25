@@ -38,7 +38,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                .IsRequired();
         });
 
-        builder.Navigation(x => x.Image).IsRequired();
+        builder.Navigation(x => x.Image);
 
         builder.HasOne(p => p.Category)
                .WithMany(c => c.Products)

@@ -6,13 +6,14 @@ namespace eShop.Application.Interfaces.Admin;
 
 public interface IProductAdminService
 {
+    ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request);
     Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id);
+    Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id);
 
 
 
     // ova treba popravajne
-    ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request);
-    Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateUpdateProductRequest request);
-    ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request);
+    Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateProductRequest request);
+    ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, UpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id);
 }

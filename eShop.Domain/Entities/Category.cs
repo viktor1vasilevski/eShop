@@ -74,6 +74,27 @@ public class Category : AuditableBaseEntity
         }
     }
 
+    public record CategoryPathItem(Guid Id, string Name);
+
+    public static List<CategoryPathItem> BuildPath(Guid id, Dictionary<Guid, Category> lookup)
+    {
+        var result = new List<CategoryPathItem>();
+        var currentId = id;
+
+        while (lookup.TryGetValue(currentId, out var current))
+        {
+            result.Insert(0, new CategoryPathItem(current.Id, current.Name));
+
+            if (current.ParentCategoryId == null)
+                break;
+
+            currentId = current.ParentCategoryId.Value;
+        }
+
+        return result;
+    }
+
+
     public record CategoryNode(Guid Id, Guid? ParentCategoryId);
 
     public static List<Guid> GetDescendantIds(IEnumerable<CategoryNode> allCategories, Guid rootId)
