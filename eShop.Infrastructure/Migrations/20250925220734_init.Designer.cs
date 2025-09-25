@@ -12,7 +12,7 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250925210550_init")]
+    [Migration("20250925220734_init")]
     partial class init
     {
         /// <inheritdoc />
