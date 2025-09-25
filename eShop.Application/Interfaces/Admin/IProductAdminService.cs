@@ -11,7 +11,7 @@ public interface IProductAdminService
 
 
     // ova treba popravajne
-    ApiResponse<List<ProductDto>> GetProducts(ProductAdminRequest request);
+    ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request);
     Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateUpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, CreateUpdateProductRequest request);
     ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id);

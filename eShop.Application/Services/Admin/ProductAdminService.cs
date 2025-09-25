@@ -177,7 +177,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         };
     }
 
-    public ApiResponse<List<ProductDto>> GetProducts(ProductAdminRequest request)
+    public ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request)
     {
         var allCategories = _categoryRepository.GetAsQueryable(x => x.IsDeleted);
 
@@ -188,10 +188,8 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         }
 
         var query = _productRepository.GetAsQueryableWhereIf(
-            filter: x => x.Where(x => !x.IsDeleted)
-                .WhereIf(!string.IsNullOrEmpty(request.Description), x => x.Description.ToLowerInvariant().Contains(request.Description.ToLowerInvariant()))
-                .WhereIf(request.CategoryId is not null && request.CategoryId != Guid.Empty, x => categoryIds.Contains(x.CategoryId))
-                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLowerInvariant().Contains(request.Name.ToLowerInvariant())),
+            filter: x => x.WhereIf(true, x => !x.IsDeleted)
+                          .WhereIf(!string.IsNullOrEmpty(request.Name), x=> x.Name.ToLower().Contains(request.Name.ToLower())),
             include: x => x.Include(x => x.Category)).AsNoTracking();
 
         var totalCount = query.Count();
@@ -229,7 +227,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var productsDTO = sortedQuery.Select(x => new ProductDto
+        var productsDTO = sortedQuery.Select(x => new ProductAdminDto
         {
             Id = x.Id,
             Name = x.Name,
@@ -237,11 +235,12 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             UnitPrice = x.UnitPrice,
             UnitQuantity = x.UnitQuantity,
             Image = ImageDataUriBuilder.FromImage(x.Image),
+            Category = x.Category.Name,
             Created = x.Created,
             LastModified = x.LastModified,
         }).ToList();
 
-        return new ApiResponse<List<ProductDto>>()
+        return new ApiResponse<List<ProductAdminDto>>()
         {
             Data = productsDTO,
             TotalCount = totalCount,
