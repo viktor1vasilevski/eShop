@@ -63,16 +63,15 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 image = Image.FromBytes(bytes, type);
             }
 
-            var productData = new ProductData(
+            var product = Product.Create(
                 name: trimmedName,
-                description: request.Description?.Trim(),
+                description: request.Description?.Trim() ?? string.Empty,
                 unitPrice: request.Price,
                 unitQuantity: request.Quantity,
                 categoryId: request.CategoryId,
-                image: image
+                image: image!
             );
 
-            var product = Product.Create(productData);
             _productRepository.Insert(product);
             await _uow.SaveChangesAsync();
 
@@ -270,7 +269,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         };
     }
 
-    public ApiResponse<ProductDetailsDTO> UpdateProduct(Guid id, UpdateProductRequest request)
+    public async Task<ApiResponse<ProductDetailsDTO>> UpdateProduct(Guid id, UpdateProductRequest request)
     {
         var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
         if (product is null)
@@ -298,17 +297,10 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 image = Image.FromBytes(bytes, type);
             }
 
-            var productData = new ProductData(
-                name: request.Name,
-                description: request.Description,
-                unitPrice: request.Price,
-                unitQuantity: request.Quantity,
-                categoryId: request.CategoryId,
-                image: image);
+            product.Update(request.Name, request.Description, request.Price, request.Quantity, request.CategoryId, image);
 
-            product.Update(productData);
             _productRepository.Update(product);
-            _uow.SaveChanges();
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<ProductDetailsDTO>
             {

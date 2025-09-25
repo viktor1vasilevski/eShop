@@ -12,7 +12,7 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250925195851_init")]
+    [Migration("20250925210550_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -215,12 +215,10 @@ namespace eShop.Infrastructure.Migrations
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<byte[]>("Bytes")
-                                .IsRequired()
                                 .HasColumnType("varbinary(max)")
                                 .HasColumnName("Image");
 
                             b1.Property<string>("Type")
-                                .IsRequired()
                                 .HasMaxLength(32)
                                 .HasColumnType("nvarchar(32)")
                                 .HasColumnName("ImageType");

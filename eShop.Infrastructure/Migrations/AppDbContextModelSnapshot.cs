@@ -212,12 +212,10 @@ namespace eShop.Infrastructure.Migrations
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<byte[]>("Bytes")
-                                .IsRequired()
                                 .HasColumnType("varbinary(max)")
                                 .HasColumnName("Image");
 
                             b1.Property<string>("Type")
-                                .IsRequired()
                                 .HasMaxLength(32)
                                 .HasColumnType("nvarchar(32)")
                                 .HasColumnName("ImageType");

@@ -44,9 +44,9 @@ public class ProductController(IProductAdminService _productAdminService,
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateProductRequest request)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateProductRequest request)
     {
-        var response = _productAdminService.UpdateProduct(id, request);
+        var response = await _productAdminService.UpdateProduct(id, request);
         return HandleResponse(response);
     }
 
