@@ -13,7 +13,7 @@ public interface IProductAdminService
 
 
     // ova treba popravajne
-    Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateProductRequest request);
-    Task<ApiResponse<ProductDetailsDTO>> UpdateProduct(Guid id, UpdateProductRequest request);
-    ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id);
+    Task<ApiResponse<ProductAdminDto>> CreateProduct(CreateProductRequest request);
+    Task<ApiResponse<ProductAdminDto>> UpdateProduct(Guid id, UpdateProductRequest request);
+    ApiResponse<ProductAdminDto> DeleteProduct(Guid id);
 }

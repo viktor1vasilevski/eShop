@@ -11,7 +11,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
-    public async Task<ApiResponse<ProductDetailsDTO>> CreateProduct(CreateProductRequest request)
+    public async Task<ApiResponse<ProductAdminDto>> CreateProduct(CreateProductRequest request)
     {
         try
         {
@@ -23,7 +23,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
 
             if (!categoryExists)
             {
-                return new ApiResponse<ProductDetailsDTO>
+                return new ApiResponse<ProductAdminDto>
                 {
                     Status = ResponseStatus.NotFound,
                     Message = CategoryConstants.CategoryDoesNotExist
@@ -35,7 +35,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
 
             if (hasChildren)
             {
-                return new ApiResponse<ProductDetailsDTO>
+                return new ApiResponse<ProductAdminDto>
                 {
                     Status = ResponseStatus.BadRequest,
                     Message = "Products are allowed only on leaf categories"
@@ -49,7 +49,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
 
             if (nameTaken)
             {
-                return new ApiResponse<ProductDetailsDTO>
+                return new ApiResponse<ProductAdminDto>
                 {
                     Status = ResponseStatus.Conflict,
                     Message = "Product exist"
@@ -71,11 +71,11 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             _productRepository.Insert(product);
             await _uow.SaveChangesAsync();
 
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Created,
-                Message = ProductConstants.PRODUCT_SUCCESSFULLY_CREATED,
-                Data = new ProductDetailsDTO
+                Message = ProductConstants.ProductSuccessfullyCreated,
+                Data = new ProductAdminDto
                 {
                     Id = product.Id,
                     Name = product.Name,
@@ -88,7 +88,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
@@ -101,11 +101,11 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         }
     }
 
-    public ApiResponse<ProductDetailsDTO> DeleteProduct(Guid id)
+    public ApiResponse<ProductAdminDto> DeleteProduct(Guid id)
     {
         var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
         if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = ProductConstants.ProductDoesNotExist
@@ -114,9 +114,9 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         product.SoftDelete();
         _uow.SaveChanges();
 
-        return new ApiResponse<ProductDetailsDTO>
+        return new ApiResponse<ProductAdminDto>
         {
-            Message = ProductConstants.PRODUCT_SUCCESSFULLY_DELETED,
+            Message = ProductConstants.ProductSuccessfullyDeleted,
             Status = ResponseStatus.Success
         };
     }
@@ -265,11 +265,11 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         };
     }
 
-    public async Task<ApiResponse<ProductDetailsDTO>> UpdateProduct(Guid id, UpdateProductRequest request)
+    public async Task<ApiResponse<ProductAdminDto>> UpdateProduct(Guid id, UpdateProductRequest request)
     {
         var product = _productRepository.Get(x => x.Id == id && !x.IsDeleted)?.FirstOrDefault();
         if (product is null)
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = ProductConstants.ProductDoesNotExist
@@ -277,10 +277,10 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
 
 
         if (product.Name.ToLower() == request.Name.ToLower() && product.Id != id)
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Conflict,
-                Message = ProductConstants.PRODUCT_EXISTS
+                Message = ProductConstants.ProductExist
             };
 
         try
@@ -296,15 +296,15 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             product.Update(request.Name, request.Description, request.Price, request.Quantity, request.CategoryId, image);
             await _uow.SaveChangesAsync();
 
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Success,
-                Message = ProductConstants.PRODUCT_SUCCESSFULLY_UPDATED,
+                Message = ProductConstants.ProductSuccessfullyUpdated,
             };
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<ProductDetailsDTO>
+            return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
