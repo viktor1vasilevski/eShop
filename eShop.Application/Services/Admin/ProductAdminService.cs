@@ -11,6 +11,118 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
 
+
+    public ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request)
+    {
+        var query = _productRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(true, x => !x.IsDeleted)
+                          .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+            include: x => x.Include(x => x.Category)).AsNoTracking();
+
+        var totalCount = query.Count();
+
+        var sortedQuery = query;
+        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
+        {
+            if (request.SortDirection.ToLower() == "asc")
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderBy(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
+                    "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
+                    "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
+                    _ => sortedQuery.OrderBy(x => x.Created)
+                };
+            }
+            else
+            {
+                sortedQuery = request.SortBy.ToLower() switch
+                {
+                    "created" => sortedQuery.OrderByDescending(x => x.Created),
+                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
+                    "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
+                    "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
+                    _ => sortedQuery.OrderByDescending(x => x.Created)
+                };
+            }
+        }
+
+        if (request.Skip.HasValue)
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+
+        if (request.Take.HasValue)
+            sortedQuery = sortedQuery.Take(request.Take.Value);
+
+        var productsDTO = sortedQuery.Select(x => new ProductAdminDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Description = x.Description,
+            UnitPrice = x.UnitPrice,
+            UnitQuantity = x.UnitQuantity,
+            Image = ImageDataUriBuilder.FromImage(x.Image),
+            Category = x.Category.Name,
+            Created = x.Created,
+            LastModified = x.LastModified,
+        }).ToList();
+
+        return new ApiResponse<List<ProductAdminDto>>()
+        {
+            Data = productsDTO,
+            TotalCount = totalCount,
+            Status = ResponseStatus.Success
+        };
+    }
+
+    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id)
+    {
+        var product = await _productRepository
+            .GetAsQueryable(x => !x.IsDeleted && x.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (product is null)
+        {
+            return new ApiResponse<ProductDetailsAdminDto>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = AdminProductConstants.ProductDoesNotExist
+            };
+        }
+
+        // Load all categories (only IDs and names)
+        var allCategories = await _categoryRepository
+            .GetAsQueryable(c => !c.IsDeleted)
+            .ToListAsync();
+
+        var lookup = allCategories.ToDictionary(c => c.Id, c => c);
+
+        var pathItems = Category.BuildPath(product.CategoryId, lookup);
+
+        var productDto = new ProductDetailsAdminDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            LastModified = product.LastModified,
+            Created = product.Created,
+            Image = ImageDataUriBuilder.FromImage(product.Image),
+            Categories = pathItems.Select(p => new CategoryRefDto
+            {
+                Id = p.Id,
+                Name = p.Name
+            }).ToList(),
+        };
+
+        return new ApiResponse<ProductDetailsAdminDto>
+        {
+            Status = ResponseStatus.Success,
+            Data = productDto
+        };
+    }
+
     public async Task<ApiResponse<ProductAdminDto>> CreateProduct(CreateProductRequest request)
     {
         try
@@ -121,54 +233,6 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         };
     }
 
-    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id)
-    {
-        var product = await _productRepository
-            .GetAsQueryable(x => !x.IsDeleted && x.Id == id)
-            .FirstOrDefaultAsync();
-
-        if (product is null)
-        {
-            return new ApiResponse<ProductDetailsAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminProductConstants.ProductDoesNotExist
-            };
-        }
-
-        // Load all categories (only IDs and names)
-        var allCategories = await _categoryRepository
-            .GetAsQueryable(c => !c.IsDeleted)
-            .ToListAsync();
-
-        var lookup = allCategories.ToDictionary(c => c.Id, c => c);
-
-        var pathItems = Category.BuildPath(product.CategoryId, lookup);
-
-        var productDto = new ProductDetailsAdminDto
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            UnitPrice = product.UnitPrice,
-            UnitQuantity = product.UnitQuantity,
-            LastModified = product.LastModified,
-            Created = product.Created,
-            Image = ImageDataUriBuilder.FromImage(product.Image),
-            Categories = pathItems.Select(p => new CategoryRefDto
-            {
-                Id = p.Id,
-                Name = p.Name
-            }).ToList(),
-        };
-
-        return new ApiResponse<ProductDetailsAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = productDto
-        };
-    }
-
     public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id)
     {
         var product = await _productRepository
@@ -199,69 +263,6 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
         {
             Status = ResponseStatus.Success,
             Data = dto
-        };
-    }
-
-    public ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request)
-    {
-        var query = _productRepository.GetAsQueryableWhereIf(
-            filter: x => x.WhereIf(true, x => !x.IsDeleted)
-                          .WhereIf(!string.IsNullOrEmpty(request.Name), x=> x.Name.ToLower().Contains(request.Name.ToLower())),
-            include: x => x.Include(x => x.Category)).AsNoTracking();
-
-        var totalCount = query.Count();
-
-        var sortedQuery = query;
-        if (!string.IsNullOrEmpty(request.SortBy) && !string.IsNullOrEmpty(request.SortDirection))
-        {
-            if (request.SortDirection.ToLower() == "asc")
-            {
-                sortedQuery = request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderBy(x => x.Created),
-                    "lastmodified" => sortedQuery.OrderBy(x => x.LastModified),
-                    "unitprice" => sortedQuery.OrderBy(x => x.UnitPrice),
-                    "unitquantity" => sortedQuery.OrderBy(x => x.UnitQuantity),
-                    _ => sortedQuery.OrderBy(x => x.Created)
-                };
-            }
-            else
-            {
-                sortedQuery = request.SortBy.ToLower() switch
-                {
-                    "created" => sortedQuery.OrderByDescending(x => x.Created),
-                    "lastmodified" => sortedQuery.OrderByDescending(x => x.LastModified),
-                    "unitprice" => sortedQuery.OrderByDescending(x => x.UnitPrice),
-                    "unitquantity" => sortedQuery.OrderByDescending(x => x.UnitQuantity),
-                    _ => sortedQuery.OrderByDescending(x => x.Created)
-                };
-            }
-        }
-
-        if (request.Skip.HasValue)
-            sortedQuery = sortedQuery.Skip(request.Skip.Value);
-
-        if (request.Take.HasValue)
-            sortedQuery = sortedQuery.Take(request.Take.Value);
-
-        var productsDTO = sortedQuery.Select(x => new ProductAdminDto
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Description = x.Description,
-            UnitPrice = x.UnitPrice,
-            UnitQuantity = x.UnitQuantity,
-            Image = ImageDataUriBuilder.FromImage(x.Image),
-            Category = x.Category.Name,
-            Created = x.Created,
-            LastModified = x.LastModified,
-        }).ToList();
-
-        return new ApiResponse<List<ProductAdminDto>>()
-        {
-            Data = productsDTO,
-            TotalCount = totalCount,
-            Status = ResponseStatus.Success
         };
     }
 
