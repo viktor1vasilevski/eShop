@@ -1,4 +1,5 @@
-﻿using eShop.Application.DTOs.Admin.Category;
+﻿using eShop.Application.Constants.Admin;
+using eShop.Application.DTOs.Admin.Category;
 using eShop.Application.DTOs.Admin.Product;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Category;
@@ -75,7 +76,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 return new ApiResponse<CategoryAdminDto>
                 {
                     Status = ResponseStatus.Conflict,
-                    Message = CategoryConstants.CategoryExist
+                    Message = AdminCategoryConstants.CategoryExist
                 };
 
             var (bytes, type) = ImageParsing.FromBase64(request.Image);
@@ -88,7 +89,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Created,
-                Message = CategoryConstants.CategorySuccessfullyCreated,
+                Message = AdminCategoryConstants.CategorySuccessfullyCreated,
                 Data = new CategoryAdminDto
                 {
                     Id = category.Id,
@@ -121,7 +122,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CategoryDoesNotExist
+                Message = AdminCategoryConstants.CategoryDoesNotExist
             };
         }
 
@@ -142,7 +143,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Conflict,
-                Message = string.Format(CategoryConstants.CategoryHasProducts, productCount)
+                Message = string.Format(AdminCategoryConstants.CategoryHasProducts, productCount)
             };
         }
 
@@ -159,7 +160,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         return new ApiResponse<CategoryAdminDto>
         {
             Status = ResponseStatus.Success,
-            Message = string.Format(CategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix),
+            Message = string.Format(AdminCategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count, pluralSuffix),
         };
     }
 
@@ -171,7 +172,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CategoryDoesNotExist
+                Message = AdminCategoryConstants.CategoryDoesNotExist
             };
         }
 
@@ -188,7 +189,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Conflict,
-                Message = CategoryConstants.CategoryExist
+                Message = AdminCategoryConstants.CategoryExist
             };
         }
 
@@ -206,7 +207,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 return new ApiResponse<CategoryAdminDto>
                 {
                     Status = ResponseStatus.BadRequest,
-                    Message = CategoryConstants.CategoryCannotBeOwnParent
+                    Message = AdminCategoryConstants.CategoryCannotBeOwnParent
                 };
             }
 
@@ -220,7 +221,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                     return new ApiResponse<CategoryAdminDto>
                     {
                         Status = ResponseStatus.BadRequest,
-                        Message = CategoryConstants.CategoryCannotBeMovedUnderDescendant
+                        Message = AdminCategoryConstants.CategoryCannotBeMovedUnderDescendant
                     };
                 }
             }
@@ -231,7 +232,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryAdminDto>
             {
                 Status = ResponseStatus.Success,
-                Message = CategoryConstants.CategorySuccessfullyUpdated,
+                Message = AdminCategoryConstants.CategorySuccessfullyUpdated,
                 Data = new CategoryAdminDto
                 {
                     Id = category.Id,
@@ -267,7 +268,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryDetailsAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CategoryDoesNotExist
+                Message = AdminCategoryConstants.CategoryDoesNotExist
             };
         }
 
@@ -318,7 +319,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
             return new ApiResponse<CategoryEditAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = CategoryConstants.CategoryDoesNotExist
+                Message = AdminCategoryConstants.CategoryDoesNotExist
             };
         }
 

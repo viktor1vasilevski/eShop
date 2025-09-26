@@ -1,5 +1,5 @@
-﻿using eShop.Application.DTOs.Admin.Category;
-using eShop.Application.DTOs.Product;
+﻿using eShop.Application.Constants.Admin;
+using eShop.Application.DTOs.Admin.Category;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Responses.Admin.Product;
@@ -26,7 +26,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 return new ApiResponse<ProductAdminDto>
                 {
                     Status = ResponseStatus.NotFound,
-                    Message = CategoryConstants.CategoryDoesNotExist
+                    Message = AdminCategoryConstants.CategoryDoesNotExist
                 };
             }
 
@@ -38,7 +38,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 return new ApiResponse<ProductAdminDto>
                 {
                     Status = ResponseStatus.BadRequest,
-                    Message = "Products are allowed only on leaf categories"
+                    Message = AdminProductConstants.ProductsAllowedOnlyOnLeafCategories
                 };
             }
 
@@ -52,7 +52,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 return new ApiResponse<ProductAdminDto>
                 {
                     Status = ResponseStatus.Conflict,
-                    Message = "Product exist"
+                    Message = AdminProductConstants.ProductExist
                 };
             }
 
@@ -74,7 +74,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Created,
-                Message = ProductConstants.ProductSuccessfullyCreated,
+                Message = AdminProductConstants.ProductSuccessfullyCreated,
                 Data = new ProductAdminDto
                 {
                     Id = product.Id,
@@ -108,7 +108,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = ProductConstants.ProductDoesNotExist
+                Message = AdminProductConstants.ProductDoesNotExist
             };
 
         product.SoftDelete();
@@ -116,7 +116,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
 
         return new ApiResponse<ProductAdminDto>
         {
-            Message = ProductConstants.ProductSuccessfullyDeleted,
+            Message = AdminProductConstants.ProductSuccessfullyDeleted,
             Status = ResponseStatus.Success
         };
     }
@@ -132,7 +132,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductDetailsAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = ProductConstants.ProductDoesNotExist
+                Message = AdminProductConstants.ProductDoesNotExist
             };
         }
 
@@ -180,7 +180,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductEditAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = "Product does not exist"
+                Message = AdminProductConstants.ProductDoesNotExist
             };
         }
 
@@ -272,7 +272,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = ProductConstants.ProductDoesNotExist
+                Message = AdminProductConstants.ProductDoesNotExist
             };
 
 
@@ -280,7 +280,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Conflict,
-                Message = ProductConstants.ProductExist
+                Message = AdminProductConstants.ProductExist
             };
 
         try
@@ -299,7 +299,7 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Success,
-                Message = ProductConstants.ProductSuccessfullyUpdated,
+                Message = AdminProductConstants.ProductSuccessfullyUpdated,
             };
         }
         catch (DomainValidationException ex)
