@@ -65,9 +65,7 @@ public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerSer
         {
             Id = x.Id,
             Name = x.Name,
-            Description = x.Description,
             Price = x.UnitPrice,
-            UnitQuantity = x.UnitQuantity,
             Image = ImageDataUriBuilder.FromImage(x.Image),
             Category = x.Category.Name,
         }).ToList();
@@ -76,6 +74,40 @@ public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerSer
         {
             Data = productsDTO,
             TotalCount = totalCount,
+            Status = ResponseStatus.Success
+        };
+    }
+
+    public ApiResponse<ProductDetailsCustomerDto> GetProductById(Guid id)
+    {
+        var product = _productRepository.GetAsQueryable(
+                filter: x => x.Id == id && !x.IsDeleted,
+                include: q => q.Include(x => x.Category))
+            .FirstOrDefault();
+
+        if (product == null)
+        {
+            return new ApiResponse<ProductDetailsCustomerDto>
+            {
+                Status = ResponseStatus.ServerError,
+                Message = "Product not found"
+            };
+        }
+
+        var productDto = new ProductDetailsCustomerDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            Image = ImageDataUriBuilder.FromImage(product.Image),
+            Category = product.Category?.Name,
+        };
+
+        return new ApiResponse<ProductDetailsCustomerDto>
+        {
+            Data = productDto,
             Status = ResponseStatus.Success
         };
     }

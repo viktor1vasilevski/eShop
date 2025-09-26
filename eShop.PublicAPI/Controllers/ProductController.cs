@@ -17,10 +17,9 @@ public class ProductController(IProductCustomerService _productCustomerService) 
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById([FromRoute] Guid id, [FromQuery] Guid? userId = null)
+    public IActionResult GetById([FromRoute] Guid id)
     {
-        //var response = _productService.GetProductById(id, userId);
-        //return HandleResponse(response);
-        return Ok();
+        var response = _productCustomerService.GetProductById(id);
+        return HandleResponse(response);
     }
 }

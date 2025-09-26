@@ -1,4 +1,4 @@
-﻿using eShop.Application.DTOs.Product;
+﻿
 using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Responses.Admin.Product;
 

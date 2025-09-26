@@ -1,6 +1,5 @@
 ﻿using eShop.Application.DTOs.Admin.Category;
 using eShop.Application.DTOs.Admin.Product;
-using eShop.Application.DTOs.Product;
 
 namespace eShop.Application.Responses.Admin.Category;
 
