@@ -56,12 +56,8 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
                 };
             }
 
-            Image? image = null;
-            if (!string.IsNullOrWhiteSpace(request.Image))
-            {
-                var (bytes, type) = ImageParsing.FromBase64(request.Image);
-                image = Image.FromBytes(bytes, type);
-            }
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            var image = Image.FromBytes(bytes, type);
 
             var product = Product.Create(
                 name: trimmedName,
@@ -298,8 +294,6 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
             }
 
             product.Update(request.Name, request.Description, request.Price, request.Quantity, request.CategoryId, image);
-
-            _productRepository.Update(product);
             await _uow.SaveChangesAsync();
 
             return new ApiResponse<ProductDetailsDTO>

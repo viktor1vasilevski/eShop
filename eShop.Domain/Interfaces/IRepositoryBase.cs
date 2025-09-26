@@ -31,7 +31,7 @@ public interface IRepositoryBase<TEntity> where TEntity : class
     void InsertRange(IEnumerable<TEntity> entities);
     TEntity Update(TEntity entity);
     Task<TEntity> UpdateAsync(TEntity entity);
-    void UpdateWithRelatedEntities(TEntity entity);
+    TEntity UpdateWithRelatedEntities(TEntity entity);
     object SetObjectStateToDetached(object obj);
     object SetObjectStateToAdded(object obj);
     bool Exists(Expression<Func<TEntity, bool>>? filter = null);

@@ -181,22 +181,40 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
     public TEntity Update(TEntity entity)
     {
         var entry = _dbContext.Entry(entity);
-        _dbContext.Entry(entity).State = EntityState.Detached;
-        _dbContext.Entry(entity).State = EntityState.Modified;
+        if (entry.State == EntityState.Detached)
+        {
+            _dbContext.Set<TEntity>().Attach(entity);
+        }
+        entry.State = EntityState.Modified;
         return entity;
     }
 
-    public async Task<TEntity> UpdateAsync(TEntity entity)
+    public Task<TEntity> UpdateAsync(TEntity entity)
+    {
+        var updated = Update(entity);
+        return Task.FromResult(updated);
+    }
+
+    public TEntity UpdateWithRelatedEntities(TEntity entity)
     {
         var entry = _dbContext.Entry(entity);
-        _dbContext.Entry(entity).State = EntityState.Detached;
-        _dbContext.Entry(entity).State = EntityState.Modified;
-        await _dbContext.SaveChangesAsync();
+        if (entry.State == EntityState.Detached)
+        {
+            _dbContext.Set<TEntity>().Attach(entity);
+        }
+
+        entry.State = EntityState.Modified;
+
+        foreach (var reference in entry.References)
+        {
+            if (reference.TargetEntry != null && reference.TargetEntry.Metadata.IsOwned())
+            {
+                reference.TargetEntry.State = EntityState.Modified;
+            }
+        }
+
         return entity;
     }
 
-    public void UpdateWithRelatedEntities(TEntity entity)
-    {
-        dbSet.Update(entity);
-    }
+
 }
