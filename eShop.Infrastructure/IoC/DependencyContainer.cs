@@ -22,6 +22,7 @@ public static class DependencyContainer
         services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
 
         services.AddScoped<IProductAdminService, ProductAdminService>();
+        services.AddScoped<IProductCustomerService, ProductCustomerService>();
 
         services.AddScoped<IBasketService, BasketService>();
 

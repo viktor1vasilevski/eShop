@@ -1,6 +1,8 @@
-﻿namespace eShop.Application.Requests.Comment;
+﻿using eShop.Application.Requests.Admin;
 
-public class CommentRequest : BaseRequest
+namespace eShop.Application.Requests.Comment;
+
+public class CommentRequest : BaseAdminRequest
 {
     public Guid ProductId { get; set; }
 }

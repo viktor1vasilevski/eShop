@@ -10,8 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
-    //public DbSet<Basket> Baskets => Set<Basket>();
-    //public DbSet<BasketItem> BasketItems => Set<BasketItem>();
+    public DbSet<Basket> Baskets => Set<Basket>();
+    public DbSet<BasketItem> BasketItems => Set<BasketItem>();
     //public DbSet<Order> Orders => Set<Order>();
     //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     //public DbSet<Comment> Comments => Set<Comment>();
@@ -58,27 +58,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-
-
-
-        //modelBuilder.Entity<User>()
-        //    .HasOne(u => u.Basket)
-        //    .WithOne(b => b.User)
-        //    .HasForeignKey<Basket>(b => b.UserId)
-        //    .IsRequired()
-        //    .OnDelete(DeleteBehavior.Cascade);
-
-        //modelBuilder.Entity<Basket>()
-        //    .HasMany(b => b.Items)
-        //    .WithOne(i => i.Basket)
-        //    .HasForeignKey(i => i.BasketId)
-        //    .OnDelete(DeleteBehavior.Cascade);
-
-        //modelBuilder.Entity<BasketItem>()
-        //    .HasOne(i => i.Product)
-        //    .WithMany(p => p.BasketItems)
-        //    .HasForeignKey(i => i.ProductId)
-        //    .OnDelete(DeleteBehavior.Restrict);
 
         //modelBuilder.Entity<Order>()
         //    .HasOne(o => o.User)

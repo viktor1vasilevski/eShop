@@ -1,6 +1,8 @@
-﻿namespace eShop.Application.Requests.User;
+﻿using eShop.Application.Requests.Admin;
 
-public class UserRequest : BaseRequest
+namespace eShop.Application.Requests.User;
+
+public class UserRequest : BaseAdminRequest
 {
     public string? FirstName { get; set; }
     public string? LastName { get; set; }

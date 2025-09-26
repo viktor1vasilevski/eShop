@@ -17,6 +17,8 @@ public class Product : AuditableBaseEntity
     public Guid CategoryId { get; private set; }
     public virtual Category Category { get; private set; } = null!;
 
+    public virtual ICollection<BasketItem> BasketItems { get; set; } = new List<BasketItem>();
+
     private Product() { }
 
     public static Product Create(string name, string description, decimal unitPrice, int unitQuantity, Guid categoryId, Image image)

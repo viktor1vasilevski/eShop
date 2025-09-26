@@ -44,6 +44,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                .WithMany(c => c.Products)
                .HasForeignKey(p => p.CategoryId)
                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(b => b.Created).IsRequired();
+        builder.Property(b => b.CreatedBy).HasMaxLength(256);
     }
 }
 

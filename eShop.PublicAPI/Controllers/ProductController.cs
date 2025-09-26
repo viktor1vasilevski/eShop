@@ -1,6 +1,5 @@
-﻿using eShop.Application.Interfaces;
-using eShop.Application.Interfaces.Customer;
-using eShop.Application.Requests.Admin.Product;
+﻿using eShop.Application.Interfaces.Customer;
+using eShop.Application.Requests.Customer.Product;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers;
@@ -11,11 +10,10 @@ public class ProductController(IProductCustomerService _productCustomerService) 
 {
 
     [HttpGet]
-    public IActionResult Get([FromQuery] ProductAdminRequest request)
+    public IActionResult Get([FromQuery] ProductCustomerRequest request)
     {
-        //var response = _productService.GetProducts(request);
-        //return HandleResponse(response);
-        return Ok();
+        var response = _productCustomerService.GetProducts(request);
+        return HandleResponse(response);
     }
 
     [HttpGet("{id}")]

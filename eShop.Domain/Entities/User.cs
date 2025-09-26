@@ -17,7 +17,7 @@ public class User : AuditableBaseEntity
     public bool IsDeleted { get; set; }
 
 
-    //public virtual Basket? Basket { get; private set; }
+    public virtual Basket? Basket { get; private set; }
     //public virtual ICollection<Order>? Orders { get; set; }
     //public virtual ICollection<Comment>? Comments { get; set; }
 

@@ -31,10 +31,12 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Navigation(x => x.Image);
 
-        // Recursive relationship
         builder.HasOne(c => c.ParentCategory)
                .WithMany(c => c.Children)
                .HasForeignKey(c => c.ParentCategoryId)
                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(b => b.Created).IsRequired();
+        builder.Property(b => b.CreatedBy).HasMaxLength(256);
     }
 }

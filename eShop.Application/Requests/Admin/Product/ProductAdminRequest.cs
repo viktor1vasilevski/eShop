@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Requests.Admin.Product;
 
-public class ProductAdminRequest : BaseRequest
+public class ProductAdminRequest : BaseAdminRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }

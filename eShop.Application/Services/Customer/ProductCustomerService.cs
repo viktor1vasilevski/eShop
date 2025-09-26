@@ -1,0 +1,83 @@
+﻿using eShop.Application.DTOs.Customer.Category;
+using eShop.Application.Interfaces.Customer;
+using eShop.Application.Requests.Customer.Product;
+using eShop.Application.Responses.Customer.Product;
+
+namespace eShop.Application.Services.Customer;
+
+public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerService> _logger) : IProductCustomerService
+{
+    private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
+    private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
+
+
+    private List<Guid> GetAllCategoryIds(Guid categoryId)
+    {
+        var allCategories = _categoryRepository
+            .GetAsQueryable()
+            .Select(c => new CategoryNode
+            {
+                Id = c.Id,
+                ParentCategoryId = c.ParentCategoryId
+            })
+            .ToList();
+
+        var ids = new List<Guid>();
+        CollectCategoryIds(categoryId, allCategories, ids);
+        return ids;
+    }
+
+    private void CollectCategoryIds(Guid categoryId, List<CategoryNode> allCategories, List<Guid> ids)
+    {
+        ids.Add(categoryId);
+
+        var children = allCategories
+            .Where(c => c.ParentCategoryId == categoryId)
+            .ToList();
+
+        foreach (var child in children)
+        {
+            CollectCategoryIds(child.Id, allCategories, ids);
+        }
+    }
+
+
+    public ApiResponse<List<ProductCustomerDto>> GetProducts(ProductCustomerRequest request)
+    {
+        var categoryIds = GetAllCategoryIds(request.CategoryId);
+
+        var query = _productRepository.GetAsQueryableWhereIf(
+            filter: x => x.WhereIf(true, x => !x.IsDeleted && categoryIds.Contains(x.CategoryId)),
+            include: x => x.Include(x => x.Category))
+            .AsNoTracking();
+
+        var totalCount = query.Count();
+
+        var sortedQuery = query;
+
+        if (request.Skip.HasValue)
+            sortedQuery = sortedQuery.Skip(request.Skip.Value);
+
+        if (request.Take.HasValue)
+            sortedQuery = sortedQuery.Take(request.Take.Value);
+
+        var productsDTO = sortedQuery.Select(x => new ProductCustomerDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Description = x.Description,
+            Price = x.UnitPrice,
+            UnitQuantity = x.UnitQuantity,
+            Image = ImageDataUriBuilder.FromImage(x.Image),
+            Category = x.Category.Name,
+        }).ToList();
+
+        return new ApiResponse<List<ProductCustomerDto>>()
+        {
+            Data = productsDTO,
+            TotalCount = totalCount,
+            Status = ResponseStatus.Success
+        };
+    }
+
+}
