@@ -1,4 +1,5 @@
-﻿using eShop.Application.DTOs.Basket;
+﻿using eShop.Application.Constants.Customer;
+using eShop.Application.DTOs.Basket;
 using eShop.Application.Requests.Basket;
 
 namespace eShop.Application.Services
@@ -13,73 +14,73 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> GetBasketByUserIdAsync(Guid userId)
         {
-            //var baskets = await _basketRepository.GetAsync(
-            //    filter: b => b.UserId == userId,
-            //    include: b => b.Include(x => x.Items).ThenInclude(i => i.Product));
+            var baskets = await _basketRepository.GetAsync(
+                filter: b => b.UserId == userId,
+                include: b => b.Include(x => x.BasketItems).ThenInclude(i => i.Product));
 
-            //var basket = baskets.FirstOrDefault();
+            var basket = baskets.FirstOrDefault();
 
-            //if (basket is null)
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Status = ResponseStatus.NotFound,
-            //        Message = BasketConstants.BASKET_NOT_FOUND_FOR_USER
-            //    };
+            if (basket is null)
+                return new ApiResponse<BasketDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = BasketConstants.BASKET_NOT_FOUND_FOR_USER
+                };
 
-            //var basketDto = new BasketDTO
-            //{
-            //    Items = basket.Items.Select(i => new BasketItemDTO
-            //    {
-            //        ProductId = i.ProductId,
-            //        ProductName = i.Product?.Name,
-            //        Quantity = i.Quantity,
-            //        Price = i.Product?.UnitPrice ?? 0,
-            //        UnitQuantity = i.Product?.UnitQuantity ?? 0,
-            //        Image = ImageDataUriBuilder.FromImage(i.Product?.Image)
-            //    }).ToList()
-            //};
+            var basketDto = new BasketDTO
+            {
+                Items = basket.BasketItems.Select(i => new BasketItemDTO
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    Quantity = i.Quantity,
+                    Price = i.Product?.UnitPrice ?? 0,
+                    UnitQuantity = i.Product?.UnitQuantity ?? 0,
+                    Image = ImageDataUriBuilder.FromImage(i.Product?.Image)
+                }).ToList()
+            };
 
             return new ApiResponse<BasketDTO>
             {
                 Status = ResponseStatus.Success,
-                //Data = basketDto
+                Data = basketDto
             };
         }
 
-        public async Task<ApiResponse<BasketDTO>> MergeItemsAsync(Guid userId, List<BasketRequest> request)
+        public async Task<ApiResponse<BasketDTO>> MergeUserBasketAsync(Guid userId, List<BasketRequest> request)
         {
-            //var userExists = await _userRepository.ExistsAsync(x => x.Id == userId);
-            //if (!userExists)
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Message = UserConstants.USER_NOT_FOUND,
-            //        Status = ResponseStatus.NotFound
-            //    };
+            var userExists = await _userRepository.ExistsAsync(x => x.Id == userId);
+            if (!userExists)
+                return new ApiResponse<BasketDTO>
+                {
+                    Message = UserCustomerConstants.UserNotFound,
+                    Status = ResponseStatus.NotFound
+                };
 
-            //var basket = _basketRepository.Get(
-            //    filter: x => x.UserId == userId,
-            //    include: x => x.Include(b => b.Items)).FirstOrDefault();
+            var basket = _basketRepository.Get(
+                filter: x => x.UserId == userId,
+                include: x => x.Include(b => b.BasketItems)).FirstOrDefault();
 
-            //if (basket == null)
-            //{
-            //    basket = Basket.CreateNew(userId);
-            //    await _basketRepository.InsertAsync(basket);
-            //}
+            if (basket == null)
+            {
+                basket = Basket.CreateNew(userId);
+                await _basketRepository.InsertAsync(basket);
+            }
 
-            //var productIds = request.Select(r => r.ProductId).Distinct().ToList();
-            //var products = await _productRepository.GetAsync(x => productIds.Contains(x.Id));
-            //var productsDict = products.ToDictionary(p => p.Id);
+            var productIds = request.Select(r => r.ProductId).Distinct().ToList();
+            var products = await _productRepository.GetAsync(x => productIds.Contains(x.Id));
+            var productsDict = products.ToDictionary(p => p.Id);
 
 
-            //foreach (var reqItem in request)
-            //{
-            //    if (!productsDict.TryGetValue(reqItem.ProductId, out var product))
-            //        continue;
+            foreach (var reqItem in request)
+            {
+                if (!productsDict.TryGetValue(reqItem.ProductId, out var product))
+                    continue;
 
-            //    //basket.AddOrUpdateItem(product, reqItem.Quantity);
-            //}
+                basket.AddOrUpdateItem(product, reqItem.Quantity);
+            }
 
-            //await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {
@@ -92,27 +93,27 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> UpdateItemQuantityAsync(Guid userId, Guid productId, int quantityToAdd)
         {
-            //var basket = (await _basketRepository.GetAsync(
-            //    filter: b => b.UserId == userId,
-            //    include: b => b.Include(b => b.Items)))
-            //    .FirstOrDefault();
+            var basket = (await _basketRepository.GetAsync(
+                filter: b => b.UserId == userId,
+                include: b => b.Include(b => b.BasketItems)))
+                .FirstOrDefault();
 
-            //if (basket == null)
-            //{
-            //    basket = Basket.CreateNew(userId);
-            //    await _basketRepository.InsertAsync(basket);
-            //}
+            if (basket == null)
+            {
+                basket = Basket.CreateNew(userId);
+                await _basketRepository.InsertAsync(basket);
+            }
 
-            //var product = _productRepository.GetById(productId);
-            //if (product == null)
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Status = ResponseStatus.NotFound,
-            //        Message = "Product not found"
-            //    };
+            var product = _productRepository.GetById(productId);
+            if (product == null)
+                return new ApiResponse<BasketDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = "Product not found"
+                };
 
-            //basket.AddOrUpdateItem(product, quantityToAdd);
-            //await _uow.SaveChangesAsync();
+            basket.AddOrUpdateItem(product, quantityToAdd);
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {
@@ -125,21 +126,21 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> ClearBasketItemsForUserAsync(Guid userId)
         {
-            //var userQuery = await _userRepository.GetAsync(
-            //    filter: x => x.Id == userId,
-            //    include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
+            var userQuery = await _userRepository.GetAsync(
+                filter: x => x.Id == userId,
+                include: x => x.Include(x => x.Basket).ThenInclude(b => b.BasketItems));
 
-            //var user = userQuery.FirstOrDefault();
-            //if (user is null)
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Status = ResponseStatus.NotFound,
-            //        Message = UserConstants.USER_NOT_FOUND,
-            //    };
+            var user = userQuery.FirstOrDefault();
+            if (user is null)
+                return new ApiResponse<BasketDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = UserCustomerConstants.UserNotFound,
+                };
 
-            //user?.ClearBasket();
+            user?.ClearBasket();
 
-            //await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {
@@ -150,41 +151,41 @@ namespace eShop.Application.Services
 
         public async Task<ApiResponse<BasketDTO>> RemoveItemAsync(Guid userId, Guid productId)
         {
-            //var userQuery = await _userRepository.GetAsync(
-            //    filter: x => x.Id == userId,
-            //    include: x => x.Include(x => x.Basket).ThenInclude(b => b.Items));
+            var userQuery = await _userRepository.GetAsync(
+                filter: x => x.Id == userId,
+                include: x => x.Include(x => x.Basket).ThenInclude(b => b.BasketItems));
 
-            //var user = userQuery.FirstOrDefault();
-            //if (user is null)
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Status = ResponseStatus.NotFound,
-            //        Message = UserConstants.USER_NOT_FOUND,
-            //    };
+            var user = userQuery.FirstOrDefault();
+            if (user is null)
+                return new ApiResponse<BasketDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = UserCustomerConstants.UserNotFound,
+                };
 
-            //var basket = user.Basket;
-            //if (basket == null)
-            //{
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Status = ResponseStatus.NotFound,
-            //        Message = "Basket not found",
-            //    };
-            //}
+            var basket = user.Basket;
+            if (basket == null)
+            {
+                return new ApiResponse<BasketDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = "Basket not found",
+                };
+            }
 
-            //var itemToRemove = basket.Items.FirstOrDefault(x => x.ProductId == productId);
-            //if (itemToRemove == null)
-            //{
-            //    return new ApiResponse<BasketDTO>
-            //    {
-            //        Status = ResponseStatus.NotFound,
-            //        Message = "Item not found in basket",
-            //    };
-            //}
+            var itemToRemove = basket.BasketItems.FirstOrDefault(x => x.ProductId == productId);
+            if (itemToRemove == null)
+            {
+                return new ApiResponse<BasketDTO>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = "Item not found in basket",
+                };
+            }
 
-            //basket.RemoveItem(productId);
+            basket.RemoveItem(productId);
 
-            //await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync();
 
             return new ApiResponse<BasketDTO>
             {

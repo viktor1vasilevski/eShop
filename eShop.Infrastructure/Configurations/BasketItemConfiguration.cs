@@ -20,7 +20,7 @@ public class BasketItemConfiguration : IEntityTypeConfiguration<BasketItem>
                .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(i => i.Basket)
-               .WithMany(b => b.Items)
+               .WithMany(b => b.BasketItems)
                .HasForeignKey(i => i.BasketId)
                .OnDelete(DeleteBehavior.Cascade);
 
