@@ -9,4 +9,5 @@ public class ProductDetailsCustomerDto
     public int UnitQuantity { get; set; }
     public string Image { get; set; } = null!;
     public string Category { get; set; } = string.Empty;
+    public bool CanComment { get; set; }
 }

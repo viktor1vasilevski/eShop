@@ -6,5 +6,5 @@ namespace eShop.Application.Interfaces.Customer;
 public interface IProductCustomerService
 {
     ApiResponse<List<ProductCustomerDto>> GetProducts(ProductCustomerRequest request);
-    ApiResponse<ProductDetailsCustomerDto> GetProductById(Guid id);
+    Task<ApiResponse<ProductDetailsCustomerDto>> GetProductById(Guid id, Guid? userId = null);
 }

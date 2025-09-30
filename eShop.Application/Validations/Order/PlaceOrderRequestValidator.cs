@@ -1,4 +1,5 @@
-﻿using eShop.Application.Requests.Order;
+﻿using eShop.Application.Requests.Customer.Order;
+using eShop.Application.Requests.Order;
 using FluentValidation;
 
 namespace eShop.Application.Validations.Order;
@@ -18,7 +19,6 @@ public class PlaceOrderRequestValidator : AbstractValidator<PlaceOrderRequest>
             .NotNull().WithMessage("Items list cannot be null.")
             .NotEmpty().WithMessage("At least one item is required.");
 
-        RuleForEach(x => x.Items)
-            .SetValidator(new OrderItemRequestValidator());
+
     }
 }

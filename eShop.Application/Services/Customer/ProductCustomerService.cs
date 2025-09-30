@@ -9,6 +9,7 @@ public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerSer
 {
     private readonly IRepositoryBase<Product> _productRepository = _uow.GetRepository<Product>();
     private readonly IRepositoryBase<Category> _categoryRepository = _uow.GetRepository<Category>();
+    private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
 
     private List<Guid> GetAllCategoryIds(Guid categoryId)
@@ -78,20 +79,30 @@ public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerSer
         };
     }
 
-    public ApiResponse<ProductDetailsCustomerDto> GetProductById(Guid id)
+    public async Task<ApiResponse<ProductDetailsCustomerDto>> GetProductById(Guid id, Guid? userId = null)
     {
-        var product = _productRepository.GetAsQueryable(
+        var product = await _productRepository.GetAsQueryable(
                 filter: x => x.Id == id && !x.IsDeleted,
                 include: q => q.Include(x => x.Category))
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         if (product == null)
         {
             return new ApiResponse<ProductDetailsCustomerDto>
             {
-                Status = ResponseStatus.ServerError,
+                Status = ResponseStatus.NotFound,
                 Message = "Product not found"
             };
+        }
+
+        bool canComment = false;
+
+        if (userId.HasValue)
+        {
+            canComment = _orderRepository.GetAsQueryable(
+                    filter: o => o.UserId == userId.Value &&
+                                 o.OrderItems.Any(oi => oi.ProductId == id))
+                .Any();
         }
 
         var productDto = new ProductDetailsCustomerDto
@@ -103,6 +114,7 @@ public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerSer
             UnitQuantity = product.UnitQuantity,
             Image = ImageDataUriBuilder.FromImage(product.Image),
             Category = product.Category?.Name,
+            CanComment = canComment
         };
 
         return new ApiResponse<ProductDetailsCustomerDto>
@@ -111,5 +123,6 @@ public class ProductCustomerService(IUnitOfWork _uow, ILogger<ProductCustomerSer
             Status = ResponseStatus.Success
         };
     }
+
 
 }

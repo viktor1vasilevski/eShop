@@ -66,8 +66,9 @@ public class BasketCustomerService(IUnitOfWork _uow, ILogger<BasketCustomerServi
         if (basket is null)
             return new ApiResponse<BasketDTO>
             {
-                Status = ResponseStatus.NotFound,
-                Message = BasketCustomerConstants.BasketNotFoundForUser
+                Status = ResponseStatus.Success,
+                //Message = BasketCustomerConstants.BasketNotFoundForUser
+                Data = new BasketDTO { Items = new List<BasketItemDTO>() }
             };
 
         var basketDto = new BasketDTO
