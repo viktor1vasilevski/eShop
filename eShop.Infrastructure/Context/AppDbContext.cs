@@ -1,5 +1,6 @@
 ﻿using eShop.Domain.Entities;
 using eShop.Domain.Entities.Base;
+using eShop.Infrastructure.Configurations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +13,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     public DbSet<User> Users => Set<User>();
     public DbSet<Basket> Baskets => Set<Basket>();
     public DbSet<BasketItem> BasketItems => Set<BasketItem>();
-    //public DbSet<Order> Orders => Set<Order>();
-    //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-    //public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Comment> Comments => Set<Comment>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -51,43 +52,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     }
 
 
-    public override int SaveChanges() =>
-      SaveChangesAsync().GetAwaiter().GetResult();
+    public override int SaveChanges() => SaveChangesAsync().GetAwaiter().GetResult();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
-
-        //modelBuilder.Entity<Order>()
-        //    .HasOne(o => o.User)
-        //    .WithMany(u => u.Orders)
-        //    .HasForeignKey(o => o.UserId)
-        //    .OnDelete(DeleteBehavior.Cascade);
-
-        //modelBuilder.Entity<OrderItem>()
-        //    .HasOne(oi => oi.Order)
-        //    .WithMany(o => o.OrderItems)
-        //    .HasForeignKey(oi => oi.OrderId)
-        //    .OnDelete(DeleteBehavior.Cascade);
-
-        //modelBuilder.Entity<OrderItem>()
-        //    .HasOne(oi => oi.Product)
-        //    .WithMany(p => p.OrderItems)
-        //    .HasForeignKey(oi => oi.ProductId)
-        //    .OnDelete(DeleteBehavior.Restrict);
-
-        //modelBuilder.Entity<Comment>()
-        //    .HasOne(c => c.Product)
-        //    .WithMany(o => o.Comments)
-        //    .HasForeignKey(c => c.ProductId)
-        //    .OnDelete(DeleteBehavior.Cascade);
-
-        //modelBuilder.Entity<Comment>()
-        //    .HasOne(c => c.User)
-        //    .WithMany(u => u.Comments)
-        //    .HasForeignKey(c => c.UserId)
-        //    .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
 
         base.OnModelCreating(modelBuilder);
     }

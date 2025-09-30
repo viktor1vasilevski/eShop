@@ -14,12 +14,19 @@ public class User : AuditableBaseEntity
     public string Email { get; private set; }
     public string PasswordHash { get; private set; }
     public string SaltKey { get; private set; }
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
 
 
     public virtual Basket? Basket { get; private set; }
-    //public virtual ICollection<Order>? Orders { get; set; }
-    //public virtual ICollection<Comment>? Comments { get; set; }
+
+
+    private readonly List<Order> _orders = [];
+    public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();
+
+
+    private readonly List<Comment> _comments = [];
+    public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
+
 
     private User() { }
 

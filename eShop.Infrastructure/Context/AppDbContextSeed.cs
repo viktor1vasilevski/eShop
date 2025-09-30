@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants;
-using eShop.Application.Interfaces;
+﻿using eShop.Application.Interfaces;
 using eShop.Domain.Entities;
 using eShop.Domain.Enums;
 using Microsoft.EntityFrameworkCore;

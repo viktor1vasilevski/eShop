@@ -17,7 +17,18 @@ public class Product : AuditableBaseEntity
     public Guid CategoryId { get; private set; }
     public virtual Category Category { get; private set; } = null!;
 
-    public virtual ICollection<BasketItem> BasketItems { get; set; } = new List<BasketItem>();
+
+    private readonly List<BasketItem> _basketItems = [];
+    public virtual IReadOnlyCollection<BasketItem> BasketItems => _basketItems.AsReadOnly();
+
+
+    private readonly List<OrderItem> _orderItems = [];
+    public virtual IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
+
+
+    private readonly List<Comment> _comments = [];
+    public virtual IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
+
 
     private Product() { }
 
@@ -38,7 +49,7 @@ public class Product : AuditableBaseEntity
         UnitPrice = unitPrice;
         UnitQuantity = unitQuantity;
 
-        if (image != null) // 👈 only update if provided
+        if (image != null)
         {
             Image = image;
         }
