@@ -43,11 +43,21 @@ public static class DependencyContainer
         //services.AddScoped<IUserAdminService, UserAdminService>();
         //services.AddScoped<IOrderAdminService, OrderAdminService>();
 
+        services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
+
+        // Register MailKit email sender (scoped is fine — a new instance per scope)
+        services.AddScoped<IEmailService, MailKitEmailService>();
+
+        // Register the background worker (hosted service)
+        services.AddHostedService<EmailBackgroundService>();
+
         services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
         services.AddScoped<IProductCustomerService, ProductCustomerService>();
         services.AddScoped<IBasketCustomerService, BasketCustomerService>();
         services.AddScoped<IOrderCustomerService, OrderCustomerService>();
         services.AddScoped<ICommentCustomerService, CommentCustomerService>();
+
+        services.AddScoped<IEmailService, MailKitEmailService>();
 
         services.AddScoped<ICustomerAuthService, CustomerAuthService>();
         services.AddScoped<IOrderService, OrderService>();

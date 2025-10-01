@@ -1,12 +1,14 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Common;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mail;
 
 namespace eShop.PublicAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class BasketController(IBasketCustomerService _basketCustomerService) : BaseController
+public class BasketController(IBasketCustomerService _basketCustomerService, IEmailService _emailService) : BaseController
 {
 
     [HttpGet("{userId}")]
@@ -36,4 +38,12 @@ public class BasketController(IBasketCustomerService _basketCustomerService) : B
         var response = await _basketCustomerService.RemoveItemAsync(userId, productId);
         return HandleResponse(response);
     }
+}
+
+public class EmailRequest
+{
+    public string To { get; set; } = string.Empty;
+    public string OrderId { get; set; } = string.Empty;
+    public string ProductName { get; set; } = string.Empty;
+    public decimal Total { get; set; }
 }

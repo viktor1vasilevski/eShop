@@ -1,6 +1,8 @@
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Validations.Order;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
+using eShop.Infrastructure.Services;
 using eShop.PublicAPI.Extensions;
 using eShop.PublicAPI.Middlewares;
 using FluentValidation;
@@ -32,6 +34,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+
 
 builder.Services.AddIoCService();
 
