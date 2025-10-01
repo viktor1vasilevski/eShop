@@ -1,5 +1,5 @@
 ﻿using eShop.Application.Interfaces.Customer;
-using eShop.Application.Requests.Auth;
+using eShop.Application.Requests.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.PublicAPI.Controllers;

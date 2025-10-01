@@ -2,7 +2,7 @@
 using eShop.Application.Enums;
 using eShop.Application.Helpers.Shared;
 using eShop.Application.Interfaces.Shared;
-using eShop.Application.Requests.Auth;
+using eShop.Application.Requests.Shared.Auth;
 using eShop.Application.Responses;
 using eShop.Application.Responses.Shared.Auth;
 using eShop.Domain.Entities;

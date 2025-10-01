@@ -1,5 +1,5 @@
 ﻿using eShop.Application.Interfaces.Shared;
-using eShop.Application.Requests.Auth;
+using eShop.Application.Requests.Shared.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

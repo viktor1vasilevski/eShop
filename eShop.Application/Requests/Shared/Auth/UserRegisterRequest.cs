@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Requests.Auth;
+﻿namespace eShop.Application.Requests.Shared.Auth;
 
 public class UserRegisterRequest
 {

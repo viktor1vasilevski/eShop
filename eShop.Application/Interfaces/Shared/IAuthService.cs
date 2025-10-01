@@ -1,4 +1,4 @@
-﻿using eShop.Application.Requests.Auth;
+﻿using eShop.Application.Requests.Shared.Auth;
 using eShop.Application.Responses;
 using eShop.Application.Responses.Shared.Auth;
 
