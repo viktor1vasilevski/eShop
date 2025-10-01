@@ -1,6 +1,11 @@
 ﻿using eShop.Application.DTOs.Order;
+using eShop.Application.Enums;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
+using eShop.Application.Responses;
+using eShop.Domain.Entities;
+using eShop.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace eShop.Application.Services.Customer;
 

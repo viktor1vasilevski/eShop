@@ -1,5 +1,12 @@
 ﻿using eShop.Application.DTOs.User;
+using eShop.Application.Enums;
+using eShop.Application.Extensions;
+using eShop.Application.Interfaces;
 using eShop.Application.Requests.User;
+using eShop.Application.Responses;
+using eShop.Domain.Entities;
+using eShop.Domain.Enums;
+using eShop.Domain.Interfaces;
 
 namespace eShop.Application.Services;
 

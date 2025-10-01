@@ -1,5 +1,6 @@
 ﻿using eShop.Application.DTOs.Basket;
 using eShop.Application.Requests.Customer.Basket;
+using eShop.Application.Responses;
 
 namespace eShop.Application.Interfaces.Customer;
 

@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Requests.AI;
+using eShop.Application.Responses;
 
 namespace eShop.Application.Interfaces.Admin;
 

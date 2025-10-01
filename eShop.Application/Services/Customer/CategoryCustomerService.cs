@@ -1,5 +1,10 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Enums;
+using eShop.Application.Interfaces.Customer;
+using eShop.Application.Responses;
 using eShop.Application.Responses.Admin.Category;
+using eShop.Domain.Entities;
+using eShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 

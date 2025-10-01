@@ -1,5 +1,6 @@
 ﻿
 using eShop.Application.Requests.Admin.Product;
+using eShop.Application.Responses;
 using eShop.Application.Responses.Admin.Product;
 
 namespace eShop.Application.Interfaces.Admin;

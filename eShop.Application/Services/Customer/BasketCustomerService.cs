@@ -1,7 +1,14 @@
 ﻿using eShop.Application.Constants.Customer;
 using eShop.Application.DTOs.Basket;
+using eShop.Application.Enums;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
+using eShop.Application.Responses;
+using eShop.Domain.Entities;
+using eShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace eShop.Application.Services.Customer;
 

@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Requests.Comment;
+﻿namespace eShop.Application.Requests.Customer.Comment;
 
 public class CreateCommentRequest
 {

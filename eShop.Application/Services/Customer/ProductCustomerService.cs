@@ -1,7 +1,15 @@
 ﻿using eShop.Application.DTOs.Customer.Category;
+using eShop.Application.Enums;
+using eShop.Application.Extensions;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
+using eShop.Application.Responses;
 using eShop.Application.Responses.Customer.Product;
+using eShop.Domain.Entities;
+using eShop.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace eShop.Application.Services.Customer;
 

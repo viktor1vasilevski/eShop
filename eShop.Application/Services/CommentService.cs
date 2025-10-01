@@ -1,5 +1,11 @@
 ﻿using eShop.Application.DTOs.Comment;
-using eShop.Application.Requests.Comment;
+using eShop.Application.Enums;
+using eShop.Application.Interfaces;
+using eShop.Application.Requests.Customer.Comment;
+using eShop.Application.Responses;
+using eShop.Domain.Entities;
+using eShop.Domain.Interfaces;
+
 
 namespace eShop.Application.Services;
 

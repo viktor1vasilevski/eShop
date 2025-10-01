@@ -2,10 +2,9 @@
 using eShop.Application.Requests.Customer.Comment;
 using eShop.Application.Responses;
 
-namespace eShop.Application.Interfaces;
+namespace eShop.Application.Interfaces.Customer;
 
-public interface ICommentService
+public interface ICommentCustomerService
 {
     ApiResponse<List<CommentDTO>> GetComments(CommentRequest request);
-    ApiResponse<CommentDTO> CreateComment(CreateCommentRequest request);
 }

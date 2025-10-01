@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Requests.Customer.Product;
+using eShop.Application.Responses;
 using eShop.Application.Responses.Customer.Product;
 
 namespace eShop.Application.Interfaces.Customer;

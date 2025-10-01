@@ -1,5 +1,5 @@
 ﻿using eShop.Application.Interfaces;
-using eShop.Application.Requests.Comment;
+using eShop.Application.Requests.Customer.Comment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
