@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Helpers\Customer\" />
     <Folder Include="Responses\Customer\Category\" />
     <Folder Include="Services\Shared\" />
   </ItemGroup>

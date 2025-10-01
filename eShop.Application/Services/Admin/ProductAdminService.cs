@@ -2,7 +2,7 @@
 using eShop.Application.DTOs.Admin.Category;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
-using eShop.Application.Helpers;
+using eShop.Application.Helpers.Admin;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Responses;

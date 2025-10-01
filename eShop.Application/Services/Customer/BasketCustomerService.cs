@@ -1,7 +1,7 @@
 ﻿using eShop.Application.Constants.Customer;
 using eShop.Application.DTOs.Basket;
 using eShop.Application.Enums;
-using eShop.Application.Helpers;
+using eShop.Application.Helpers.Admin;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
 using eShop.Application.Responses;

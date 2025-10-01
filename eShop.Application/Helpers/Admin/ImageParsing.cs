@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Helpers;
+﻿namespace eShop.Application.Helpers.Admin;
 
 public static class ImageParsing
 {

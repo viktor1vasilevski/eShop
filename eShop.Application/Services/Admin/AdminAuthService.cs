@@ -1,8 +1,6 @@
 ﻿using eShop.Application.Constants;
-using eShop.Application.DTOs.Auth;
 using eShop.Application.Enums;
-using eShop.Application.Helpers;
-using eShop.Application.Interfaces;
+using eShop.Application.Helpers.Shared;
 using eShop.Application.Interfaces.Shared;
 using eShop.Application.Requests.Auth;
 using eShop.Application.Responses;

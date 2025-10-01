@@ -1,7 +1,7 @@
 ﻿using eShop.Application.DTOs.Order;
 using eShop.Application.DTOs.OrderItem;
 using eShop.Application.Enums;
-using eShop.Application.Helpers;
+using eShop.Application.Helpers.Admin;
 using eShop.Application.Interfaces;
 using eShop.Application.Requests.Order;
 using eShop.Application.Responses;

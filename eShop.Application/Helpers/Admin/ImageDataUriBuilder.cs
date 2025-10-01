@@ -1,6 +1,6 @@
 ﻿using eShop.Domain.ValueObjects;
 
-namespace eShop.Application.Helpers;
+namespace eShop.Application.Helpers.Admin;
 
 public static class ImageDataUriBuilder
 {

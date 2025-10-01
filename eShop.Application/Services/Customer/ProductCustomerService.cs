@@ -1,7 +1,7 @@
 ﻿using eShop.Application.DTOs.Customer.Category;
 using eShop.Application.Enums;
 using eShop.Application.Extensions;
-using eShop.Application.Helpers;
+using eShop.Application.Helpers.Admin;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
 using eShop.Application.Responses;

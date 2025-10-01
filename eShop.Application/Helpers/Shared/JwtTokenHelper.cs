@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace eShop.Application.Helpers;
+namespace eShop.Application.Helpers.Shared;
 
 public static class JwtTokenHelper
 {
@@ -17,11 +17,11 @@ public static class JwtTokenHelper
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-            new Claim(ClaimTypes.Name, user.Username) 
-        };
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Role, user.Role.ToString()),
+        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+        new Claim(ClaimTypes.Name, user.Username)
+    };
 
         var token = new JwtSecurityToken(
             claims: claims,
