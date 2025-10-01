@@ -1,6 +1,6 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Admin;
-using eShop.Application.Requests.AI;
+using eShop.Application.Requests.Admin.AI;
 using eShop.Application.Responses;
 using Microsoft.Extensions.Configuration;
 using System.Text;

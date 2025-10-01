@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Requests.AI;
+﻿namespace eShop.Application.Requests.Admin.AI;
 
 public class GenerateProductDescriptionRequest
 {

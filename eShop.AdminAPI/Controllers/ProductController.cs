@@ -1,7 +1,7 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Admin;
+using eShop.Application.Requests.Admin.AI;
 using eShop.Application.Requests.Admin.Product;
-using eShop.Application.Requests.AI;
 using eShop.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
