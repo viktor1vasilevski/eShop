@@ -1,5 +1,5 @@
-﻿using eShop.Application.Interfaces;
-using eShop.Application.Requests.User;
+﻿using eShop.Application.Interfaces.Admin;
+using eShop.Application.Requests.Admin.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,21 +9,14 @@ namespace eShop.AdminAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class UserController(IUserService _userService) : BaseController
+public class UserController(IUserAdminService _userAdminService) : BaseController
 {
 
     [HttpGet]
     public IActionResult Get([FromQuery] UserRequest request)
     {
-        var response = _userService.GetUsers(request);
+        var response = _userAdminService.GetUsers(request);
         return HandleResponse(response);
     }
-
-    //[HttpGet("{userId}")]
-    //public IActionResult GetById([FromRoute] Guid userId)
-    //{
-    //    var response = _orderService.GetOrdersForUserId(userId);
-    //    return HandleResponse(response);
-    //}
 
 }

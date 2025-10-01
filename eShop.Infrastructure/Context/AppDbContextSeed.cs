@@ -1,4 +1,4 @@
-﻿using eShop.Application.Interfaces;
+﻿using eShop.Application.Interfaces.Shared;
 using eShop.Domain.Entities;
 using eShop.Domain.Enums;
 using Microsoft.EntityFrameworkCore;

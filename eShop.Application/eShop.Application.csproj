@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Responses\Customer\Category\" />
+    <Folder Include="Services\Shared\" />
   </ItemGroup>
 
 </Project>

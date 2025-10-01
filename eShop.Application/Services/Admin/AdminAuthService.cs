@@ -3,8 +3,10 @@ using eShop.Application.DTOs.Auth;
 using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Requests.Auth;
 using eShop.Application.Responses;
+using eShop.Application.Responses.Shared.Auth;
 using eShop.Domain.Entities;
 using eShop.Domain.Enums;
 using eShop.Domain.Interfaces;
@@ -17,14 +19,14 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration, I
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
 
 
-    public async Task<ApiResponse<LoginDTO>> LoginAsync(UserLoginRequest request)
+    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {
         var normalizedUsername = request.Username.Trim().ToLowerInvariant();
         var response = await _userRepository.GetAsync(x => x.Username == normalizedUsername);
         var user = response?.FirstOrDefault();
 
         if (user is null || user?.Role != Role.Admin || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
-            return new ApiResponse<LoginDTO>
+            return new ApiResponse<LoginDto>
             {
                 Message = AuthConstants.INVALID_CREDENTIAL,
                 Status = ResponseStatus.Unauthorized
@@ -32,11 +34,11 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration, I
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
-        return new ApiResponse<LoginDTO>
+        return new ApiResponse<LoginDto>
         {
             Status = ResponseStatus.Success,
             Message = AuthConstants.ADMIN_LOGIN_SUCCESS,
-            Data = new LoginDTO
+            Data = new LoginDto
             {
                 Id = user.Id,
                 Token = token,

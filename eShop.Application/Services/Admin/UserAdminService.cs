@@ -1,33 +1,19 @@
-﻿using eShop.Application.DTOs.User;
-using eShop.Application.Enums;
+﻿using eShop.Application.Enums;
 using eShop.Application.Extensions;
-using eShop.Application.Interfaces;
-using eShop.Application.Requests.User;
+using eShop.Application.Interfaces.Admin;
+using eShop.Application.Requests.Admin.User;
 using eShop.Application.Responses;
+using eShop.Application.Responses.Admin.User;
 using eShop.Domain.Entities;
 using eShop.Domain.Enums;
 using eShop.Domain.Interfaces;
 
-namespace eShop.Application.Services;
+namespace eShop.Application.Services.Admin;
 
-public class UserService(IUnitOfWork _uow) : IUserService
+public class UserAdminService(IUnitOfWork _uow) : IUserAdminService
 {
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
-
-    public ApiResponse<UserDetailsDTO> GetUserDetailsById(Guid userId)
-    {
-        //var query = _userRepository.GetAsQueryable(
-        //    filter: x => x.Id == userId,
-        //    include: x => x.Include(x => x.Orders)
-        //    );
-
-        return new ApiResponse<UserDetailsDTO>
-        {
-
-        };
-    }
-
-    public ApiResponse<List<UserDTO>> GetUsers(UserRequest request)
+    public ApiResponse<List<UserDto>> GetUsers(UserRequest request)
     {
         var query = _userRepository.GetAsQueryableWhereIf(
             filter: x => x.WhereIf(!String.IsNullOrEmpty(request.FirstName), x => x.FirstName.ToLower().Contains(request.FirstName.ToLower()))
@@ -65,7 +51,7 @@ public class UserService(IUnitOfWork _uow) : IUserService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var usersDTO = sortedQuery.Select(x => new UserDTO
+        var usersDTO = sortedQuery.Select(x => new UserDto
         {
             Id = x.Id,
             FirstName = x.FirstName,
@@ -75,7 +61,7 @@ public class UserService(IUnitOfWork _uow) : IUserService
             Created = x.Created,
         }).ToList();
 
-        return new ApiResponse<List<UserDTO>>
+        return new ApiResponse<List<UserDto>>
         {
             Data = usersDTO,
             Status = ResponseStatus.Success,

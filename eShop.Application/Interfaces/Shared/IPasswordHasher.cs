@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Interfaces;
+﻿namespace eShop.Application.Interfaces.Shared;
 
 public interface IPasswordHasher
 {

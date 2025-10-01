@@ -1,6 +1,4 @@
-﻿using eShop.Application.Requests.Admin;
-
-namespace eShop.Application.Requests.User;
+﻿namespace eShop.Application.Requests.Admin.User;
 
 public class UserRequest : BaseAdminRequest
 {

@@ -1,4 +1,4 @@
-﻿using eShop.Application.Interfaces;
+﻿using eShop.Application.Interfaces.Shared;
 using System.Security.Cryptography;
 
 namespace eShop.Infrastructure.Services;

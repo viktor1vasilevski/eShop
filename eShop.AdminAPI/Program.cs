@@ -1,6 +1,6 @@
 using eShop.AdminAPI.Extension;
 using eShop.AdminAPI.Middlewares;
-using eShop.Application.Interfaces;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Validations.Category;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;

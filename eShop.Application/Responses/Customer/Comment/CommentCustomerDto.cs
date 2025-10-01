@@ -1,6 +1,6 @@
-﻿namespace eShop.Application.DTOs.Comment;
+﻿namespace eShop.Application.Responses.Customer.Comment;
 
-public class CommentDTO
+public class CommentCustomerDto
 {
     public string CommentText { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;

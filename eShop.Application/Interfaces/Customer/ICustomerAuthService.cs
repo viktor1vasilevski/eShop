@@ -1,4 +1,5 @@
 ﻿using eShop.Application.DTOs.Auth;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Requests.Auth;
 using eShop.Application.Responses;
 

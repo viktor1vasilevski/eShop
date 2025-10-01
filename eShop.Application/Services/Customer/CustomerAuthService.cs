@@ -2,10 +2,11 @@
 using eShop.Application.DTOs.Auth;
 using eShop.Application.Enums;
 using eShop.Application.Helpers;
-using eShop.Application.Interfaces;
 using eShop.Application.Interfaces.Customer;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Requests.Auth;
 using eShop.Application.Responses;
+using eShop.Application.Responses.Shared.Auth;
 using eShop.Application.Services.Admin;
 using eShop.Domain.Entities;
 using eShop.Domain.Enums;
@@ -22,14 +23,14 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
     private readonly IRepositoryBase<User> _userRepository = _uow.GetRepository<User>();
 
 
-    public async Task<ApiResponse<LoginDTO>> LoginAsync(UserLoginRequest request)
+    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {
         var normalizedUsername = request.Username.Trim().ToLowerInvariant();
         var response = await _userRepository.GetAsync(x => x.Username == normalizedUsername);
         var user = response?.FirstOrDefault();
 
         if (user is null || user?.Role != Role.Customer || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
-            return new ApiResponse<LoginDTO>
+            return new ApiResponse<LoginDto>
             {
                 Status = ResponseStatus.Unauthorized,
                 Message = AuthConstants.INVALID_CREDENTIAL,
@@ -37,11 +38,11 @@ public class CustomerAuthService(IUnitOfWork _uow, IConfiguration _configuration
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
-        return new ApiResponse<LoginDTO>
+        return new ApiResponse<LoginDto>
         {
             Status = ResponseStatus.Success,
             Message = AuthConstants.CUSTOMER_LOGIN_SUCCESS,
-            Data = new LoginDTO
+            Data = new LoginDto
             {
                 Id = user.Id,
                 Token = token,

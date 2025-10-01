@@ -1,21 +1,20 @@
-﻿using eShop.Application.DTOs.Comment;
-using eShop.Application.Enums;
-using eShop.Application.Interfaces;
+﻿using eShop.Application.Enums;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Comment;
 using eShop.Application.Responses;
+using eShop.Application.Responses.Customer.Comment;
 using eShop.Domain.Entities;
 using eShop.Domain.Interfaces;
 
+namespace eShop.Application.Services.Customer;
 
-namespace eShop.Application.Services;
-
-public class CommentService(IUnitOfWork _uow) : ICommentService
+public class CommentCustomerService(IUnitOfWork _uow) : ICommentCustomerService
 {
     private readonly IRepositoryBase<Comment> _commentRepository = _uow.GetRepository<Comment>();
     private readonly IRepositoryBase<Order> _orderRepository = _uow.GetRepository<Order>();
 
 
-    public ApiResponse<List<CommentDTO>> GetComments(CommentRequest request)
+    public ApiResponse<List<CommentCustomerDto>> GetComments(CommentRequest request)
     {
         var query = _commentRepository.GetAsQueryable(x => x.ProductId == request.ProductId);
 
@@ -48,7 +47,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
         if (request.Take.HasValue)
             sortedQuery = sortedQuery.Take(request.Take.Value);
 
-        var commentsDTO = sortedQuery.Select(x => new CommentDTO
+        var commentsDTO = sortedQuery.Select(x => new CommentCustomerDto
         {
             Rating = x.Rating,
             Created = x.Created,
@@ -56,21 +55,22 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
             CreatedBy = x.CreatedBy
         }).ToList();
 
-        return new ApiResponse<List<CommentDTO>>()
+        return new ApiResponse<List<CommentCustomerDto>>()
         {
             Data = commentsDTO,
             TotalCount = totalCount,
             Status = ResponseStatus.Success,
         };
     }
-    public ApiResponse<CommentDTO> CreateComment(CreateCommentRequest request)
+
+    public ApiResponse<CommentCustomerDto> CreateComment(CreateCommentRequest request)
     {
         bool hasBought = _orderRepository.Exists(o =>
             o.UserId == request.UserId &&
             o.OrderItems.Any(i => i.ProductId == request.ProductId));
 
         if (!hasBought)
-            return new ApiResponse<CommentDTO>
+            return new ApiResponse<CommentCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = "User cannot comment without buying the product."
@@ -81,7 +81,7 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
         _commentRepository.Insert(comment);
         _uow.SaveChanges();
 
-        var resultDto = new CommentDTO
+        var resultDto = new CommentCustomerDto
         {
             CommentText = comment.CommentText,
             CreatedBy = comment.CreatedBy,
@@ -89,12 +89,10 @@ public class CommentService(IUnitOfWork _uow) : ICommentService
             Rating = comment.Rating,
         };
 
-        return new ApiResponse<CommentDTO>
+        return new ApiResponse<CommentCustomerDto>
         {
             Status = ResponseStatus.Success,
             Data = resultDto
         };
     }
-
-
 }
