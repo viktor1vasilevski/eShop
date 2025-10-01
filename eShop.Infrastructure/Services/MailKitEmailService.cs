@@ -1,68 +1,64 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Interfaces;
+using eShop.Application.Interfaces.Customer;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using MailKit.Net.Smtp;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 
-
-namespace eShop.Infrastructure.Services;
-
-public class MailKitEmailService : IEmailService
+namespace eShop.Infrastructure.Services
 {
-    private readonly IConfiguration _config;
-
-    public MailKitEmailService(IConfiguration config) => _config = config ?? throw new ArgumentNullException(nameof(config));
-
-    public async Task SendHtmlAsync(string to, string subject, string html)
+    public class MailKitEmailService : IEmailService
     {
-        var msg = new MimeMessage();
-        msg.From.Add(new MailboxAddress(_config["Email:SenderName"], _config["Email:SenderEmail"]));
-        msg.To.Add(MailboxAddress.Parse(to));
-        msg.Subject = subject;
+        private readonly IConfiguration _config;
 
-        msg.Body = new TextPart("html")
+        public MailKitEmailService(IConfiguration config)
         {
-            Text = html
-        };
-
-        using var smtp = new SmtpClient();
-
-        var host = _config["Email:SmtpHost"];
-        var portStr = _config["Email:SmtpPort"];
-        var port = 587;
-        if (!string.IsNullOrWhiteSpace(portStr) && int.TryParse(portStr, out var p)) port = p;
-
-        // Connect. Use StartTls by default; if you use local dev SMTP without TLS set SecureSocketOptions.None
-        await smtp.ConnectAsync(host, port, SecureSocketOptions.StartTls);
-
-        var user = _config["Email:SmtpUser"];
-        var pass = _config["Email:SmtpPass"];
-
-        // Only authenticate if credentials are provided
-        if (!string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(pass))
-        {
-            await smtp.AuthenticateAsync(user, pass);
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
-        await smtp.SendAsync(msg);
-        await smtp.DisconnectAsync(true);
-    }
+        /// <summary>
+        /// Send an arbitrary HTML email.
+        /// The background worker calls this when it dequeues EmailMessage.
+        /// </summary>
+        public async Task SendHtmlAsync(string to, string subject, string html)
+        {
+            if (string.IsNullOrWhiteSpace(to)) throw new ArgumentException("Recipient is required.", nameof(to));
+            if (string.IsNullOrWhiteSpace(subject)) subject = "(no subject)";
 
-    private string BuildOrderHtml(string orderId, string productName, decimal total)
-    {
-        // Minimal HTML; later you'll replace it with the full BuildOrderHtml that uses order items.
-        return $@"
-            <h2>Thanks for your order!</h2>
-            <p><b>Order ID:</b> {orderId}</p>
-            <p><b>Product:</b> {System.Net.WebUtility.HtmlEncode(productName)}</p>
-            <p><b>Total:</b> {total:C}</p>
-            <p>We’ll notify you when it ships.</p>";
-    }
+            var msg = new MimeMessage();
+            var senderName = _config["Email:SenderName"] ?? "No-Reply";
+            var senderEmail = _config["Email:SenderEmail"] ?? "no-reply@localhost";
 
-    public async Task SendOrderConfirmationAsync(string to, string orderId, string productName, decimal total)
-    {
-        var subject = $"Order Confirmation #{orderId}";
-        var html = BuildOrderHtml(orderId, productName, total);
-        await SendHtmlAsync(to, subject, html);
+            msg.From.Add(new MailboxAddress(senderName, senderEmail));
+            msg.To.Add(MailboxAddress.Parse(to));
+            msg.Subject = subject;
+
+            msg.Body = new TextPart("html") { Text = html ?? string.Empty };
+
+            // For debugging SMTP exchange, you can use:
+            // using var smtp = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
+            using var smtp = new SmtpClient();
+
+            var host = _config["Email:SmtpHost"] ?? "localhost";
+            var port = 587;
+            if (!string.IsNullOrWhiteSpace(_config["Email:SmtpPort"]) && int.TryParse(_config["Email:SmtpPort"], out var p)) port = p;
+
+            // Default to StartTls. If you're using a local dev SMTP (MailDev/Papercut) you might choose SecureSocketOptions.None.
+            await smtp.ConnectAsync(host, port, SecureSocketOptions.StartTls).ConfigureAwait(false);
+
+            var user = _config["Email:SmtpUser"];
+            var pass = _config["Email:SmtpPass"];
+
+            if (!string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(pass))
+            {
+                await smtp.AuthenticateAsync(user, pass).ConfigureAwait(false);
+            }
+
+            await smtp.SendAsync(msg).ConfigureAwait(false);
+            await smtp.DisconnectAsync(true).ConfigureAwait(false);
+        }
     }
 }
