@@ -1,12 +1,8 @@
-﻿using eShop.Application.Interfaces;
-using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Interfaces.Customer;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using System;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace eShop.Infrastructure.Services
 {
@@ -19,10 +15,6 @@ namespace eShop.Infrastructure.Services
             _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
-        /// <summary>
-        /// Send an arbitrary HTML email.
-        /// The background worker calls this when it dequeues EmailMessage.
-        /// </summary>
         public async Task SendHtmlAsync(string to, string subject, string html)
         {
             if (string.IsNullOrWhiteSpace(to)) throw new ArgumentException("Recipient is required.", nameof(to));
@@ -38,15 +30,12 @@ namespace eShop.Infrastructure.Services
 
             msg.Body = new TextPart("html") { Text = html ?? string.Empty };
 
-            // For debugging SMTP exchange, you can use:
-            // using var smtp = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
             using var smtp = new SmtpClient();
 
             var host = _config["Email:SmtpHost"] ?? "localhost";
             var port = 587;
             if (!string.IsNullOrWhiteSpace(_config["Email:SmtpPort"]) && int.TryParse(_config["Email:SmtpPort"], out var p)) port = p;
 
-            // Default to StartTls. If you're using a local dev SMTP (MailDev/Papercut) you might choose SecureSocketOptions.None.
             await smtp.ConnectAsync(host, port, SecureSocketOptions.StartTls).ConfigureAwait(false);
 
             var user = _config["Email:SmtpUser"];

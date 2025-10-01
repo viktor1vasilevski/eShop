@@ -3,5 +3,4 @@
 public interface IEmailService
 {
     Task SendHtmlAsync(string to, string subject, string html);
-
 }

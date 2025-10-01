@@ -6,6 +6,7 @@ using eShop.Application.Services;
 using eShop.Application.Services.Admin;
 using eShop.Application.Services.Customer;
 using eShop.Domain.Interfaces;
+using eShop.Infrastructure.BackgroundServices;
 using eShop.Infrastructure.Repositories;
 using eShop.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +46,6 @@ public static class DependencyContainer
 
         services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
 
-        // Register MailKit email sender (scoped is fine — a new instance per scope)
         services.AddScoped<IEmailService, MailKitEmailService>();
 
         // Register the background worker (hosted service)

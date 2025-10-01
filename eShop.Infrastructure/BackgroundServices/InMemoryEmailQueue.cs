@@ -2,20 +2,15 @@
 using eShop.Application.Interfaces.Customer;
 using System.Threading.Channels;
 
-namespace eShop.Infrastructure.Services;
+namespace eShop.Infrastructure.BackgroundServices;
 
 public class InMemoryEmailQueue : IEmailQueue
 {
-    private readonly Channel<EmailMessage> _channel;
+    private readonly Channel<EmailMessage> _channel = Channel.CreateUnbounded<EmailMessage>(
+        new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
 
-    public InMemoryEmailQueue()
-    {
-        _channel = Channel.CreateUnbounded<EmailMessage>(new UnboundedChannelOptions
-        {
-            SingleReader = true,
-            SingleWriter = false
-        });
-    }
+    public ValueTask EnqueueAsync(EmailMessage message) =>
+        _channel.Writer.WriteAsync(message);
 
     public async ValueTask<EmailMessage?> DequeueAsync(CancellationToken ct)
     {
@@ -29,7 +24,4 @@ public class InMemoryEmailQueue : IEmailQueue
             return null;
         }
     }
-
-    public ValueTask EnqueueAsync(EmailMessage message) =>
-        _channel.Writer.WriteAsync(message);
 }

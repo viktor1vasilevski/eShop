@@ -4,23 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace eShop.Infrastructure.Services;
-
-public class EmailBackgroundService : BackgroundService
+public class EmailBackgroundService(IEmailQueue queue, IServiceProvider serviceProvider, ILogger<EmailBackgroundService> logger) : BackgroundService
 {
-    private readonly IEmailQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<EmailBackgroundService> _logger;
+    private readonly IEmailQueue _queue = queue ?? throw new ArgumentNullException(nameof(queue));
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly ILogger<EmailBackgroundService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public EmailBackgroundService(
-        IEmailQueue queue,
-        IServiceProvider serviceProvider,
-        ILogger<EmailBackgroundService> logger)
-    {
-        _queue = queue ?? throw new ArgumentNullException(nameof(queue));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("EmailBackgroundService starting.");
@@ -35,7 +25,6 @@ public class EmailBackgroundService : BackgroundService
 
                 _logger.LogInformation("Dequeued email for {To} (subject: {Subject})", message.To, message.Subject);
 
-                // Create a scope so we can resolve scoped services safely
                 using var scope = _serviceProvider.CreateScope();
                 var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
 
@@ -45,13 +34,11 @@ public class EmailBackgroundService : BackgroundService
             }
             catch (OperationCanceledException)
             {
-                // Host is shutting down
                 break;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send email to {To}", message?.To);
-                // For learning: log and continue. In prod, consider persistence/retries.
             }
         }
 
