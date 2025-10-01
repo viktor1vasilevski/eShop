@@ -33,7 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Services.AddIoCService();
+builder.Services.AddAdminIoCServices();
 
 // Fluent Validations
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>(ServiceLifetime.Transient);

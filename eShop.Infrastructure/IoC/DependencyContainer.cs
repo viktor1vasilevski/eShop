@@ -14,14 +14,34 @@ namespace eShop.Infrastructure.IoC;
 
 public static class DependencyContainer
 {
-    public static IServiceCollection AddIoCService(this IServiceCollection services)
+    public static IServiceCollection AddAdminIoCServices(this IServiceCollection services)
     {
-        // Application.Services
         services.AddScoped<IAuthService, AdminAuthService>();
 
         services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         services.AddScoped<IProductAdminService, ProductAdminService>();
         services.AddScoped<IUserAdminService, UserAdminService>();
+        services.AddScoped<IOrderAdminService, OrderAdminService>();
+
+        services.AddScoped<IOrderService, OrderService>();
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+        return services;
+    }
+
+
+    public static IServiceCollection AddIoCService(this IServiceCollection services)
+    {
+        // Application.Services
+        //services.AddScoped<IAuthService, AdminAuthService>();
+
+        //services.AddScoped<ICategoryAdminService, CategoryAdminService>();
+        //services.AddScoped<IProductAdminService, ProductAdminService>();
+        //services.AddScoped<IUserAdminService, UserAdminService>();
+        //services.AddScoped<IOrderAdminService, OrderAdminService>();
 
         services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
         services.AddScoped<IProductCustomerService, ProductCustomerService>();

@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Interfaces;
-using eShop.Application.Requests.Order;
+using eShop.Application.Interfaces.Admin;
+using eShop.Application.Requests.Admin.Order;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,13 +10,13 @@ namespace eShop.AdminAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class OrderController(IOrderService _orderService) : BaseController
+public class OrderController(IOrderService _orderService, IOrderAdminService _orderAdminService) : BaseController
 {
 
     [HttpGet]
-    public IActionResult Get([FromQuery] OrderRequest request)
+    public IActionResult Get([FromQuery] OrderAdminRequest request)
     {
-        var response = _orderService.GetOrders(request);
+        var response = _orderAdminService.GetOrders(request);
         return HandleResponse(response);
     }
 

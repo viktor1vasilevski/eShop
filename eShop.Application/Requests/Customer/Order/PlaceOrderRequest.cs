@@ -1,5 +1,4 @@
 ﻿using eShop.Application.DTOs.Customer.OrderItem;
-using eShop.Application.Requests.Order;
 
 namespace eShop.Application.Requests.Customer.Order;
 
