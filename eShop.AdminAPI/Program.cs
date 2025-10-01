@@ -1,4 +1,4 @@
-using eShop.AdminAPI.Extension;
+using eShop.AdminAPI.Extensions;
 using eShop.AdminAPI.Middlewares;
 using eShop.Application.Interfaces.Shared;
 using eShop.Application.Validations.Category;
@@ -35,7 +35,6 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAdminIoCServices();
 
-// Fluent Validations
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>(ServiceLifetime.Transient);
 builder.Services.AddFluentValidationAutoValidation();
 

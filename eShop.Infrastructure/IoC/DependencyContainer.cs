@@ -34,16 +34,8 @@ public static class DependencyContainer
     }
 
 
-    public static IServiceCollection AddIoCService(this IServiceCollection services)
+    public static IServiceCollection AddCustomerIoCService(this IServiceCollection services)
     {
-        // Application.Services
-        //services.AddScoped<IAuthService, AdminAuthService>();
-
-        //services.AddScoped<ICategoryAdminService, CategoryAdminService>();
-        //services.AddScoped<IProductAdminService, ProductAdminService>();
-        //services.AddScoped<IUserAdminService, UserAdminService>();
-        //services.AddScoped<IOrderAdminService, OrderAdminService>();
-
         services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
 
         services.AddScoped<IEmailService, MailKitEmailService>();
@@ -56,8 +48,6 @@ public static class DependencyContainer
         services.AddScoped<IBasketCustomerService, BasketCustomerService>();
         services.AddScoped<IOrderCustomerService, OrderCustomerService>();
         services.AddScoped<ICommentCustomerService, CommentCustomerService>();
-
-        services.AddScoped<IEmailService, MailKitEmailService>();
 
         services.AddScoped<ICustomerAuthService, CustomerAuthService>();
         services.AddScoped<IOrderService, OrderService>();

@@ -1,7 +1,9 @@
-using eShop.Application.Interfaces.Customer;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Validations.Order;
+using eShop.Domain.Interfaces;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
+using eShop.Infrastructure.Repositories;
 using eShop.Infrastructure.Services;
 using eShop.PublicAPI.Extensions;
 using eShop.PublicAPI.Middlewares;
@@ -35,9 +37,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-
-
-builder.Services.AddIoCService();
+builder.Services.AddCustomerIoCService();
 
 // Fluent Validations
 builder.Services.AddValidatorsFromAssemblyContaining<PlaceOrderRequestValidator>(ServiceLifetime.Transient);

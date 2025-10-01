@@ -47,7 +47,6 @@ public class OrderCustomerService : IOrderCustomerService
 
         var order = Order.Create(request.UserId);
 
-        // We'll build a small list of lines for the email so we don't need extra DB reads later
         var productLines = new List<(string ProductName, int Quantity, decimal UnitPrice)>();
 
         foreach (var itemRequest in request.Items)
@@ -65,7 +64,6 @@ public class OrderCustomerService : IOrderCustomerService
             var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice);
             order.AddOrderItem(orderItem);
 
-            // capture name/qty/price for the email
             productLines.Add((ProductName: product.Name ?? $"Product {product.Id}", Quantity: itemRequest.Quantity, UnitPrice: product.UnitPrice));
         }
 
@@ -74,11 +72,8 @@ public class OrderCustomerService : IOrderCustomerService
         await _orderRepository.InsertAsync(order);
         await _uow.SaveChangesAsync();
 
-        // Build response DTO as you normally do
         response.Status = ResponseStatus.Success;
 
-
-        // --- Build HTML and enqueue email (non-blocking work)
         try
         {
             var html = BuildOrderHtml(order, user, productLines);
@@ -96,7 +91,6 @@ public class OrderCustomerService : IOrderCustomerService
         }
         catch (Exception ex)
         {
-            // Never fail the order because email enqueue failed; just log it.
             _logger.LogWarning(ex, "Order {OrderId}: failed to enqueue confirmation email to {Email}", order.Id, user.Email);
         }
 
@@ -106,23 +100,40 @@ public class OrderCustomerService : IOrderCustomerService
     private string BuildOrderHtml(Order order, User user, List<(string ProductName, int Quantity, decimal UnitPrice)> productLines)
     {
         var sb = new StringBuilder();
-        sb.Append($"<h2>Thanks for your order, {System.Net.WebUtility.HtmlEncode(user.FirstName ?? user.Email)}!</h2>");
-        sb.Append($"<p>Order ID: <strong>{order.Id}</strong></p>");
-        sb.Append("<table style='border-collapse:collapse;width:100%'>");
-        sb.Append("<thead><tr><th style='text-align:left;padding:8px'>Product</th><th style='padding:8px'>Qty</th><th style='text-align:right;padding:8px'>Price</th></tr></thead>");
-        sb.Append("<tbody>");
+
+        sb.AppendLine("<!doctype html>");
+        sb.AppendLine("<html>");
+        sb.AppendLine("<head>");
+        sb.AppendLine("<meta charset=\"utf-8\"/>");
+        // small inline style block — Gmail supports simple styles inline or in head
+        sb.AppendLine("<style>");
+        sb.AppendLine("  table { border-collapse: collapse; width: 100%; }");
+        sb.AppendLine("  th, td { padding: 8px; border: 1px solid #ddd; }");
+        sb.AppendLine("  th { background-color: #f4f4f4; text-align: left; }");
+        sb.AppendLine("</style>");
+        sb.AppendLine("</head>");
+        sb.AppendLine("<body>");
+        sb.AppendLine($"<h2>Thanks for your order, {System.Net.WebUtility.HtmlEncode(user.FirstName ?? user.Email)}!</h2>");
+        sb.AppendLine($"<p>Order ID: <strong>{order.Id}</strong></p>");
+        sb.AppendLine("<table role=\"presentation\" aria-hidden=\"true\">");
+        sb.AppendLine("<thead><tr><th>Product</th><th style='text-align:center'>Qty</th><th style='text-align:right'>Price</th></tr></thead>");
+        sb.AppendLine("<tbody>");
         foreach (var line in productLines)
         {
-            sb.Append("<tr>");
-            sb.Append($"<td style='padding:8px'>{System.Net.WebUtility.HtmlEncode(line.ProductName)}</td>");
-            sb.Append($"<td style='text-align:center;padding:8px'>{line.Quantity}</td>");
-            sb.Append($"<td style='text-align:right;padding:8px'>{line.UnitPrice:C}</td>");
-            sb.Append("</tr>");
+            sb.AppendLine("<tr>");
+            sb.AppendLine($"  <td>{System.Net.WebUtility.HtmlEncode(line.ProductName)}</td>");
+            sb.AppendLine($"  <td style='text-align:center'>{line.Quantity}</td>");
+            sb.AppendLine($"  <td style='text-align:right'>{line.UnitPrice:C}</td>");
+            sb.AppendLine("</tr>");
         }
-        sb.Append("</tbody>");
-        sb.Append("</table>");
-        sb.Append($"<p><strong>Total: {order.TotalAmount:C}</strong></p>");
-        sb.Append("<p>We will notify you when your order ships.</p>");
+        sb.AppendLine("</tbody>");
+        sb.AppendLine("</table>");
+        sb.AppendLine($"<p><strong>Total: {order.TotalAmount:C}</strong></p>");
+        sb.AppendLine("<p>We will notify you when your order ships.</p>");
+        sb.AppendLine("</body>");
+        sb.AppendLine("</html>");
+
         return sb.ToString();
     }
+
 }
