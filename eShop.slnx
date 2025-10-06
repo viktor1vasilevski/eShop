@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="eShop.Api.Admin/eShop.Api.Admin.csproj" Id="d46d1843-fec9-40c8-9773-5ae5617f4a99" />
+  <Project Path="eShop.Api.Customer/eShop.Api.Customer.csproj" Id="a94f5376-a962-4c67-b666-d77fde358ef9" />
+  <Project Path="eShop.Application/eShop.Application.csproj" />
+  <Project Path="eShop.Domain/eShop.Domain.csproj" />
+  <Project Path="eShop.Infrastructure/eShop.Infrastructure.csproj" />
+</Solution>
