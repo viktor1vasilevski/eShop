@@ -1,4 +1,5 @@
-﻿using eShop.Application.Interfaces.Shared;
+﻿using eShop.Application.Enums;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Requests.Shared.Auth;
 using eShop.Application.Responses.Shared.Auth;
 using eShop.Application.Responses.Shared.Base;
@@ -14,15 +15,6 @@ public class AdminAuthService(IUnitOfWork _uow, IConfiguration _configuration, I
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {
-
-        // Build query using QueryAsync
-        var (products, totalCount) = await _userRepository.QueryAsync(q =>
-            q.Where(p => !p.IsDeleted)
-             .WhereIf(!string.IsNullOrEmpty(request.Name), p => p.Name.ToLower().Contains(request.Name.ToLower()))
-             .Include(p => p.Category)
-             .OrderBy(p => request.SortDirection == "asc"
-                            ? p.Name
-                            : p.Name)
-        );
+        return new ApiResponse<LoginDto>();
     }
 }

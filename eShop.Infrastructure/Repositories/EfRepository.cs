@@ -60,26 +60,5 @@ public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         return predicate == null ? await _dbSet.AnyAsync() : await _dbSet.AnyAsync(predicate);
     }
-
-    public async Task<(IEnumerable<TEntity> Items, int TotalCount)> QueryAsync(
-        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
-        int? skip = null,
-        int? take = null,
-        bool asNoTracking = true)
-    {
-        IQueryable<TEntity> query = _dbSet;
-        if (asNoTracking) query = query.AsNoTracking();
-
-        if (queryBuilder != null)
-            query = queryBuilder(query);
-
-        int totalCount = await query.CountAsync();
-
-        if (skip.HasValue) query = query.Skip(skip.Value);
-        if (take.HasValue) query = query.Take(take.Value);
-
-        var items = await query.ToListAsync();
-        return (items, totalCount);
-    }
 }
 
