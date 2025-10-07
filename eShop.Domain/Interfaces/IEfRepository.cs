@@ -1,0 +1,16 @@
+﻿using eShop.Domain.Interfaces.Base;
+using System.Linq.Expressions;
+
+namespace eShop.Domain.Interfaces;
+
+public interface IEfRepository<TEntity> : IRepository<TEntity> where TEntity : class
+{
+    Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+        Expression<Func<TEntity, TResult>>? selector = null,
+        Expression<Func<TEntity, object>>[]? includes = null,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+        int? skip = null,
+        int? take = null);
+}
+

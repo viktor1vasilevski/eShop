@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace eShop.Domain.Interfaces;
+namespace eShop.Domain.Interfaces.Base;
 
 public interface IRepository<TEntity> where TEntity : class
 {

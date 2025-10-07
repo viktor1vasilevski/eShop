@@ -1,9 +1,6 @@
 ﻿using eShop.Domain.Enums;
-using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
-using System.Data;
-using System.Xml.Linq;
 
 namespace eShop.Domain.Models;
 
@@ -19,15 +16,15 @@ public class User : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
-    //public virtual Basket? Basket { get; private set; }
+    public virtual Basket? Basket { get; private set; }
 
 
-    //private readonly List<Order> _orders = [];
-    //public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();
+    private readonly List<Order> _orders = [];
+    public IReadOnlyCollection<Order> Orders => _orders.AsReadOnly();
 
 
-    //private readonly List<Comment> _comments = [];
-    //public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
+    private readonly List<Comment> _comments = [];
+    public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
 
 
     private User() { }

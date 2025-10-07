@@ -1,0 +1,87 @@
+﻿using eShop.Application.Constants.Admin;
+using eShop.Application.Enums;
+using eShop.Application.Interfaces.Shared;
+using eShop.Application.Requests.Shared.Auth;
+using eShop.Application.Responses.Shared.Auth;
+using eShop.Application.Responses.Shared.Base;
+using eShop.Domain.Enums;
+using eShop.Domain.Interfaces;
+using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
+using System.Security.Claims;
+using System.Text;
+
+namespace eShop.Application.Services.Admin;
+
+public class AuthAdminService : IAuthService
+{
+    private readonly IEfRepository<User> _userQueryRepo;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IConfiguration _configuration;
+
+    public AuthAdminService(IUnitOfWork uow, IPasswordHasher passwordHasher, IConfiguration configuration)
+    {
+        _userQueryRepo = uow.GetEfRepository<User>();
+        _passwordHasher = passwordHasher;
+        _configuration = configuration;
+    }
+    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
+    {
+        var normalizedUsername = request.Username.Trim().ToLowerInvariant();
+        var users = await _userQueryRepo.FindAsync(x => x.Username.ToLower() == normalizedUsername);
+        var user = users.FirstOrDefault();
+
+        if (user is null || user?.Role != Role.Admin || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
+            return new ApiResponse<LoginDto>
+            {
+                Message = AdminAuthConstants.InvalidCredentials,
+                Status = ResponseStatus.Unauthorized
+            };
+
+        var token = JwtTokenHelper.GenerateToken(_configuration, user);
+
+        return new ApiResponse<LoginDto>
+        {
+            Status = ResponseStatus.Success,
+            Message = AdminAuthConstants.AdminLoggedSuccessfully,
+            Data = new LoginDto
+            {
+                Id = user.Id,
+                Token = token,
+                Email = user.Email,
+                Username = user.Username,
+                Role = user.Role
+            }
+        };
+    }
+}
+
+public static class JwtTokenHelper
+{
+    public static string GenerateToken(IConfiguration configuration, User user)
+    {
+        var secretKey = configuration["JwtSettings:Secret"] ?? "AlternativeSecretKeyOfAtLeast32Characters!";
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Role, user.Role.ToString()),
+        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+        new Claim(ClaimTypes.Name, user.Username)
+    };
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddDays(22),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}

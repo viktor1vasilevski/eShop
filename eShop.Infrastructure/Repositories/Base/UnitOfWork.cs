@@ -1,14 +1,15 @@
 ﻿using eShop.Domain.Interfaces;
+using eShop.Domain.Interfaces.Base;
 using eShop.Infrastructure.Context;
 
-namespace eShop.Infrastructure.Repositories;
+namespace eShop.Infrastructure.Repositories.Base;
 
-public class EfUnitOfWork : IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
     private readonly Dictionary<Type, object> _repositories = new();
 
-    public EfUnitOfWork(AppDbContext context)
+    public UnitOfWork(AppDbContext context)
     {
         _context = context;
     }
@@ -23,8 +24,16 @@ public class EfUnitOfWork : IUnitOfWork
         return repository;
     }
 
+    public IEfRepository<TEntity> GetEfRepository<TEntity>() where TEntity : class
+    {
+        if (_repositories.TryGetValue(typeof(TEntity), out var repo))
+            return (IEfRepository<TEntity>)repo;
+
+        var repository = new EfRepository<TEntity>(_context);
+        _repositories[typeof(TEntity)] = repository;
+        return repository;
+    }
     public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
     public void SaveChanges() => _context.SaveChanges();
     public void Dispose() => _context.Dispose();
 }
-

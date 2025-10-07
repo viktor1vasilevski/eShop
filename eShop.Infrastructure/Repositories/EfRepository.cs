@@ -1,11 +1,12 @@
 ﻿using eShop.Domain.Interfaces;
+using eShop.Domain.Interfaces.Base;
 using eShop.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace eShop.Infrastructure.Repositories;
 
-public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class
+public class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository<TEntity> where TEntity : class
 {
     protected readonly AppDbContext _context;
     protected readonly DbSet<TEntity> _dbSet;
@@ -60,5 +61,38 @@ public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         return predicate == null ? await _dbSet.AnyAsync() : await _dbSet.AnyAsync(predicate);
     }
+
+    public async Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+        Expression<Func<TEntity, TResult>>? selector = null,
+        Expression<Func<TEntity, object>>[]? includes = null,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+        int? skip = null,
+        int? take = null)
+    {
+        IQueryable<TEntity> query = _dbSet;
+
+        if (includes != null)
+            foreach (var include in includes)
+                query = query.Include(include);
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        int totalCount = await query.CountAsync();
+
+        if (orderBy != null)
+            query = orderBy(query);
+
+        if (skip.HasValue) query = query.Skip(skip.Value);
+        if (take.HasValue) query = query.Take(take.Value);
+
+        if (selector != null)
+            return (await query.Select(selector).ToListAsync(), totalCount);
+
+        var result = await query.ToListAsync();
+        return ((IEnumerable<TResult>)result, totalCount);
+    }
+
 }
 

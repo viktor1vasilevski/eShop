@@ -1,5 +1,8 @@
-﻿using eShop.Application.Interfaces.Shared;
+﻿using eShop.Application.Interfaces.Admin;
+using eShop.Application.Interfaces.Shared;
 using eShop.Application.Services.Admin;
+using eShop.Domain.Interfaces.Base;
+using eShop.Infrastructure.Repositories.Base;
 using eShop.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,9 +12,9 @@ public static class DependencyContainer
 {
     public static IServiceCollection AddAdminIoCServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AdminAuthService>();
+        services.AddScoped<IAuthService, AuthAdminService>();
 
-        //services.AddScoped<ICategoryAdminService, CategoryAdminService>();
+        services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         //services.AddScoped<IProductAdminService, ProductAdminService>();
         //services.AddScoped<IUserAdminService, UserAdminService>();
         //services.AddScoped<IOrderAdminService, OrderAdminService>();
@@ -19,6 +22,7 @@ public static class DependencyContainer
         //services.AddScoped<IUnitOfWork, UnitOfWork>();
         //services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
