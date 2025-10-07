@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Interfaces.Shared;
+using eShop.Application.Services.Admin;
 using eShop.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,7 +9,7 @@ public static class DependencyContainer
 {
     public static IServiceCollection AddAdminIoCServices(this IServiceCollection services)
     {
-        //services.AddScoped<IAuthService, AdminAuthService>();
+        services.AddScoped<IAuthService, AdminAuthService>();
 
         //services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         //services.AddScoped<IProductAdminService, ProductAdminService>();

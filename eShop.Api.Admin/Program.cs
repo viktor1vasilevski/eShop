@@ -40,7 +40,7 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        var password = builder.Configuration["SeedAdmin:Password"];
+        var password = builder.Configuration["SeedAdmin:Password"] ?? "Admin@123";
         AppDbContextSeed.SeedAdminUser(dbContext, password, _passwordHasher);
         AppDbContextSeed.SeedTestUser(dbContext, _passwordHasher);
     }
