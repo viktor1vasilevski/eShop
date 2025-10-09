@@ -15,32 +15,32 @@ public class ProductAdminService(IUnitOfWork _uow, ILogger<ProductAdminService> 
     private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
 
 
-    public Task<ApiResponse<ProductAdminDto>> CreateProduct(CreateProductRequest request)
+    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductRequest request)
     {
         throw new NotImplementedException();
     }
 
-    public ApiResponse<ProductAdminDto> DeleteProduct(Guid id)
+    public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id)
+    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id)
+    public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public ApiResponse<List<ProductAdminDto>> GetProducts(ProductAdminRequest request)
+    public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ApiResponse<ProductAdminDto>> UpdateProduct(Guid id, UpdateProductRequest request)
+    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductRequest request)
     {
         throw new NotImplementedException();
     }

@@ -7,13 +7,14 @@ namespace eShop.Application.Interfaces.Admin;
 
 public interface ICategoryAdminService
 {
-    // queries
+    // Queries
     Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request);
     Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id);
     Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id);
     Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync();
 
-    // commands
+
+    // Commands
     Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryRequest request);
     Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request);
     Task<ApiResponse<CategoryAdminDto>> DeleteCategoryAsync(Guid id);
