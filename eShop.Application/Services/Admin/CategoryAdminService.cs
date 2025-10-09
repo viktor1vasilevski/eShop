@@ -27,7 +27,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request)
     {
-        var orderBy = SortHelper.BuildCategorySort(request.SortBy, request.SortDirection);
+        var orderBy = SortHelper.BuildSort<Category>(request.SortBy, request.SortDirection);
 
         var (categories, totalCount) = await _categoryAdminService.QueryAsync(
             queryBuilder: q => q
@@ -197,7 +197,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         var (categories, _) = await _categoryAdminService.QueryAsync(
             queryBuilder: q => q
                 .Where(c => c.Id == id && !c.IsDeleted).AsNoTracking(),
-            includes: [ c => c.Products, c => c.Children ],
+            includeBuilder: c => c.Include(c => c.Products).Include(c => c.Children),
             selector: c => new CategoryDetailsAdminDto
             {
                 Id = c.Id,

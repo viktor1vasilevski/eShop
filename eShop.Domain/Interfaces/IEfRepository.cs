@@ -8,7 +8,7 @@ public interface IEfRepository<TEntity> : IRepository<TEntity> where TEntity : c
     Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
         Expression<Func<TEntity, TResult>>? selector = null,
-        Expression<Func<TEntity, object>>[]? includes = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         int? skip = null,
         int? take = null);

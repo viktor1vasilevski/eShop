@@ -1,11 +1,17 @@
 ﻿using eShop.Domain.Models;
+using eShop.Domain.Models.Base;
 
 namespace eShop.Application.Helpers;
 
 public static class SortHelper
 {
-    public static Func<IQueryable<Category>, IOrderedQueryable<Category>>? BuildCategorySort(
-        string? sortBy, string? direction)
+    /// <summary>
+    /// Builds a dynamic OrderBy function for any entity type with Created/LastModified properties.
+    /// </summary>
+    public static Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? BuildSort<TEntity>(
+        string? sortBy,
+        string? direction)
+        where TEntity : AuditableBaseEntity
     {
         if (string.IsNullOrWhiteSpace(sortBy) || string.IsNullOrWhiteSpace(direction))
             return null;
@@ -15,14 +21,16 @@ public static class SortHelper
         return sortBy.Trim().ToLower() switch
         {
             "created" => asc
-                ? q => q.OrderBy(x => x.Created)
-                : q => q.OrderByDescending(x => x.Created),
+                ? q => q.OrderBy(e => e.Created)
+                : q => q.OrderByDescending(e => e.Created),
+
             "lastmodified" => asc
-                ? q => q.OrderBy(x => x.LastModified)
-                : q => q.OrderByDescending(x => x.LastModified),
+                ? q => q.OrderBy(e => e.LastModified)
+                : q => q.OrderByDescending(e => e.LastModified),
+
             _ => asc
-                ? q => q.OrderBy(x => x.Created)
-                : q => q.OrderByDescending(x => x.Created)
+                ? q => q.OrderBy(e => e.Created)
+                : q => q.OrderByDescending(e => e.Created)
         };
     }
 }

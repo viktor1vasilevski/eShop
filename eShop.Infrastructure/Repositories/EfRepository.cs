@@ -66,18 +66,17 @@ public class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository<TEntity
     }
 
     public async Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
-        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
-        Expression<Func<TEntity, TResult>>? selector = null,
-        Expression<Func<TEntity, object>>[]? includes = null,
-        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-        int? skip = null,
-        int? take = null)
+    Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+    Expression<Func<TEntity, TResult>>? selector = null,
+    Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+    Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+    int? skip = null,
+    int? take = null)
     {
         IQueryable<TEntity> query = _dbSet;
 
-        if (includes != null)
-            foreach (var include in includes)
-                query = query.Include(include);
+        if (includeBuilder != null)
+            query = includeBuilder(query);
 
         if (queryBuilder != null)
             query = queryBuilder(query);
@@ -96,6 +95,7 @@ public class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository<TEntity
         var result = await query.ToListAsync();
         return ((IEnumerable<TResult>)result, totalCount);
     }
+
 
 }
 
