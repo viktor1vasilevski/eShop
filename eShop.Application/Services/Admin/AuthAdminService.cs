@@ -13,21 +13,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Admin;
 
-public class AuthAdminService : IAuthService
+public class AuthAdminService(IUnitOfWork _uow, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthService
 {
-    private readonly IEfRepository<User> _userQueryRepo;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly IConfiguration _configuration;
+    private readonly IEfRepository<User> _userRepository = _uow.GetEfRepository<User>();
 
-    public AuthAdminService(IUnitOfWork uow, IPasswordHasher passwordHasher, IConfiguration configuration)
-    {
-        _userQueryRepo = uow.GetEfRepository<User>();
-        _passwordHasher = passwordHasher;
-        _configuration = configuration;
-    }
+
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {
-        var user = await _userQueryRepo.FirstOrDefaultAsync(x => x.Username == request.Username);
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username == request.Username);
 
         if (user is null || user?.Username != request.Username || user?.Role != Role.Admin || 
             !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))

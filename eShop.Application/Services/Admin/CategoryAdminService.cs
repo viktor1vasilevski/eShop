@@ -13,6 +13,7 @@ using eShop.Domain.Interfaces;
 using eShop.Domain.Interfaces.Base;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObject;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static eShop.Domain.Models.Category;
 
@@ -22,6 +23,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 {
     private readonly IEfRepository<Category> _categoryAdminService = _uow.GetEfRepository<Category>();
     private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
+
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request)
     {
@@ -194,7 +196,7 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
     {
         var (categories, _) = await _categoryAdminService.QueryAsync(
             queryBuilder: q => q
-                .Where(c => c.Id == id && !c.IsDeleted),
+                .Where(c => c.Id == id && !c.IsDeleted).AsNoTracking(),
             includes: [ c => c.Products, c => c.Children ],
             selector: c => new CategoryDetailsAdminDto
             {
