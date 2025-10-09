@@ -27,16 +27,17 @@ public class AuthAdminService : IAuthService
     }
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {
-        var normalizedUsername = request.Username.Trim().ToLowerInvariant();
-        var users = await _userQueryRepo.FindAsync(x => x.Username.ToLower() == normalizedUsername);
-        var user = users.FirstOrDefault();
+        var user = await _userQueryRepo.FirstOrDefaultAsync(x => x.Username == request.Username);
 
-        if (user is null || user?.Role != Role.Admin || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
+        if (user is null || user?.Username != request.Username || user?.Role != Role.Admin || 
+            !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
+        {
             return new ApiResponse<LoginDto>
             {
                 Message = AdminAuthConstants.InvalidCredentials,
                 Status = ResponseStatus.Unauthorized
             };
+        }
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 

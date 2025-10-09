@@ -1,9 +1,12 @@
 using eShop.Api.Admin.Extensions;
 using eShop.Api.Admin.Middlewares;
-using eShop.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
-using eShop.Infrastructure.IoC;
 using eShop.Application.Interfaces.Shared;
+using eShop.Application.Validations.Admin.Category;
+using eShop.Infrastructure.Context;
+using eShop.Infrastructure.IoC;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAdminIoCServices();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>(ServiceLifetime.Transient);
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

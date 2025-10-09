@@ -36,6 +36,9 @@ public class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository<TEntity
         return await query.ToListAsync();
     }
 
+    public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate) =>
+        await _dbSet.FirstOrDefaultAsync(predicate);
+
     public async Task AddAsync(TEntity entity)
     {
         await _dbSet.AddAsync(entity);
