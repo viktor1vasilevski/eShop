@@ -96,6 +96,24 @@ public class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository<TEntity
         return ((IEnumerable<TResult>)result, totalCount);
     }
 
+    public async Task<TResult?> GetSingleAsync<TResult>(
+        Expression<Func<TEntity, bool>> predicate,
+        Expression<Func<TEntity, TResult>>? selector = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null)
+    {
+        IQueryable<TEntity> query = _dbSet;
+
+        if (includeBuilder != null)
+            query = includeBuilder(query);
+
+        query = query.Where(predicate);
+
+        if (selector != null)
+            return await query.Select(selector).FirstOrDefaultAsync();
+
+        return await query.Cast<TResult>().FirstOrDefaultAsync();
+    }
+
 
 }
 

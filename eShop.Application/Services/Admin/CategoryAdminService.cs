@@ -14,12 +14,11 @@ using eShop.Domain.Interfaces.Base;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObject;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using static eShop.Domain.Models.Category;
 
 namespace eShop.Application.Services.Admin;
 
-public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService> _logger) : ICategoryAdminService
+public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 {
     private readonly IEfRepository<Category> _categoryAdminService = _uow.GetEfRepository<Category>();
     private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
@@ -96,11 +95,6 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
             };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unexpected error while creating category");
-            throw;
         }
     }
 
@@ -194,10 +188,9 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
 
     public async Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id)
     {
-        var (categories, _) = await _categoryAdminService.QueryAsync(
-            queryBuilder: q => q
-                .Where(c => c.Id == id && !c.IsDeleted).AsNoTracking(),
-            includeBuilder: c => c.Include(c => c.Products).Include(c => c.Children),
+        var category = await _categoryAdminService.GetSingleAsync(
+            filter: c => c.Id == id && !c.IsDeleted,
+            includeBuilder: q => q.Include(c => c.Products).Include(c => c.Children),
             selector: c => new CategoryDetailsAdminDto
             {
                 Id = c.Id,
@@ -214,20 +207,14 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
                     .OrderBy(c => c.Name)
                     .Select(c => new CategoryRefDto { Id = c.Id, Name = c.Name })
                     .ToList()
-            },
-            take: 1
-        );
-
-        var category = categories.FirstOrDefault();
+            });
 
         if (category is null)
-        {
             return new ApiResponse<CategoryDetailsAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminCategoryConstants.CategoryDoesNotExist
             };
-        }
 
         return new ApiResponse<CategoryDetailsAdminDto>
         {
@@ -236,9 +223,9 @@ public class CategoryAdminService(IUnitOfWork _uow, ILogger<CategoryAdminService
         };
     }
 
+
     public async Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id)
     {
-        // 1️⃣ Fetch all categories as flat DTOs
         var (allCategories, _) = await _categoryAdminService.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
             selector: c => new CategoryFlatDto

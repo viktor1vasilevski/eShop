@@ -92,4 +92,25 @@ public class Category : AuditableBaseEntity
         Traverse(rootId);
         return result;
     }
+
+    public record CategoryPathItem(Guid Id, string Name);
+
+    public static List<CategoryPathItem> BuildPath(Guid id, Dictionary<Guid, Category> lookup)
+    {
+        var result = new List<CategoryPathItem>();
+        var currentId = id;
+
+        while (lookup.TryGetValue(currentId, out var current))
+        {
+            result.Insert(0, new CategoryPathItem(current.Id, current.Name));
+
+            if (current.ParentCategoryId == null)
+                break;
+
+            currentId = current.ParentCategoryId.Value;
+        }
+
+        return result;
+    }
+
 }

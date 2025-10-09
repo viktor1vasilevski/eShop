@@ -5,12 +5,13 @@ namespace eShop.Domain.Interfaces;
 
 public interface IEfRepository<TEntity> : IRepository<TEntity> where TEntity : class
 {
-    Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
-        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+    Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+        Expression<Func<TEntity, TResult>>? selector = null, Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, int? skip = null, int? take = null);
+
+    Task<TResult?> GetSingleAsync<TResult>(
+        Expression<Func<TEntity, bool>> filter,
         Expression<Func<TEntity, TResult>>? selector = null,
-        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
-        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-        int? skip = null,
-        int? take = null);
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null);
 }
 
