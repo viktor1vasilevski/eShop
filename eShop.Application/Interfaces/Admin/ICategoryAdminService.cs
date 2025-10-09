@@ -8,14 +8,14 @@ namespace eShop.Application.Interfaces.Admin;
 public interface ICategoryAdminService
 {
     // Queries
-    Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request);
-    Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id);
-    Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id);
-    Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync();
-
+    Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync(CancellationToken cancellationToken = default);
 
     // Commands
-    Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryRequest request);
-    Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request);
-    Task<ApiResponse<CategoryAdminDto>> DeleteCategoryAsync(Guid id);
+    Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CategoryAdminDto>> DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default);
 }
+

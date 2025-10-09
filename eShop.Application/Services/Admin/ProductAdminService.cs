@@ -22,7 +22,7 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
     private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
 
 
-    public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request)
+    public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Product>(request.SortBy, request.SortDirection);
 
@@ -45,7 +45,8 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
             includeBuilder: x => x.Include(x => x.Category),
             orderBy: orderBy,
             skip: request.Skip,
-            take: request.Take
+            take: request.Take,
+            cancellationToken: cancellationToken
         );
 
         return new ApiResponse<List<ProductAdminDto>>
@@ -56,12 +57,14 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
         };
     }
 
-    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id)
+    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productAdminService.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
             includeBuilder: q => q.Include(p => p.Category),
-            selector: p => p);
+            selector: p => p,
+            cancellationToken: cancellationToken
+        );
 
         if (product is null)
             return new ApiResponse<ProductDetailsAdminDto>
@@ -72,7 +75,8 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
 
         var (categories, _) = await _categoryAdminService.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
-            selector: c => c
+            selector: c => c,
+            cancellationToken: cancellationToken
         );
 
         var lookup = categories.ToDictionary(c => c.Id, c => c);
@@ -99,21 +103,20 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
         };
     }
 
-    public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id)
+    public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productAdminService.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
-            selector: p => p
+            selector: p => p,
+            cancellationToken: cancellationToken
         );
 
         if (product is null)
-        {
             return new ApiResponse<ProductEditAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminProductConstants.ProductDoesNotExist
             };
-        }
 
         var dto = new ProductEditAdminDto
         {
@@ -133,49 +136,48 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
         };
     }
 
-
-    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductRequest request)
+    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductRequest request, CancellationToken cancellationToken = default)
     {
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLowerInvariant();
 
-        var categoryExists = await _categoryAdminService.ExistsAsync(c =>
-            c.Id == request.CategoryId && !c.IsDeleted);
+        var categoryExists = await _categoryAdminService.ExistsAsync(
+            c => c.Id == request.CategoryId && !c.IsDeleted,
+            cancellationToken: cancellationToken
+        );
 
         if (!categoryExists)
-        {
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminCategoryConstants.CategoryDoesNotExist
             };
-        }
 
-        var hasChildren = await _categoryAdminService.ExistsAsync(c =>
-            c.ParentCategoryId == request.CategoryId && !c.IsDeleted);
+        var hasChildren = await _categoryAdminService.ExistsAsync(
+            c => c.ParentCategoryId == request.CategoryId && !c.IsDeleted,
+            cancellationToken: cancellationToken
+        );
 
         if (hasChildren)
-        {
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = AdminProductConstants.ProductsAllowedOnlyOnLeafCategories
             };
-        }
 
-        var nameTaken = await _productAdminService.ExistsAsync(p =>
-            p.CategoryId == request.CategoryId &&
-            !p.IsDeleted &&
-            p.Name.ToLower() == normalizedName);
+        var nameTaken = await _productAdminService.ExistsAsync(
+            p => p.CategoryId == request.CategoryId &&
+                 !p.IsDeleted &&
+                 p.Name.ToLower() == normalizedName,
+            cancellationToken: cancellationToken
+        );
 
         if (nameTaken)
-        {
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.Conflict,
                 Message = AdminProductConstants.ProductExist
             };
-        }
 
         try
         {
@@ -191,8 +193,8 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
                 image: image!
             );
 
-            await _productAdminService.AddAsync(product);
-            await _uow.SaveChangesAsync();
+            await _productAdminService.AddAsync(product, cancellationToken);
+            await _uow.SaveChangesAsync(cancellationToken);
 
             return new ApiResponse<ProductAdminDto>
             {
@@ -219,24 +221,23 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
         }
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id)
+    public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productAdminService.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
-            selector: p => p
+            selector: p => p,
+            cancellationToken: cancellationToken
         );
 
         if (product is null)
-        {
             return new ApiResponse<ProductAdminDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminProductConstants.ProductDoesNotExist
             };
-        }
 
         product.SoftDelete();
-        await _uow.SaveChangesAsync();
+        await _uow.SaveChangesAsync(cancellationToken);
 
         return new ApiResponse<ProductAdminDto>
         {
@@ -245,12 +246,12 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
         };
     }
 
-
-    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductRequest request)
+    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductRequest request, CancellationToken cancellationToken = default)
     {
         var product = await _productAdminService.GetSingleAsync(
             filter: p => !p.IsDeleted && p.Id == id,
-            selector: p => p
+            selector: p => p,
+            cancellationToken: cancellationToken
         );
 
         if (product is null)
@@ -268,7 +269,8 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
                 p => p.CategoryId == request.CategoryId &&
                      !p.IsDeleted &&
                      p.Name.ToLower() == request.Name.Trim().ToLower() &&
-                     p.Id != id
+                     p.Id != id,
+                cancellationToken: cancellationToken
             );
 
             if (nameTaken)
@@ -299,7 +301,7 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
                 image
             );
 
-            await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync(cancellationToken);
 
             return new ApiResponse<ProductAdminDto>
             {
@@ -316,6 +318,4 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
             };
         }
     }
-
-
 }

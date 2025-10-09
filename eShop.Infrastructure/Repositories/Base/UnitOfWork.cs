@@ -34,7 +34,7 @@ public class UnitOfWork : IUnitOfWork
         return repository;
     }
 
-    public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
     public void SaveChanges() => _context.SaveChanges();
     public void Dispose() => _context.Dispose();
 }
