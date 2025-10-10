@@ -4,6 +4,7 @@ using eShop.Application.Services.Admin;
 using eShop.Domain.Interfaces.Base;
 using eShop.Infrastructure.Repositories.Base;
 using eShop.Infrastructure.Services;
+using eShop.Infrastructure.Services.Admin;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace eShop.Infrastructure.IoC;
@@ -20,7 +21,7 @@ public static class DependencyContainer
         //services.AddScoped<IOrderAdminService, OrderAdminService>();
 
         //services.AddScoped<IUnitOfWork, UnitOfWork>();
-        //services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
+        services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

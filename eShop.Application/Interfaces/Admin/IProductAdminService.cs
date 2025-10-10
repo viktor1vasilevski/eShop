@@ -10,6 +10,7 @@ public interface IProductAdminService
     Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken = default);
 
     // Commands
     Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductRequest request, CancellationToken cancellationToken = default);

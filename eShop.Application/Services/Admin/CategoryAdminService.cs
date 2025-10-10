@@ -202,7 +202,8 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         var category = await _categoryAdminService.GetSingleAsync(
             filter: c => c.Id == id && !c.IsDeleted,
             includeBuilder: q => q.Include(c => c.Products)
-                                  .Include(c => c.Children),
+                                  .Include(c => c.Children)
+                                  .AsNoTracking(),
             selector: c => new CategoryDetailsAdminDto
             {
                 Id = c.Id,

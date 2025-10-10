@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Admin;
 
-public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
+public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IProductAdminService
 {
     private readonly IEfRepository<Category> _categoryAdminService = _uow.GetEfRepository<Category>();
     private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
@@ -318,4 +318,25 @@ public class ProductAdminService(IUnitOfWork _uow) : IProductAdminService
             };
         }
     }
+
+    public async Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _openAIProductDescriptionGenerator.GenerateOpenAIProductDescriptionAsync(request, cancellationToken);
+
+        if (response.StartsWith("OpenAI API error:", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ApiResponse<string>
+            {
+                Status = ResponseStatus.Error,
+                Message = response
+            };
+        }
+
+        return new ApiResponse<string>
+        {
+            Status = ResponseStatus.Success,
+            Data = response
+        };
+    }
+
 }
