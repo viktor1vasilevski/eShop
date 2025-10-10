@@ -4,35 +4,34 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace eShop.Api.Admin.Extensions
+namespace eShop.Api.Admin.Extensions;
+
+public static class JwtServiceCollectionExtension
 {
-    public static class JwtServiceCollectionExtension
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]));
+
+        var tokenValidationParameters = new TokenValidationParameters
         {
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            IssuerSigningKey = signingKey,
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+            NameClaimType = JwtRegisteredClaimNames.Sub,
+            RoleClaimType = ClaimTypes.Role
+        };
 
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]));
-
-            var tokenValidationParameters = new TokenValidationParameters
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(jwt =>
             {
-                IssuerSigningKey = signingKey,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero,
-                NameClaimType = JwtRegisteredClaimNames.Sub,
-                RoleClaimType = ClaimTypes.Role
-            };
+                jwt.MapInboundClaims = false;
+                jwt.TokenValidationParameters = tokenValidationParameters;
+            });
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(jwt =>
-                {
-                    jwt.MapInboundClaims = false;
-                    jwt.TokenValidationParameters = tokenValidationParameters;
-                });
-
-            return services;
-        }
+        return services;
     }
 }
