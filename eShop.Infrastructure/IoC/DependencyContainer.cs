@@ -15,14 +15,13 @@ public static class DependencyContainer
 {
     public static IServiceCollection AddAdminIoCServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AuthAdminService>();
+        services.AddScoped<IAuthAdminService, AuthAdminService>();
 
         services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         services.AddScoped<IProductAdminService, ProductAdminService>();
         //services.AddScoped<IUserAdminService, UserAdminService>();
         //services.AddScoped<IOrderAdminService, OrderAdminService>();
 
-        //services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -36,14 +35,13 @@ public static class DependencyContainer
         //services.AddScoped<IEmailService, MailKitEmailService>();
         //services.AddHostedService<EmailBackgroundService>();
 
-        //services.AddScoped<ICustomerAuthService, CustomerAuthService>();
+        services.AddScoped<IAuthCustomerService, AuthCustomerService>();
 
         services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
         services.AddScoped<IProductCustomerService, ProductCustomerService>();
-        //services.AddScoped<IBasketCustomerService, BasketCustomerService>();
-        //services.AddScoped<IOrderCustomerService, OrderCustomerService>();
-        //services.AddScoped<ICommentCustomerService, CommentCustomerService>();
-        //services.AddScoped<IOrderCustomerService, OrderCustomerService>();
+        services.AddScoped<IBasketCustomerService, BasketCustomerService>();
+        services.AddScoped<IOrderCustomerService, OrderCustomerService>();
+        services.AddScoped<ICommentCustomerService, CommentCustomerService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();

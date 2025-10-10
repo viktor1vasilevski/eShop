@@ -10,7 +10,7 @@ namespace eShop.Application.Services.Customer;
 
 public class ProductCustomerService(IUnitOfWork _uow) : IProductCustomerService
 {
-    private readonly IEfRepository<Product> _productCustomerService = _uow.GetEfRepository<Product>();
+    private readonly IEfRepository<Product> _productService = _uow.GetEfRepository<Product>();
 
 
     public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
