@@ -1,6 +1,8 @@
 ﻿using eShop.Application.Interfaces.Admin;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Interfaces.Shared;
 using eShop.Application.Services.Admin;
+using eShop.Application.Services.Customer;
 using eShop.Domain.Interfaces.Base;
 using eShop.Infrastructure.Repositories.Base;
 using eShop.Infrastructure.Services;
@@ -36,14 +38,14 @@ public static class DependencyContainer
 
         //services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 
-        //services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
-        //services.AddScoped<IProductCustomerService, ProductCustomerService>();
+        services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
+        services.AddScoped<IProductCustomerService, ProductCustomerService>();
         //services.AddScoped<IBasketCustomerService, BasketCustomerService>();
         //services.AddScoped<IOrderCustomerService, OrderCustomerService>();
         //services.AddScoped<ICommentCustomerService, CommentCustomerService>();
         //services.AddScoped<IOrderCustomerService, OrderCustomerService>();
 
-        //services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;

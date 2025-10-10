@@ -18,15 +18,15 @@ namespace eShop.Application.Services.Admin;
 
 public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IProductAdminService
 {
-    private readonly IEfRepository<Category> _categoryAdminService = _uow.GetEfRepository<Category>();
-    private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
+    private readonly IEfRepository<Category> _categoryAdminRepository = _uow.GetEfRepository<Category>();
+    private readonly IEfRepository<Product> _productAdminRepository = _uow.GetEfRepository<Product>();
 
 
     public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Product>(request.SortBy, request.SortDirection);
 
-        var (products, totalCount) = await _productAdminService.QueryAsync(
+        var (products, totalCount) = await _productAdminRepository.QueryAsync(
             queryBuilder: q => q
                 .Where(x => !x.IsDeleted)
                 .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
@@ -59,7 +59,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
 
     public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var product = await _productAdminService.GetSingleAsync(
+        var product = await _productAdminRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
             includeBuilder: q => q.Include(p => p.Category),
             selector: p => p,
@@ -73,7 +73,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
                 Message = AdminProductConstants.ProductDoesNotExist
             };
 
-        var (categories, _) = await _categoryAdminService.QueryAsync(
+        var (categories, _) = await _categoryAdminRepository.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
             selector: c => c,
             cancellationToken: cancellationToken
@@ -105,7 +105,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
 
     public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var product = await _productAdminService.GetSingleAsync(
+        var product = await _productAdminRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
             selector: p => p,
             cancellationToken: cancellationToken
@@ -141,7 +141,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLowerInvariant();
 
-        var categoryExists = await _categoryAdminService.ExistsAsync(
+        var categoryExists = await _categoryAdminRepository.ExistsAsync(
             c => c.Id == request.CategoryId && !c.IsDeleted,
             cancellationToken: cancellationToken
         );
@@ -153,7 +153,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
                 Message = AdminCategoryConstants.CategoryDoesNotExist
             };
 
-        var hasChildren = await _categoryAdminService.ExistsAsync(
+        var hasChildren = await _categoryAdminRepository.ExistsAsync(
             c => c.ParentCategoryId == request.CategoryId && !c.IsDeleted,
             cancellationToken: cancellationToken
         );
@@ -165,7 +165,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
                 Message = AdminProductConstants.ProductsAllowedOnlyOnLeafCategories
             };
 
-        var nameTaken = await _productAdminService.ExistsAsync(
+        var nameTaken = await _productAdminRepository.ExistsAsync(
             p => p.CategoryId == request.CategoryId &&
                  !p.IsDeleted &&
                  p.Name.ToLower() == normalizedName,
@@ -193,7 +193,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
                 image: image!
             );
 
-            await _productAdminService.AddAsync(product, cancellationToken);
+            await _productAdminRepository.AddAsync(product, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
             return new ApiResponse<ProductAdminDto>
@@ -223,7 +223,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
 
     public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var product = await _productAdminService.GetSingleAsync(
+        var product = await _productAdminRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
             selector: p => p,
             cancellationToken: cancellationToken
@@ -248,7 +248,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
 
     public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductRequest request, CancellationToken cancellationToken = default)
     {
-        var product = await _productAdminService.GetSingleAsync(
+        var product = await _productAdminRepository.GetSingleAsync(
             filter: p => !p.IsDeleted && p.Id == id,
             selector: p => p,
             cancellationToken: cancellationToken
@@ -265,7 +265,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
 
         if (!string.Equals(product.Name, request.Name, StringComparison.OrdinalIgnoreCase))
         {
-            var nameTaken = await _productAdminService.ExistsAsync(
+            var nameTaken = await _productAdminRepository.ExistsAsync(
                 p => p.CategoryId == request.CategoryId &&
                      !p.IsDeleted &&
                      p.Name.ToLower() == request.Name.Trim().ToLower() &&

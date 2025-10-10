@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Constants\Shared\" />
+    <Folder Include="Requests\Customer\Category\" />
   </ItemGroup>
 
 </Project>

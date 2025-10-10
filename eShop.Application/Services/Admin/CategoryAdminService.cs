@@ -20,15 +20,15 @@ namespace eShop.Application.Services.Admin;
 
 public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 {
-    private readonly IEfRepository<Category> _categoryAdminService = _uow.GetEfRepository<Category>();
-    private readonly IEfRepository<Product> _productAdminService = _uow.GetEfRepository<Product>();
+    private readonly IEfRepository<Category> _categoryAdminRepository = _uow.GetEfRepository<Category>();
+    private readonly IEfRepository<Product> _productAdminRepository = _uow.GetEfRepository<Product>();
 
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Category>(request.SortBy, request.SortDirection);
 
-        var (categories, totalCount) = await _categoryAdminService.QueryAsync(
+        var (categories, totalCount) = await _categoryAdminRepository.QueryAsync(
             queryBuilder: q => q
                 .WhereIf(true, x => !x.IsDeleted)
                 .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
@@ -58,7 +58,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLower();
 
-        if (await _categoryAdminService.ExistsAsync(
+        if (await _categoryAdminRepository.ExistsAsync(
                 x => x.Name.ToLower() == normalizedName &&
                      x.ParentCategoryId == request.ParentCategoryId &&
                      !x.IsDeleted,
@@ -78,7 +78,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
             var category = Category.Create(trimmedName, image, request.ParentCategoryId);
 
-            await _categoryAdminService.AddAsync(category, cancellationToken);
+            await _categoryAdminRepository.AddAsync(category, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
             return new ApiResponse<CategoryAdminDto>
@@ -106,7 +106,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public async Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryAdminService.GetByIdAsync(id, cancellationToken);
+        var category = await _categoryAdminRepository.GetByIdAsync(id, cancellationToken);
         if (category is null)
             return new ApiResponse<CategoryAdminDto>
             {
@@ -117,7 +117,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         var trimmedName = request.Name?.Trim() ?? string.Empty;
         var normalizedName = trimmedName.ToLower();
 
-        if (await _categoryAdminService.ExistsAsync(x =>
+        if (await _categoryAdminRepository.ExistsAsync(x =>
                 x.Id != id &&
                 x.ParentCategoryId == request.ParentCategoryId &&
                 x.Name.ToLower() == normalizedName &&
@@ -151,7 +151,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
                     };
                 }
 
-                var allCategories = await _categoryAdminService.QueryAsync(
+                var allCategories = await _categoryAdminRepository.QueryAsync(
                     queryBuilder: q => q.Where(c => !c.IsDeleted),
                     selector: c => new Category.CategoryNode(c.Id, c.ParentCategoryId),
                     cancellationToken: cancellationToken
@@ -169,7 +169,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
             }
 
             category.Update(trimmedName, image, request.ParentCategoryId);
-            _categoryAdminService.Update(category);
+            _categoryAdminRepository.Update(category);
             await _uow.SaveChangesAsync(cancellationToken);
 
             // 6️⃣ Return result
@@ -199,7 +199,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public async Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryAdminService.GetSingleAsync(
+        var category = await _categoryAdminRepository.GetSingleAsync(
             filter: c => c.Id == id && !c.IsDeleted,
             includeBuilder: q => q.Include(c => c.Products)
                                   .Include(c => c.Children)
@@ -248,7 +248,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public async Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var (allCategories, _) = await _categoryAdminService.QueryAsync(
+        var (allCategories, _) = await _categoryAdminRepository.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
             selector: c => new CategoryFlatDto
             {
@@ -260,7 +260,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
             cancellationToken: cancellationToken
         );
 
-        var entity = (await _categoryAdminService.FindAsync(
+        var entity = (await _categoryAdminRepository.FindAsync(
             predicate: c => c.Id == id && !c.IsDeleted,
             cancellationToken: cancellationToken
         )).FirstOrDefault();
@@ -322,7 +322,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync(CancellationToken cancellationToken = default)
     {
-        var (allCategories, _) = await _categoryAdminService.QueryAsync(
+        var (allCategories, _) = await _categoryAdminRepository.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
             selector: c => new CategoryFlatDto
             {
@@ -345,7 +345,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
     public async Task<ApiResponse<CategoryAdminDto>> DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var exists = await _categoryAdminService.ExistsAsync(c => !c.IsDeleted && c.Id == id, cancellationToken);
+        var exists = await _categoryAdminRepository.ExistsAsync(c => !c.IsDeleted && c.Id == id, cancellationToken);
         if (!exists)
             return new ApiResponse<CategoryAdminDto>
             {
@@ -353,7 +353,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
                 Message = AdminCategoryConstants.CategoryDoesNotExist
             };
 
-        var (allCategories, _) = await _categoryAdminService.QueryAsync(
+        var (allCategories, _) = await _categoryAdminRepository.QueryAsync(
             queryBuilder: c => c.Where(c => !c.IsDeleted),
             selector: c => new CategoryNode(c.Id, c.ParentCategoryId),
             cancellationToken: cancellationToken
@@ -361,7 +361,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
 
         var idsToDelete = Category.GetDescendantIds(allCategories.ToList(), id);
 
-        var (productIds, _) = await _productAdminService.QueryAsync(
+        var (productIds, _) = await _productAdminRepository.QueryAsync(
             queryBuilder: p => p.Where(p => idsToDelete.Contains(p.CategoryId)),
             selector: p => p.Id,
             cancellationToken: cancellationToken
@@ -374,7 +374,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
                 Message = string.Format(AdminCategoryConstants.CategoryHasProducts, productIds.Count())
             };
 
-        var (categoriesToDelete, _) = await _categoryAdminService.QueryAsync(
+        var (categoriesToDelete, _) = await _categoryAdminRepository.QueryAsync(
             queryBuilder: c => c.Where(c => idsToDelete.Contains(c.Id)),
             selector: c => c,
             cancellationToken: cancellationToken

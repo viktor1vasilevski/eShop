@@ -2,6 +2,7 @@ using eShop.Api.Customer.Extensions;
 using eShop.Api.Customer.Middlewares;
 using eShop.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using eShop.Infrastructure.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddCustomerIoCService();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
