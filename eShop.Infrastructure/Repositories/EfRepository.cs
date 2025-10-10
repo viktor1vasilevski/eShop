@@ -76,7 +76,7 @@ public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity>
         int? take = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> query = _dbSet;
+        IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
         if (includeBuilder != null)
             query = includeBuilder(query);
