@@ -27,14 +27,14 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateCategoryAdminRequest request)
     {
         var response = await _categoryAdminService.CreateCategoryAsync(request);
         return HandleResponse(response);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCategoryRequest request)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCategoryAdminRequest request)
     {
         var response = await _categoryAdminService.UpdateCategoryAsync(id, request);
         return HandleResponse(response);

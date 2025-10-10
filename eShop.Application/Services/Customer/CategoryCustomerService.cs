@@ -5,7 +5,6 @@ using eShop.Domain.Interfaces;
 using eShop.Domain.Interfaces.Base;
 using eShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
 
 namespace eShop.Application.Services.Customer;
 

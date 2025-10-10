@@ -4,6 +4,7 @@ using eShop.Application.Interfaces.Shared;
 using eShop.Application.Services.Admin;
 using eShop.Application.Services.Customer;
 using eShop.Domain.Interfaces.Base;
+using eShop.Infrastructure.BackgroundServices;
 using eShop.Infrastructure.Repositories.Base;
 using eShop.Infrastructure.Services;
 using eShop.Infrastructure.Services.Admin;
@@ -31,9 +32,9 @@ public static class DependencyContainer
 
     public static IServiceCollection AddCustomerIoCService(this IServiceCollection services)
     {
-        //services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
-        //services.AddScoped<IEmailService, MailKitEmailService>();
-        //services.AddHostedService<EmailBackgroundService>();
+        services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
+        services.AddScoped<IEmailService, MailKitEmailService>();
+        services.AddHostedService<EmailBackgroundService>();
 
         services.AddScoped<IAuthCustomerService, AuthCustomerService>();
 

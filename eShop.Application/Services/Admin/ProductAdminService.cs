@@ -136,7 +136,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
         };
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLowerInvariant();
@@ -246,7 +246,7 @@ public class ProductAdminService(IUnitOfWork _uow, IOpenAIProductDescriptionGene
         };
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => !p.IsDeleted && p.Id == id,

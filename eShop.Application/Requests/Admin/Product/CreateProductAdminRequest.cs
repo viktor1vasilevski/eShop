@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Requests.Admin.Product;
 
-public class CreateProductRequest
+public class CreateProductAdminRequest
 {
     public string Name { get; set; } = string.Empty;
     public Guid CategoryId { get; set; }

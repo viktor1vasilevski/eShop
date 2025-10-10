@@ -14,8 +14,8 @@ public interface ICategoryAdminService
     Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync(CancellationToken cancellationToken = default);
 
     // Commands
-    Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryAdminRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryAdminRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<CategoryAdminDto>> DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default);
 }
 

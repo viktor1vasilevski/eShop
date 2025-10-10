@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Requests.Admin.Category;
 
-public class CreateCategoryRequest
+public class CreateCategoryAdminRequest
 {
     public string Name { get; set; } = string.Empty;
     public Guid? ParentCategoryId { get; set; }

@@ -53,7 +53,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         };
     }
 
-    public async Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLower();
@@ -104,7 +104,7 @@ public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
         }
     }
 
-    public async Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
         var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
         if (category is null)

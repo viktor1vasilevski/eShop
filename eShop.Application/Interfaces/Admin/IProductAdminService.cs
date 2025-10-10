@@ -13,8 +13,8 @@ public interface IProductAdminService
     Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken = default);
 
     // Commands
-    Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default);
 }
 

@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace eShop.Application.Validations.Admin.Category
 {
-    public class CreateCategoryRequestValidator : AbstractValidator<CreateCategoryRequest>
+    public class CreateCategoryRequestValidator : AbstractValidator<CreateCategoryAdminRequest>
     {
         public CreateCategoryRequestValidator()
         {

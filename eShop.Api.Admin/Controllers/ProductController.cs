@@ -28,14 +28,14 @@ namespace eShop.Api.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] CreateProductAdminRequest request, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.CreateProductAsync(request, cancellationToken);
             return HandleResponse(response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateProductAdminRequest request, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.UpdateProductAsync(id, request, cancellationToken);
             return HandleResponse(response);
