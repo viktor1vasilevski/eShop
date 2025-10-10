@@ -4,7 +4,9 @@ using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Interfaces.Shared;
+using eShop.Application.Requests.Customer.Auth;
 using eShop.Application.Requests.Shared.Auth;
+using eShop.Application.Responses.Customer.Auth;
 using eShop.Application.Responses.Shared.Auth;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Enums;
@@ -49,5 +51,10 @@ public class AuthCustomerService(IUnitOfWork _uow, IPasswordHasher _passwordHash
                 Role = user.Role
             }
         };
+    }
+
+    public async Task<ApiResponse<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request)
+    {
+        throw new NotImplementedException();
     }
 }
