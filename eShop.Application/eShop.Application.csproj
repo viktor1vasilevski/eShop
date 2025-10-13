@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DTOs\Customer\Category\" />
     <Folder Include="Requests\Customer\Category\" />
   </ItemGroup>
 

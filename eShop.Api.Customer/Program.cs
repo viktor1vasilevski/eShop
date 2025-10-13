@@ -24,7 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Services.AddCustomerIoCService();
+builder.Services.AddCustomerIoCService(builder.Configuration);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

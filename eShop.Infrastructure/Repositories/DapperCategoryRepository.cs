@@ -2,48 +2,55 @@
 using eShop.Domain.Interfaces;
 using System.Data;
 
-namespace eShop.Infrastructure.Repositories
+namespace eShop.Infrastructure.Repositories;
+
+public class DapperCategoryRepository(IDbConnection _dbConnection) : IDapperCategoryRepository
 {
-    public class DapperCategoryRepository : IDapperCategoryRepository
+
+
+    public async Task<List<CategoryTreeDto>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken)
     {
-        private readonly IDbConnection _dbConnection;
+        const string categoriesSql = @"
+            SELECT Id, Name, ParentCategoryId
+            FROM Categories
+            WHERE IsDeleted = 0
+            ORDER BY Name;";
 
-        public DapperCategoryRepository(IDbConnection dbConnection)
-        {
-            _dbConnection = dbConnection;
-        }
+        var categoriesCommand = new CommandDefinition(categoriesSql, cancellationToken: cancellationToken);
+        var allCategories = (await _dbConnection.QueryAsync<CategoryTreeDto>(categoriesCommand)).ToList();
 
-        public async Task<List<CategoryTreeDto>> GetCategoryTreeForMenuAsync()
-        {
-            var sql = @"
-                SELECT Id, Name, ParentCategoryId
-                FROM Categories
-                WHERE IsDeleted = 0
-            ";
+        const string productCategoriesSql = @"
+            SELECT DISTINCT CategoryId
+            FROM Products
+            WHERE IsDeleted = 0;";
 
-            var categories = (await _dbConnection.QueryAsync<CategoryTreeDto>(sql)).ToList();
+        var productCategoriesCommand = new CommandDefinition(productCategoriesSql, cancellationToken: cancellationToken);
+        var categoriesWithProducts = (await _dbConnection.QueryAsync<Guid>(productCategoriesCommand)).ToHashSet();
 
-            return BuildCustomerCategoryTree(categories);
-        }
-
-        private List<CategoryTreeDto> BuildCustomerCategoryTree(List<CategoryTreeDto> categories, Guid? parentId = null)
-        {
-            return categories
-                .Where(c => c.ParentCategoryId == parentId)
-                .Select(c =>
-                {
-                    var children = BuildCustomerCategoryTree(categories, c.Id);
-
-                    bool isLeaf = !children.Any();
-
-                    return new CategoryTreeDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        Children = children
-                    };
-                })
-                .ToList();
-        }
+        return BuildCategoryTreeWithProducts(allCategories, categoriesWithProducts);
     }
+
+    private List<CategoryTreeDto> BuildCategoryTreeWithProducts(
+        List<CategoryTreeDto> allCategories,
+        HashSet<Guid> categoriesWithProducts,
+        Guid? parentId = null)
+    {
+        var result = new List<CategoryTreeDto>();
+
+        foreach (var category in allCategories.Where(c => c.ParentCategoryId == parentId))
+        {
+            var children = BuildCategoryTreeWithProducts(allCategories, categoriesWithProducts, category.Id);
+
+            if (categoriesWithProducts.Contains(category.Id) || children.Any())
+            {
+                category.Children = children;
+                result.Add(category);
+            }
+        }
+
+        return result;
+    }
+
+
+
 }
