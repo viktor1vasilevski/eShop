@@ -1,15 +1,19 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Enums;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
 using eShop.Application.Responses.Customer.Order;
+using eShop.Application.Responses.Customer.OrderItem;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces;
 using eShop.Domain.Interfaces.Base;
 using eShop.Domain.Models;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace eShop.Application.Services.Customer;
 
-public class OrderCustomerService(IUnitOfWork _uow) : IOrderCustomerService
+public class OrderCustomerService(IUnitOfWork _uow, ILogger<OrderCustomerService> _logger, IEmailQueue _emailQueue) : IOrderCustomerService
 {
     private readonly IEfRepository<Order> _orderRepository = _uow.GetEfRepository<Order>();
     private readonly IEfRepository<User> _userRepository = _uow.GetEfRepository<User>();
@@ -22,8 +26,101 @@ public class OrderCustomerService(IUnitOfWork _uow) : IOrderCustomerService
 
     public async Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetSingleAsync(
+            filter: u => u.Id == request.UserId,
+            selector: s => s,
+            cancellationToken: cancellationToken);
+
+        if (user is null)
+        {
+            return new ApiResponse<OrderDetailsCustomerDto>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = CustomerAuthConstants.UserNotFound
+            };
+        }
+
+        var order = Order.Create(request.UserId);
+        var productLines = new List<(string ProductName, int Quantity, decimal UnitPrice)>();
+
+        var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
+
+        var (products, _) = await _productRepository.QueryAsync(
+            queryBuilder: q => q.Where(p => productIds.Contains(p.Id)),
+            selector: p => p,
+            cancellationToken: cancellationToken);
+
+        var productDict = products.ToDictionary(p => p.Id);
+
+        foreach (var itemRequest in request.Items)
+        {
+            if (!productDict.TryGetValue(itemRequest.ProductId, out var product))
+            {
+                return new ApiResponse<OrderDetailsCustomerDto>
+                {
+                    Status = ResponseStatus.NotFound,
+                    Message = string.Format(CustomerOrderConstants.ProductNotFound, itemRequest.ProductId)
+                };
+            }
+
+            product.SubtrackQuantity(itemRequest.Quantity);
+
+            var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice);
+            order.AddOrderItem(orderItem);
+
+            productLines.Add((
+                ProductName: product.Name ?? $"Product {product.Id}",
+                Quantity: itemRequest.Quantity,
+                UnitPrice: product.UnitPrice
+            ));
+        }
+
+        // 5️⃣ Set total value
+        order.TotalValue(request.TotalAmount);
+
+        // 6️⃣ Persist changes
+        await _orderRepository.AddAsync(order, cancellationToken);
+        await _uow.SaveChangesAsync(cancellationToken);
+
+        // 7️⃣ Send confirmation email (non-critical)
+        try
+        {
+            var html = BuildOrderHtml(order, user, productLines);
+            var subject = $"Order Confirmation #{order.Id}";
+
+            var emailMessage = new EmailMessage(
+                To: user.Email,
+                Subject: subject,
+                HtmlBody: html);
+
+            await _emailQueue.EnqueueAsync(emailMessage);
+            _logger.LogInformation("Order {OrderId}: confirmation email queued for {Email}", order.Id, user.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Order {OrderId}: failed to queue confirmation email for {Email}", order.Id, user.Email);
+        }
+
+        // 8️⃣ Return response DTO
+        return new ApiResponse<OrderDetailsCustomerDto>
+        {
+            Status = ResponseStatus.Success,
+            Message = CustomerOrderConstants.OrderPlaced,
+            Data = new OrderDetailsCustomerDto
+            {
+                OrderId = order.Id,
+                TotalAmount = order.TotalAmount,
+                OrderCreatedOn = order.Created,
+                Items = productLines.Select(p => new OrderItemCustomerDto
+                {
+                    ProductName = p.ProductName,
+                    Quantity = p.Quantity,
+                    UnitPrice = p.UnitPrice
+                }).ToList()
+            }
+        };
     }
+
 
     private string BuildOrderHtml(Order order, User user, List<(string ProductName, int Quantity, decimal UnitPrice)> productLines)
     {

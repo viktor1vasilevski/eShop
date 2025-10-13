@@ -4,6 +4,7 @@ namespace eShop.Application.Responses.Customer.Order;
 
 public class OrderDetailsCustomerDto
 {
+    public Guid OrderId { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
