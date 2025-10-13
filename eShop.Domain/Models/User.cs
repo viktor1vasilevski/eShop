@@ -37,7 +37,7 @@ public class User : AuditableBaseEntity
         return instance;
     }
 
-    //public void ClearBasket() => Basket?.ClearItems();
+    public void ClearBasket() => Basket?.ClearItems();
 
 
     private void ApplyUserData(UserData user)
