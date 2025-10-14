@@ -17,10 +17,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Customer;
 
-public class AuthCustomerService(IUnitOfWork _uow, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
+public class AuthCustomerService(IUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
 {
-    private readonly IEfRepository<User> _userRepository = _uow.GetEfRepository<User>();
-
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {

@@ -13,11 +13,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class BasketCustomerService(IUnitOfWork _uow) : IBasketCustomerService
+public class BasketCustomerService(IUnitOfWork _uow, IEfRepository<Basket> _basketRepository, IEfRepository<Product> _productRepository, IEfRepository<User> _userRepository) : IBasketCustomerService
 {
-    private readonly IEfRepository<Basket> _basketRepository = _uow.GetEfRepository<Basket>();
-    private readonly IEfRepository<Product> _productRepository = _uow.GetEfRepository<Product>();
-    private readonly IEfRepository<User> _userRepository = _uow.GetEfRepository<User>();
 
     public async Task<ApiResponse<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {

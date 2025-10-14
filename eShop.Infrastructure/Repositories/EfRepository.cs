@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace eShop.Infrastructure.Repositories;
 
-public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity>, IEfRepository<TEntity> where TEntity : class
+public class EfRepository<TEntity>(AppDbContext _context) : IEfRepository<TEntity>, IRepository<TEntity> where TEntity : class
 {
     protected readonly DbSet<TEntity> _dbSet = _context.Set<TEntity>();
 
@@ -21,8 +21,7 @@ public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity>
         return await _dbSet.ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>>? predicate = null,
-                                                      CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
         IQueryable<TEntity> query = _dbSet;
         if (predicate != null)
@@ -31,8 +30,7 @@ public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity>
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
-                                                    CancellationToken cancellationToken = default)
+    public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         return await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
     }
@@ -58,8 +56,7 @@ public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity>
         _dbSet.Remove(entity);
     }
 
-    public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate = null,
-                                        CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
         return predicate == null
             ? await _dbSet.AnyAsync(cancellationToken)
@@ -117,8 +114,5 @@ public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity>
 
         return await query.Cast<TResult>().FirstOrDefaultAsync(cancellationToken);
     }
-
-
-
 }
 

@@ -8,15 +8,11 @@ using eShop.Domain.Interfaces;
 using eShop.Domain.Interfaces.Base;
 using eShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using static eShop.Domain.Models.Category;
 
 namespace eShop.Application.Services.Customer;
 
-public class ProductCustomerService(IUnitOfWork _uow) : IProductCustomerService
+public class ProductCustomerService(IUnitOfWork _uow, IEfRepository<Product> _productRepository, IEfRepository<Category> _categoryRepository) : IProductCustomerService
 {
-    private readonly IEfRepository<Product> _productRepository = _uow.GetEfRepository<Product>();
-    private readonly IEfRepository<Category> _categoryRepository = _uow.GetEfRepository<Category>();
-
 
     public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
     {

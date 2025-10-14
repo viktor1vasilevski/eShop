@@ -13,11 +13,10 @@ using System.Text;
 
 namespace eShop.Application.Services.Customer;
 
-public class OrderCustomerService(IUnitOfWork _uow, ILogger<OrderCustomerService> _logger, IEmailQueue _emailQueue) : IOrderCustomerService
+public class OrderCustomerService(IUnitOfWork _uow, IEfRepository<Order> _orderRepository, 
+    IEfRepository<User> _userRepository, IEfRepository<Product> _productRepository, 
+    ILogger<OrderCustomerService> _logger, IEmailQueue _emailQueue) : IOrderCustomerService
 {
-    private readonly IEfRepository<Order> _orderRepository = _uow.GetEfRepository<Order>();
-    private readonly IEfRepository<User> _userRepository = _uow.GetEfRepository<User>();
-    private readonly IEfRepository<Product> _productRepository = _uow.GetEfRepository<Product>();
 
     public async Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {

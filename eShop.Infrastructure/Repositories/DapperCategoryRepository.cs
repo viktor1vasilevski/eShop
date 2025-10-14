@@ -7,7 +7,6 @@ namespace eShop.Infrastructure.Repositories;
 public class DapperCategoryRepository(IDbConnection _dbConnection) : IDapperCategoryRepository
 {
 
-
     public async Task<List<CategoryTreeDto>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken)
     {
         const string categoriesSql = @"

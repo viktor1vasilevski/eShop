@@ -15,10 +15,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Admin;
 
-public class AuthAdminService(IUnitOfWork _uow, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthAdminService
+public class AuthAdminService(IUnitOfWork _uow, IEfRepository<User> _userRepository, 
+    IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthAdminService
 {
-    private readonly IEfRepository<User> _userRepository = _uow.GetEfRepository<User>();
-
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
     {

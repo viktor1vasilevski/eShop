@@ -18,11 +18,8 @@ using static eShop.Domain.Models.Category;
 
 namespace eShop.Application.Services.Admin;
 
-public class CategoryAdminService(IUnitOfWork _uow) : ICategoryAdminService
+public class CategoryAdminService(IUnitOfWork _uow, IEfRepository<Category> _categoryRepository, IEfRepository<Product> _productRepository) : ICategoryAdminService
 {
-    private readonly IEfRepository<Category> _categoryRepository = _uow.GetEfRepository<Category>();
-    private readonly IEfRepository<Product> _productRepository = _uow.GetEfRepository<Product>();
-
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
