@@ -5,11 +5,11 @@ namespace eShop.Domain.Models;
 
 public class BasketItem : AuditableBaseEntity
 {
-    public Guid BasketId { get; set; }
-    public virtual Basket? Basket { get; set; }
+    public Guid BasketId { get; private set; }
+    public virtual Basket? Basket { get; private set; }
 
-    public Guid ProductId { get; set; }
-    public virtual Product? Product { get; set; }
+    public Guid ProductId { get; private set; }
+    public virtual Product? Product { get; private set; }
 
     public int Quantity { get; private set; }
 

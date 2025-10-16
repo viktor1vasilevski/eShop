@@ -7,8 +7,8 @@ namespace eShop.Domain.Models;
 
 public class Product : AuditableBaseEntity
 {
-    public string Name { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
+    public string Name { get; private set; }
+    public string Description { get; private set; }
     public decimal UnitPrice { get; private set; }
     public int UnitQuantity { get; private set; }
     public Image Image { get; private set; } = null!;

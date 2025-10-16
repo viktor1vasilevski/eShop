@@ -6,8 +6,9 @@ namespace eShop.Domain.Models;
 
 public class Basket : AuditableBaseEntity
 {
-    public Guid UserId { get; set; }
-    public virtual User? User { get; set; }
+    public Guid UserId { get; private set; }
+    public virtual User? User { get; private set; }
+
 
     private readonly List<BasketItem> _basketItems = [];
     public IReadOnlyCollection<BasketItem>? BasketItems => _basketItems.AsReadOnly();

@@ -12,8 +12,8 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251007192546_add_tables")]
-    partial class add_tables
+    [Migration("20251016222745_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

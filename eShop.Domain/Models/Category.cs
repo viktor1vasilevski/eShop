@@ -11,7 +11,6 @@ public class Category : AuditableBaseEntity
     public bool IsDeleted { get; private set; }
 
 
-
     public Guid? ParentCategoryId { get; private set; }
     public virtual Category? ParentCategory { get; private set; }
 
