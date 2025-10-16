@@ -12,7 +12,7 @@ using System.Text;
 
 namespace eShop.Application.Services.Customer;
 
-public class OrderCustomerService(IUnitOfWork _uow, IRepository<Order> _orderRepository, IRepository<User> _userRepository, IRepository<Product> _productRepository, 
+public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository, IEfRepository<Product> _productRepository, 
     ILogger<OrderCustomerService> _logger, IEmailQueue _emailQueue) : IOrderCustomerService
 {
 

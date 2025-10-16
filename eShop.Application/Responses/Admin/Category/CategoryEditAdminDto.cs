@@ -1,4 +1,5 @@
-﻿using eShop.Domain.Interfaces;
+﻿using eShop.Application.Interfaces.Customer;
+using eShop.Domain.Interfaces;
 
 namespace eShop.Application.Responses.Admin.Category;
 

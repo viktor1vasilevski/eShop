@@ -30,8 +30,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+builder.Services.AddScoped<IEfUnitOfWork, EfUnitOfWork>();
+builder.Services.AddScoped(typeof(IEfRepository<>), typeof(EfRepository<>));
 builder.Services.AddAdminIoCServices();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>(ServiceLifetime.Transient);

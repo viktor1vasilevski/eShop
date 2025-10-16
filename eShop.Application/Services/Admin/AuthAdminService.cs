@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Admin;
 
-public class AuthAdminService(IUnitOfWork _uow, IRepository<User> _userRepository, 
+public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, 
     IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthAdminService
 {
 

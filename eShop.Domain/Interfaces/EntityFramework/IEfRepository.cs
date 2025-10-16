@@ -2,7 +2,7 @@
 
 namespace eShop.Domain.Interfaces.EntityFramework;
 
-public interface IRepository<TEntity> where TEntity : class
+public interface IEfRepository<TEntity> where TEntity : class
 {
     Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default);
     Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);

@@ -1,4 +1,5 @@
-﻿using eShop.Application.Requests.Admin.Category;
+﻿using eShop.Application.Interfaces.Customer;
+using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces;

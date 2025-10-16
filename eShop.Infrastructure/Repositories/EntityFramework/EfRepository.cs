@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace eShop.Infrastructure.Repositories.EntityFramework
 {
-    public class EfRepository<TEntity>(AppDbContext _context) : IRepository<TEntity> where TEntity : class
+    public class EfRepository<TEntity>(AppDbContext _context) : IEfRepository<TEntity> where TEntity : class
     {
         protected readonly DbSet<TEntity> _dbSet = _context.Set<TEntity>();
 

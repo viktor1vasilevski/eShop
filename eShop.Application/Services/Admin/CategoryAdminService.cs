@@ -5,6 +5,7 @@ using eShop.Application.Enums;
 using eShop.Application.Extensions;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Admin;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
@@ -18,7 +19,7 @@ using static eShop.Domain.Models.Category;
 
 namespace eShop.Application.Services.Admin;
 
-public class CategoryAdminService(IUnitOfWork _uow, IRepository<Category> _categoryRepository, IRepository<Product> _productRepository) : ICategoryAdminService
+public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, IEfRepository<Product> _productRepository) : ICategoryAdminService
 {
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)

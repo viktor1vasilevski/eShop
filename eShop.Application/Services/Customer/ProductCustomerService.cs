@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class ProductCustomerService(IUnitOfWork _uow, IRepository<Product> _productRepository, IRepository<Category> _categoryRepository) : IProductCustomerService
+public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository, IEfRepository<Category> _categoryRepository) : IProductCustomerService
 {
 
     public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)

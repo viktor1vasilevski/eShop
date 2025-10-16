@@ -16,7 +16,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Customer;
 
-public class AuthCustomerService(IUnitOfWork _uow, IRepository<User> _userRepository, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
+public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
 {
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)

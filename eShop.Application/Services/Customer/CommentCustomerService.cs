@@ -10,8 +10,8 @@ using eShop.Domain.Models;
 
 namespace eShop.Application.Services.Customer;
 
-public class CommentCustomerService(IUnitOfWork _uow, IRepository<Comment> _commentRepository, 
-    IRepository<Order> _orderRepository) : ICommentCustomerService
+public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _commentRepository, 
+    IEfRepository<Order> _orderRepository) : ICommentCustomerService
 {
 
     public async Task<ApiResponse<List<CommentCustomerDto>>> GetCommentsAsync(CommentCustomerRequest request, CancellationToken cancellationToken = default)

@@ -3,7 +3,7 @@ using eShop.Application.Interfaces.Customer;
 using eShop.Application.Interfaces.Shared;
 using eShop.Application.Services.Admin;
 using eShop.Application.Services.Customer;
-using eShop.Domain.Interfaces;
+using eShop.Domain.Interfaces.Dapper;
 using eShop.Infrastructure.BackgroundServices;
 using eShop.Infrastructure.Repositories.Dapper;
 using eShop.Infrastructure.Services;
@@ -50,7 +50,9 @@ public static class DependencyContainer
             return connection;
         });
 
-        services.AddScoped<IDapperCategoryRepository, DapperCategoryRepository>();
+        services.AddScoped(typeof(IDapperRepository<>), typeof(DapperRepository<>));
+        services.AddScoped<IDapperUnitOfWork, DapperUnitOfWork>();
+
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;
