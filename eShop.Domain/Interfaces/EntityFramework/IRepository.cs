@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace eShop.Domain.Interfaces.Base;
+namespace eShop.Domain.Interfaces.EntityFramework;
 
 public interface IRepository<TEntity> where TEntity : class
 {
@@ -12,5 +12,18 @@ public interface IRepository<TEntity> where TEntity : class
     void Update(TEntity entity);
     void Delete(TEntity entity);
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
-}
+    Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
+    Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+    Expression<Func<TEntity, TResult>>? selector = null,
+    Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+    Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+    int? skip = null,
+    int? take = null,
+    CancellationToken cancellationToken = default);
 
+    Task<TResult?> GetSingleAsync<TResult>(
+        Expression<Func<TEntity, bool>> filter,
+        Expression<Func<TEntity, TResult>>? selector = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+        CancellationToken cancellationToken = default);
+}

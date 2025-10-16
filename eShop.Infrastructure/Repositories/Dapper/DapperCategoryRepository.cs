@@ -2,7 +2,7 @@
 using eShop.Domain.Interfaces;
 using System.Data;
 
-namespace eShop.Infrastructure.Repositories;
+namespace eShop.Infrastructure.Repositories.Dapper;
 
 public class DapperCategoryRepository(IDbConnection _dbConnection) : IDapperCategoryRepository
 {

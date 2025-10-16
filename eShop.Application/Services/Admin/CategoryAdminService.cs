@@ -10,7 +10,7 @@ using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObject;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ using static eShop.Domain.Models.Category;
 
 namespace eShop.Application.Services.Admin;
 
-public class CategoryAdminService(IUnitOfWork _uow, IEfRepository<Category> _categoryRepository, IEfRepository<Product> _productRepository) : ICategoryAdminService
+public class CategoryAdminService(IUnitOfWork _uow, IRepository<Category> _categoryRepository, IRepository<Product> _productRepository) : ICategoryAdminService
 {
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)

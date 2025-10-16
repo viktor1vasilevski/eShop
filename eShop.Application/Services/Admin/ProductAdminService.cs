@@ -8,16 +8,15 @@ using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Responses.Admin.Product;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Exceptions;
-using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObject;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Admin;
 
-public class ProductAdminService(IUnitOfWork _uow, IEfRepository<Category> _categoryRepository, 
-    IEfRepository<Product> _productRepository, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IProductAdminService
+public class ProductAdminService(IUnitOfWork _uow, IRepository<Category> _categoryRepository, 
+    IRepository<Product> _productRepository, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IProductAdminService
 {
 
     public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)

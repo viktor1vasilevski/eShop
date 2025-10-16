@@ -8,14 +8,13 @@ using eShop.Application.Requests.Shared.Auth;
 using eShop.Application.Responses.Shared.Auth;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Enums;
-using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Admin;
 
-public class AuthAdminService(IUnitOfWork _uow, IEfRepository<User> _userRepository, 
+public class AuthAdminService(IUnitOfWork _uow, IRepository<User> _userRepository, 
     IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthAdminService
 {
 

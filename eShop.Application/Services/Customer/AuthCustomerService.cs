@@ -10,14 +10,13 @@ using eShop.Application.Responses.Customer.Auth;
 using eShop.Application.Responses.Shared.Auth;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Enums;
-using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Customer;
 
-public class AuthCustomerService(IUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
+public class AuthCustomerService(IUnitOfWork _uow, IRepository<User> _userRepository, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
 {
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)

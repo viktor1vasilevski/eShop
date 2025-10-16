@@ -2,7 +2,7 @@
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 
 namespace eShop.Application.Services.Customer;
 

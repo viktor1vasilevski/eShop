@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Interfaces\Dapper\" />
     <Folder Include="ValueObject\User\" />
   </ItemGroup>
 

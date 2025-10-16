@@ -1,7 +1,7 @@
-﻿using eShop.Domain.Interfaces.Base;
+﻿using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Infrastructure.Context;
 
-namespace eShop.Infrastructure.Repositories.Base;
+namespace eShop.Infrastructure.Repositories.EntityFramework;
 
 public class UnitOfWork(AppDbContext _context) : IUnitOfWork
 {

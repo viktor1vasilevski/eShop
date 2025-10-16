@@ -6,14 +6,14 @@ using eShop.Application.Requests.Customer.Basket;
 using eShop.Application.Responses.Customer.Basket;
 using eShop.Application.Responses.Customer.BasketItem;
 using eShop.Application.Responses.Shared.Base;
-using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class BasketCustomerService(IUnitOfWork _uow, IEfRepository<Basket> _basketRepository, IEfRepository<Product> _productRepository, IEfRepository<User> _userRepository) : IBasketCustomerService
+public class BasketCustomerService(IUnitOfWork _uow, IRepository<Basket> _basketRepository, 
+    IRepository<Product> _productRepository, IRepository<User> _userRepository) : IBasketCustomerService
 {
 
     public async Task<ApiResponse<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)

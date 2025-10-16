@@ -1,4 +1,4 @@
-﻿namespace eShop.Domain.Interfaces.Base;
+﻿namespace eShop.Domain.Interfaces.EntityFramework;
 
 public interface IUnitOfWork : IDisposable
 {

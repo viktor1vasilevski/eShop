@@ -5,7 +5,7 @@ using eShop.Application.Services.Admin;
 using eShop.Application.Services.Customer;
 using eShop.Domain.Interfaces;
 using eShop.Infrastructure.BackgroundServices;
-using eShop.Infrastructure.Repositories;
+using eShop.Infrastructure.Repositories.Dapper;
 using eShop.Infrastructure.Services;
 using eShop.Infrastructure.Services.Admin;
 using Microsoft.Data.SqlClient;

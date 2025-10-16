@@ -5,13 +5,13 @@ using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Comment;
 using eShop.Application.Responses.Customer.Comment;
 using eShop.Application.Responses.Shared.Base;
-using eShop.Domain.Interfaces;
-using eShop.Domain.Interfaces.Base;
+using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 
 namespace eShop.Application.Services.Customer;
 
-public class CommentCustomerService(IUnitOfWork _uow, IEfRepository<Comment> _commentRepository, IEfRepository<Order> _orderRepository) : ICommentCustomerService
+public class CommentCustomerService(IUnitOfWork _uow, IRepository<Comment> _commentRepository, 
+    IRepository<Order> _orderRepository) : ICommentCustomerService
 {
 
     public async Task<ApiResponse<List<CommentCustomerDto>>> GetCommentsAsync(CommentCustomerRequest request, CancellationToken cancellationToken = default)
