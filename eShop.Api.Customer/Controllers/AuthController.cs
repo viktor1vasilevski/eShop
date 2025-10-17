@@ -12,14 +12,14 @@ public class AuthController(IAuthCustomerService _customerAuthService) : BaseCon
 
 
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
+    public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
     {
         var response = await _customerAuthService.LoginAsync(request);
         return HandleResponse(response);
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterAsync([FromBody] CustomerRegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] CustomerRegisterRequest request)
     {
         var response = await _customerAuthService.RegisterCustomerAsync(request);
         return HandleResponse(response);

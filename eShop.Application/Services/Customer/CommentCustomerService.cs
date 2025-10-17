@@ -83,7 +83,4 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
             Data = resultDto
         };
     }
-
-
-
 }

@@ -9,7 +9,7 @@ public class CategoryController(ICategoryCustomerService _categoryCustomerServic
 {
 
 
-    [HttpGet("categoryTreeForMenu")]
+    [HttpGet("category-tree-for-menu")]
     public async Task<IActionResult> GetCategoryTreeForMenu(CancellationToken cancellationToken)
     {
         var response = await _categoryCustomerService.GetCategoryTreeForMenuAsync(cancellationToken);

@@ -13,7 +13,7 @@ public class AuthController(IAuthAdminService _authAdminService) : BaseControlle
 
 
     [HttpPost("admin/login")]
-    public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
+    public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
     {
         var response = await _authAdminService.LoginAsync(request);
         return HandleResponse(response);

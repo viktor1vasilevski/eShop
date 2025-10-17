@@ -1,8 +1,10 @@
 using eShop.Api.Customer.Extensions;
 using eShop.Api.Customer.Middlewares;
+using eShop.Domain.Interfaces.Dapper;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
+using eShop.Infrastructure.Repositories.Dapper;
 using eShop.Infrastructure.Repositories.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +30,10 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddScoped<IEfUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped(typeof(IEfRepository<>), typeof(EfRepository<>));
+
+builder.Services.AddScoped(typeof(IDapperRepository<>), typeof(DapperRepository<>));
+builder.Services.AddScoped<IDapperUnitOfWork, DapperUnitOfWork>();
+
 builder.Services.AddCustomerIoCService(builder.Configuration);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

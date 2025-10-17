@@ -20,7 +20,7 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
+    public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         var response = await _categoryAdminService.GetCategoryByIdAsync(id);
         return HandleResponse(response);

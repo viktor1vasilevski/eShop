@@ -21,7 +21,7 @@ namespace eShop.Api.Admin.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.GetProductByIdAsync(id, cancellationToken);
             return HandleResponse(response);

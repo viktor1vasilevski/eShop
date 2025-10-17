@@ -1,4 +1,5 @@
-﻿using eShop.Application.Enums;
+﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
@@ -10,7 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository, IEfRepository<Category> _categoryRepository) : IProductCustomerService
+public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository, 
+    IEfRepository<Category> _categoryRepository, IEfRepository<Order> _orderRepository) : IProductCustomerService
 {
 
     public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
@@ -72,5 +74,50 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
         {
             CollectCategoryIds(child.Id, allCategories, ids);
         }
+    }
+
+    public async Task<ApiResponse<ProductDetailsCustomerDto>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default)
+    {
+        var product = await _productRepository.GetSingleAsync(
+            filter: x => x.Id == productId && !x.IsDeleted,
+            selector: x => x,
+            includeBuilder: x => x.Include(x => x.Category)
+            );
+
+        if (product == null)
+        {
+            return new ApiResponse<ProductDetailsCustomerDto>
+            {
+                Status = ResponseStatus.NotFound,
+                Message = CustomerProductConstants.ProductNotFound,
+            };
+        }
+
+        bool canComment = false;
+
+        if (userId.HasValue)
+        {
+            canComment = await _orderRepository.ExistsAsync(
+                o => o.UserId == userId.Value && o.OrderItems.Any(oi => oi.ProductId == productId),
+                cancellationToken);
+        }
+
+        var productDto = new ProductDetailsCustomerDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
+            Image = ImageDataUriBuilder.FromImage(product.Image),
+            Category = product.Category?.Name,
+            CanComment = canComment
+        };
+
+        return new ApiResponse<ProductDetailsCustomerDto>
+        {
+            Data = productDto,
+            Status = ResponseStatus.Success
+        };
     }
 }

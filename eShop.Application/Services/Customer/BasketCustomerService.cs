@@ -42,7 +42,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
         return new ApiResponse<BasketCustomerDto>
         {
             Status = ResponseStatus.Success,
-            Message = BasketCustomerConstants.BasketCleared
+            Message = CustomerBasketConstants.BasketCleared
         };
     }
 
@@ -101,7 +101,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
             return new ApiResponse<BasketCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = BasketCustomerConstants.BasketNotFoundForUser
+                Message = CustomerBasketConstants.BasketNotFoundForUser
             };
         }
 
@@ -111,7 +111,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
             return new ApiResponse<BasketCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
-                Message = BasketItemCustomerConstants.BasketItemNotFound
+                Message = CustomerBasketItemConstants.BasketItemNotFound
             };
         }
 
@@ -122,7 +122,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
         return new ApiResponse<BasketCustomerDto>
         {
             Status = ResponseStatus.Success,
-            Message = BasketItemCustomerConstants.BasketItemRemoved
+            Message = CustomerBasketItemConstants.BasketItemRemoved
         };
     }
 
@@ -172,7 +172,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         return new ApiResponse<BasketCustomerDto>
         {
-            Message = BasketCustomerConstants.BasketUpdated,
+            Message = CustomerBasketConstants.BasketUpdated,
             Status = ResponseStatus.Success
         };
     }

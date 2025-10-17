@@ -2,7 +2,7 @@
 
 namespace eShop.Domain.Interfaces.Dapper;
 
-public interface IDapperRepository<T> where T : class
+public interface IDapperRepository<TEntity> where TEntity : class
 {
     Task<IEnumerable<TResult>> QueryAsync<TResult>(string sql, object? parameters = null, IDbTransaction? transaction = null, CancellationToken cancellationToken = default);
     Task<TResult?> QuerySingleAsync<TResult>(string sql, object? parameters = null, IDbTransaction? transaction = null, CancellationToken cancellationToken = default);

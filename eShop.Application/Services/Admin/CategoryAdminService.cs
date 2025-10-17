@@ -10,7 +10,6 @@ using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Exceptions;
-using eShop.Domain.Interfaces;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObject;

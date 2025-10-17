@@ -1,6 +1,7 @@
 ﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace eShop.Api.Customer.Controllers;
 
@@ -8,6 +9,8 @@ namespace eShop.Api.Customer.Controllers;
 [ApiController]
 public class ProductController(IProductCustomerService _productCustomerService) : BaseController
 {
+
+
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] ProductCustomerRequest request)
     {
@@ -15,21 +18,21 @@ public class ProductController(IProductCustomerService _productCustomerService) 
         return HandleResponse(response);
     }
 
-    //[HttpGet("{id}")]
-    //public async Task<IActionResult> GetById([FromRoute] Guid id)
-    //{
-    //    Guid? userId = null;
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        Guid? userId = null;
 
-    //    if (User.Identity?.IsAuthenticated == true)
-    //    {
-    //        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-    //        if (claim != null && Guid.TryParse(claim.Value, out var parsedId))
-    //        {
-    //            userId = parsedId;
-    //        }
-    //    }
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null && Guid.TryParse(claim.Value, out var parsedId))
+            {
+                userId = parsedId;
+            }
+        }
 
-    //    var response = await _productCustomerService.GetProductById(id, userId);
-    //    return HandleResponse(response);
-    //}
+        var response = await _productCustomerService.GetProductByIdAsync(id, userId, cancellationToken);
+        return HandleResponse(response);
+    }
 }

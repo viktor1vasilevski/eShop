@@ -13,13 +13,13 @@ public interface IEfRepository<TEntity> where TEntity : class
     void Delete(TEntity entity);
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
     Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
-    Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
-    Expression<Func<TEntity, TResult>>? selector = null,
-    Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
-    Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-    int? skip = null,
-    int? take = null,
-    CancellationToken cancellationToken = default);
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
+        Expression<Func<TEntity, TResult>>? selector = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+        int? skip = null,
+        int? take = null,
+        CancellationToken cancellationToken = default);
 
     Task<TResult?> GetSingleAsync<TResult>(
         Expression<Func<TEntity, bool>> filter,
