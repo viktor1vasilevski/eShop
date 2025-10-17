@@ -1,12 +1,16 @@
 ﻿using eShop.Application.Constants.Customer;
 using eShop.Application.Enums;
+using eShop.Application.Extensions;
+using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
+using eShop.Application.Responses.Admin.Product;
 using eShop.Application.Responses.Customer.Order;
 using eShop.Application.Responses.Customer.OrderItem;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -18,7 +22,42 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
 
     public async Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var (query, totalCount) = await _orderRepository.QueryAsync(
+            queryBuilder: x => x.Where(a => a.UserId == userId),
+            orderBy: x => x.OrderByDescending(x => x.Created),
+            includeBuilder: x => x.Include(oi => oi.OrderItems).ThenInclude(p => p.Product),
+            selector: x => new OrderDetailsCustomerDto
+                {
+                    FirstName = x.User.FirstName,
+                    LastName = x.User.LastName,
+                    Username = x.User.Username,
+                    TotalAmount = x.TotalAmount,
+                    OrderCreatedOn = x.Created,
+                    Items = x.OrderItems.Select(item => new OrderItemCustomerDto
+                    {
+                        ProductName = item.Product!.Name,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
+                        Image = ImageDataUriBuilder.FromImage(item.Product.Image)
+                    }).ToList()
+                }
+            );
+
+        if (query is null || totalCount == 0)
+        {
+            return new ApiResponse<List<OrderDetailsCustomerDto>>
+            {
+                Data = [],
+                Status = ResponseStatus.Success,
+            };
+        }
+
+        return new ApiResponse<List<OrderDetailsCustomerDto>>
+        {
+            Data = query.ToList(),
+            Status = ResponseStatus.Success,
+            TotalCount = totalCount,
+        };
     }
 
     public async Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)

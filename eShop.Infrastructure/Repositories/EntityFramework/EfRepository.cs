@@ -101,7 +101,7 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
             CancellationToken cancellationToken = default)
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
             if (includeBuilder != null)
                 query = includeBuilder(query);
