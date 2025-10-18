@@ -70,9 +70,10 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
             int? skip = null,
             int? take = null,
+            bool asNoTracking = true,
             CancellationToken cancellationToken = default)
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<TEntity> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
 
             if (includeBuilder != null)
                 query = includeBuilder(query);
@@ -99,9 +100,10 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
             Expression<Func<TEntity, bool>> predicate,
             Expression<Func<TEntity, TResult>>? selector = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+            bool asNoTracking = true,
             CancellationToken cancellationToken = default)
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<TEntity> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
 
             if (includeBuilder != null)
                 query = includeBuilder(query);

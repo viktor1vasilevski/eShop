@@ -84,6 +84,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         var (products, _) = await _productRepository.QueryAsync(
             queryBuilder: q => q.Where(p => productIds.Contains(p.Id)),
             selector: p => p,
+            asNoTracking: false,
             cancellationToken: cancellationToken);
 
         var productDict = products.ToDictionary(p => p.Id);
@@ -111,14 +112,11 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             ));
         }
 
-        // 5️⃣ Set total value
         order.TotalValue(request.TotalAmount);
 
-        // 6️⃣ Persist changes
         await _orderRepository.AddAsync(order, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        // 7️⃣ Send confirmation email (non-critical)
         try
         {
             var html = BuildOrderHtml(order, user, productLines);
@@ -137,7 +135,6 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             _logger.LogWarning(ex, "Order {OrderId}: failed to queue confirmation email for {Email}", order.Id, user.Email);
         }
 
-        // 8️⃣ Return response DTO
         return new ApiResponse<OrderDetailsCustomerDto>
         {
             Status = ResponseStatus.Success,

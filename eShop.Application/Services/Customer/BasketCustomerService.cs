@@ -23,6 +23,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
             includeBuilder: q => q.Include(u => u.Basket)
                                   .ThenInclude(b => b.BasketItems),
             selector: x => x,
+            asNoTracking: false,
             cancellationToken: cancellationToken
         );
 
@@ -141,6 +142,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
             filter: b => b.UserId == userId,
             includeBuilder: q => q.Include(b => b.BasketItems),
             selector: q => q,
+            asNoTracking: false,
             cancellationToken: cancellationToken
         );
 
@@ -154,7 +156,8 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         var (products, _) = await _productRepository.QueryAsync(
             queryBuilder: q => q.Where(p => productIds.Contains(p.Id)),
-            selector: p => p, // return full entity
+            selector: p => p,
+            asNoTracking: false,
             cancellationToken: cancellationToken
         );
 

@@ -19,11 +19,13 @@ public interface IEfRepository<TEntity> where TEntity : class
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         int? skip = null,
         int? take = null,
+        bool asNoTracking = true,
         CancellationToken cancellationToken = default);
 
     Task<TResult?> GetSingleAsync<TResult>(
         Expression<Func<TEntity, bool>> filter,
         Expression<Func<TEntity, TResult>>? selector = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
+        bool asNoTracking = true,
         CancellationToken cancellationToken = default);
 }
