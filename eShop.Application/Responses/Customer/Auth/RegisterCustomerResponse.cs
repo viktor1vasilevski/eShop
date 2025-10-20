@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Responses.Customer.Auth;
 
-public class RegisterCustomerDto
+public class RegisterCustomerResponse
 {
     public Guid Id { get; set; }
     public string FirstName { get; set; } = string.Empty;

@@ -1,5 +1,7 @@
 ﻿using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Shared.Auth;
+using eShop.Application.Responses.Shared.Auth;
+using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +15,9 @@ public class AuthController(IAuthAdminService _authAdminService) : BaseControlle
 
 
     [HttpPost("admin/login")]
-    public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
+    public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] UserLoginRequest request)
     {
         var response = await _authAdminService.LoginAsync(request);
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 }

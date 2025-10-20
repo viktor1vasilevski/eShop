@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Customer;
+using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces.Dapper;
 using eShop.Domain.Models;
@@ -8,7 +9,7 @@ namespace eShop.Application.Services.Customer;
 
 public class CategoryCustomerService(IDapperRepository<Category> _categoryDapperRepository) : ICategoryCustomerService
 {
-    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<List<CategoryTreeResponse>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
     {
         const string categoriesSql = @"
             SELECT Id, Name, ParentCategoryId
@@ -17,7 +18,7 @@ public class CategoryCustomerService(IDapperRepository<Category> _categoryDapper
             ORDER BY Name;";
 
         var allCategories = (await _categoryDapperRepository
-            .QueryAsync<CategoryTreeDto>(categoriesSql, cancellationToken: cancellationToken))
+            .QueryAsync<CategoryTreeResponse>(categoriesSql, cancellationToken: cancellationToken))
             .ToList();
 
         const string productCategoriesSql = @"
@@ -31,19 +32,19 @@ public class CategoryCustomerService(IDapperRepository<Category> _categoryDapper
 
         var tree = BuildCategoryTree(allCategories, categoriesWithProducts);
 
-        return new ApiResponse<List<CategoryTreeDto>>
+        return new ApiResponse<List<CategoryTreeResponse>>
         {
             Data = tree,
             Status = ResponseStatus.Success
         };
     }
 
-    private static List<CategoryTreeDto> BuildCategoryTree(
-    List<CategoryTreeDto> allCategories,
+    private static List<CategoryTreeResponse> BuildCategoryTree(
+    List<CategoryTreeResponse> allCategories,
     HashSet<Guid> categoriesWithProducts,
     Guid? parentId = null)
     {
-        var result = new List<CategoryTreeDto>();
+        var result = new List<CategoryTreeResponse>();
 
         foreach (var category in allCategories.Where(c => c.ParentCategoryId == parentId))
         {

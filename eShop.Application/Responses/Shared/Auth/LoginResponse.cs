@@ -2,7 +2,7 @@
 
 namespace eShop.Application.Responses.Shared.Auth;
 
-public class LoginDto
+public class LoginResponse
 {
     public Guid Id { get; set; }
     public string Token { get; set; } = string.Empty;

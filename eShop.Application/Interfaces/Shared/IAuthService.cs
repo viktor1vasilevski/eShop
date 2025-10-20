@@ -6,5 +6,5 @@ namespace eShop.Application.Interfaces.Shared;
 
 public interface IAuthService
 {
-    Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request);
+    Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request);
 }

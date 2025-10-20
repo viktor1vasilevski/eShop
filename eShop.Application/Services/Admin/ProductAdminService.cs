@@ -19,7 +19,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
     IEfRepository<Product> _productRepository, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IProductAdminService
 {
 
-    public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<List<ProductAdminResponse>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Product>(request.SortBy, request.SortDirection);
 
@@ -27,7 +27,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             queryBuilder: q => q
                 .Where(x => !x.IsDeleted)
                 .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
-            selector: x => new ProductAdminDto
+            selector: x => new ProductAdminResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -46,7 +46,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             cancellationToken: cancellationToken
         );
 
-        return new ApiResponse<List<ProductAdminDto>>
+        return new ApiResponse<List<ProductAdminResponse>>
         {
             Data = products.ToList(),
             TotalCount = totalCount,
@@ -54,7 +54,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         };
     }
 
-    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductDetailsAdminResponse>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
@@ -64,7 +64,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-            return new ApiResponse<ProductDetailsAdminDto>
+            return new ApiResponse<ProductDetailsAdminResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminProductConstants.ProductDoesNotExist
@@ -80,7 +80,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
 
         var pathItems = Category.BuildPath(product.CategoryId, lookup);
 
-        var productDto = new ProductDetailsAdminDto
+        var productDto = new ProductDetailsAdminResponse
         {
             Id = product.Id,
             Name = product.Name,
@@ -93,14 +93,14 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             LastModified = product.LastModified
         };
 
-        return new ApiResponse<ProductDetailsAdminDto>
+        return new ApiResponse<ProductDetailsAdminResponse>
         {
             Status = ResponseStatus.Success,
             Data = productDto
         };
     }
 
-    public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductEditAdminResponse>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
@@ -109,13 +109,13 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-            return new ApiResponse<ProductEditAdminDto>
+            return new ApiResponse<ProductEditAdminResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminProductConstants.ProductDoesNotExist
             };
 
-        var dto = new ProductEditAdminDto
+        var dto = new ProductEditAdminResponse
         {
             Id = product.Id,
             Name = product.Name,
@@ -126,14 +126,14 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             CategoryId = product.CategoryId
         };
 
-        return new ApiResponse<ProductEditAdminDto>
+        return new ApiResponse<ProductEditAdminResponse>
         {
             Status = ResponseStatus.Success,
             Data = dto
         };
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductAdminResponse>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLowerInvariant();
@@ -144,7 +144,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (!categoryExists)
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminCategoryConstants.CategoryDoesNotExist
@@ -156,7 +156,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (hasChildren)
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = AdminProductConstants.ProductsAllowedOnlyOnLeafCategories
@@ -170,7 +170,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (nameTaken)
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.Conflict,
                 Message = AdminProductConstants.ProductExist
@@ -193,11 +193,11 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             await _productRepository.AddAsync(product, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.Created,
                 Message = AdminProductConstants.ProductSuccessfullyCreated,
-                Data = new ProductAdminDto
+                Data = new ProductAdminResponse
                 {
                     Id = product.Id,
                     Name = product.Name,
@@ -210,7 +210,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
@@ -218,7 +218,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         }
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductAdminResponse>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
@@ -227,7 +227,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminProductConstants.ProductDoesNotExist
@@ -236,14 +236,14 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         product.SoftDelete();
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<ProductAdminDto>
+        return new ApiResponse<ProductAdminResponse>
         {
             Status = ResponseStatus.Success,
             Message = AdminProductConstants.ProductSuccessfullyDeleted
         };
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductAdminResponse>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => !p.IsDeleted && p.Id == id,
@@ -253,7 +253,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
 
         if (product is null)
         {
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = AdminProductConstants.ProductDoesNotExist
@@ -272,7 +272,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
 
             if (nameTaken)
             {
-                return new ApiResponse<ProductAdminDto>
+                return new ApiResponse<ProductAdminResponse>
                 {
                     Status = ResponseStatus.Conflict,
                     Message = AdminProductConstants.ProductExist
@@ -300,7 +300,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
 
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.Success,
                 Message = AdminProductConstants.ProductSuccessfullyUpdated
@@ -308,7 +308,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<ProductAdminDto>
+            return new ApiResponse<ProductAdminResponse>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message

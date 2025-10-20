@@ -2,7 +2,7 @@
 
 namespace eShop.Application.Responses.Admin.Product;
 
-public class ProductDetailsAdminDto
+public class ProductDetailsAdminResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

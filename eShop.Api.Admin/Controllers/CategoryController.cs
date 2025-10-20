@@ -1,5 +1,7 @@
 ﻿using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Category;
+using eShop.Application.Responses.Admin.Category;
+using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,51 +15,51 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
 {
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] CategoryAdminRequest request)
+    public async Task<ActionResult<ApiResponse<CategoryAdminResponse>>> Get([FromQuery] CategoryAdminRequest request)
     {
         var response = await _categoryAdminService.GetCategoriesAsync(request);
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById([FromRoute] Guid id)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> GetById([FromRoute] Guid id)
     {
         var response = await _categoryAdminService.GetCategoryByIdAsync(id);
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryAdminRequest request)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Create([FromBody] CreateCategoryAdminRequest request)
     {
         var response = await _categoryAdminService.CreateCategoryAsync(request);
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCategoryAdminRequest request)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Update([FromRoute] Guid id, [FromBody] UpdateCategoryAdminRequest request)
     {
         var response = await _categoryAdminService.UpdateCategoryAsync(id, request);
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 
     [HttpGet("{id}/edit")]
-    public async Task<IActionResult> GetCategoryForEdit(Guid id)
+    public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryForEdit(Guid id)
     {
         var response = await _categoryAdminService.GetCategoryForEditAsync(id);
-        return Ok(response);
+        return HandleResponsee(response);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete([FromRoute] Guid id)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Delete([FromRoute] Guid id)
     {
         var response = await _categoryAdminService.DeleteCategoryAsync(id);
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 
     [HttpGet("tree")]
-    public async Task<IActionResult> GetCategoryTree()
+    public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryTree()
     {
         var response = await _categoryAdminService.GetCategoryTreeAsync();
-        return HandleResponse(response);
+        return HandleResponsee(response);
     }
 }

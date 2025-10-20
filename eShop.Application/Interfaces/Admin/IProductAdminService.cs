@@ -6,15 +6,12 @@ namespace eShop.Application.Interfaces.Admin;
 
 public interface IProductAdminService
 {
-    // Queries
-    Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<List<ProductAdminResponse>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductDetailsAdminResponse>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductEditAdminResponse>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken = default);
-
-    // Commands
-    Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductAdminResponse>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductAdminResponse>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductAdminResponse>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default);
 }
 

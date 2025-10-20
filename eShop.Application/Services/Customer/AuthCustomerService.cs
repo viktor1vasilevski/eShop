@@ -19,14 +19,14 @@ namespace eShop.Application.Services.Customer;
 public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthCustomerService
 {
 
-    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request)
+    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request)
     {
         var user = await _userRepository.FirstOrDefaultAsync(x => x.Username == request.Username);
 
         if (user is null || user?.Username != request.Username || user?.Role != Role.Customer ||
             !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
         {
-            return new ApiResponse<LoginDto>
+            return new ApiResponse<LoginResponse>
             {
                 Message = SharedConstants.InvalidCredentials,
                 Status = ResponseStatus.Unauthorized
@@ -35,11 +35,11 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
-        return new ApiResponse<LoginDto>
+        return new ApiResponse<LoginResponse>
         {
             Status = ResponseStatus.Success,
             Message = CustomerAuthConstants.CustomerLoggedSuccessfully,
-            Data = new LoginDto
+            Data = new LoginResponse
             {
                 Id = user.Id,
                 Token = token,
@@ -50,7 +50,7 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
         };
     }
 
-    public async Task<ApiResponse<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request)
+    public async Task<ApiResponse<RegisterCustomerResponse>> RegisterCustomerAsync(CustomerRegisterRequest request)
     {
         throw new NotImplementedException();
     }
