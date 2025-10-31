@@ -19,8 +19,8 @@ public static class JwtTokenHelper
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-            new Claim(ClaimTypes.Name, user.Username)
+            new Claim(JwtRegisteredClaimNames.Sub, user.Username.Value),
+            new Claim(ClaimTypes.Name, user.Username.Value)
         };
 
         var token = new JwtSecurityToken(
