@@ -10,13 +10,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(u => u.Id);
 
-        builder.Property(u => u.FirstName)
-               .IsRequired()
-               .HasMaxLength(100);
+        builder.OwnsOne(u => u.FullName, fullName =>
+        {
+            fullName.Property(fn => fn.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("FirstName");
 
-        builder.Property(u => u.LastName)
-               .IsRequired()
-               .HasMaxLength(100);
+            fullName.Property(fn => fn.LastName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("LastName");
+        });
 
         builder.Property(u => u.Username)
                .IsRequired()

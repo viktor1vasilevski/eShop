@@ -1,10 +1,8 @@
 ﻿using eShop.Application.Constants.Customer;
 using eShop.Application.Enums;
-using eShop.Application.Extensions;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
-using eShop.Application.Responses.Admin.Product;
 using eShop.Application.Responses.Customer.Order;
 using eShop.Application.Responses.Customer.OrderItem;
 using eShop.Application.Responses.Shared.Base;
@@ -28,8 +26,8 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             includeBuilder: x => x.Include(oi => oi.OrderItems).ThenInclude(p => p.Product),
             selector: x => new OrderDetailsCustomerDto
                 {
-                    FirstName = x.User.FirstName,
-                    LastName = x.User.LastName,
+                    FirstName = x.User.FullName.FirstName,
+                    LastName = x.User.FullName.LastName,
                     Username = x.User.Username,
                     TotalAmount = x.TotalAmount,
                     OrderCreatedOn = x.Created,
@@ -170,7 +168,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         sb.AppendLine("</style>");
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
-        sb.AppendLine($"<h2>Thanks for your order, {System.Net.WebUtility.HtmlEncode(user.FirstName ?? user.Email)}!</h2>");
+        sb.AppendLine($"<h2>Thanks for your order, {System.Net.WebUtility.HtmlEncode(user.FullName.FirstName ?? user.Email)}!</h2>");
         sb.AppendLine($"<p>Order ID: <strong>{order.Id}</strong></p>");
         sb.AppendLine("<table role=\"presentation\" aria-hidden=\"true\">");
         sb.AppendLine("<thead><tr><th>Product</th><th style='text-align:center'>Qty</th><th style='text-align:right'>Price</th></tr></thead>");

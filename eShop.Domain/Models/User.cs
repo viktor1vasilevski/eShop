@@ -1,13 +1,13 @@
 ﻿using eShop.Domain.Enums;
 using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
 public class User : AuditableBaseEntity
 {
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
+    public FullName FullName { get; private set; }
     public string Username { get; private set; }
     public Role Role { get; private set; }
     public string Email { get; private set; }
@@ -42,8 +42,6 @@ public class User : AuditableBaseEntity
 
     private void ApplyUserData(UserData user)
     {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.FirstName, nameof(user.FirstName));
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.LastName, nameof(user.LastName));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Username, nameof(user.Username));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Email, nameof(user.Email));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.PasswordHash, nameof(user.PasswordHash));
@@ -53,8 +51,7 @@ public class User : AuditableBaseEntity
 
         Username = user.Username.ToLower();
         Email = user.Email.ToLower();
-        FirstName = user.FirstName;
-        LastName = user.LastName;
+        FullName = FullName.Create(user.FirstName, user.LastName);
         Role = user.Role;
         PasswordHash = user.PasswordHash;
         SaltKey = user.Salt;
