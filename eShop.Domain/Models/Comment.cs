@@ -1,5 +1,7 @@
-﻿using eShop.Domain.Helpers;
+﻿using eShop.Domain.Enums;
+using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
@@ -11,21 +13,20 @@ public class Comment : AuditableBaseEntity
     public Guid UserId { get; private set; }
     public virtual User? User { get; private set; }
 
-    public string? CommentText { get; private set; }
-    public int Rating { get; private set; }
+    public CommentText? CommentText { get; private set; }
+    public Rating Rating { get; private set; }
 
 
     private Comment() { }
-    public static Comment Create(string commentText, int rating, Guid productId, Guid userId)
+    public static Comment Create(string commentText, Rating rating, Guid productId, Guid userId)
     {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(commentText, nameof(commentText));
         DomainValidatorHelper.ThrowIfEmptyGuid(productId, nameof(productId));
         DomainValidatorHelper.ThrowIfEmptyGuid(userId, nameof(userId));
 
         return new Comment
         {
             Id = Guid.NewGuid(),
-            CommentText = commentText,
+            CommentText = CommentText.Create(commentText),
             Rating = rating,
             ProductId = productId,
             UserId = userId,

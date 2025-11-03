@@ -10,12 +10,20 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
     {
         builder.HasKey(i => i.Id);
 
-        builder.Property(i => i.Quantity)
-               .IsRequired();
+        builder.OwnsOne(x => x.UnitPrice, price =>
+        {
+            price.Property(p => p.Value)
+                 .HasColumnName("UnitPrice")
+                 .HasColumnType("decimal(18,2)")
+                 .IsRequired();
+        });
 
-        builder.Property(i => i.UnitPrice)
-               .HasColumnType("decimal(18,2)")
+        builder.OwnsOne(x => x.UnitQuantity, qty =>
+        {
+            qty.Property(q => q.Value)
+               .HasColumnName("UnitQuantity")
                .IsRequired();
+        });
 
         builder.Property(i => i.OrderId)
                .IsRequired();

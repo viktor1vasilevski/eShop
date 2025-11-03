@@ -23,9 +23,6 @@ public class Category : AuditableBaseEntity
     public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
 
 
-
-
-
     private Category() { }
 
     public static Category Create(string name, Image image, Guid? parentCategoryId)

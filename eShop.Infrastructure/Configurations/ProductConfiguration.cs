@@ -10,20 +10,36 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Name)
-               .HasMaxLength(200)
-               .IsRequired();
+        builder.OwnsOne(x => x.Name, n =>
+        {
+            n.Property(p => p.Value)
+             .HasColumnName("Name")
+             .HasMaxLength(50)
+             .IsRequired();
+        });
 
-        builder.Property(x => x.Description)
-               .HasMaxLength(2500)
-               .IsRequired();
+        builder.OwnsOne(x => x.Description, desc =>
+        {
+            desc.Property(d => d.Value)
+                .HasColumnName("Description")
+                .HasMaxLength(2500)
+                .IsRequired();
+        });
 
-        builder.Property(x => x.UnitPrice)
-               .HasColumnType("decimal(18,2)")
-               .IsRequired();
+        builder.OwnsOne(x => x.UnitPrice, price =>
+        {
+            price.Property(p => p.Value)
+                 .HasColumnName("UnitPrice")
+                 .HasColumnType("decimal(18,2)")
+                 .IsRequired();
+        });
 
-        builder.Property(x => x.UnitQuantity)
+        builder.OwnsOne(x => x.UnitQuantity, qty =>
+        {
+            qty.Property(q => q.Value)
+               .HasColumnName("UnitQuantity")
                .IsRequired();
+        });
 
         builder.OwnsOne(x => x.Image, img =>
         {

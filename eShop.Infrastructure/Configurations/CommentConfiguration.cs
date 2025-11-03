@@ -10,11 +10,16 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
     {
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.CommentText)
-               .HasMaxLength(2500)
-               .IsRequired();
+        builder.OwnsOne(c => c.CommentText, ct =>
+        {
+            ct.Property(p => p.Value)
+              .HasColumnName("CommentText")
+              .HasMaxLength(2500)
+              .IsRequired();
+        });
 
         builder.Property(c => c.Rating)
+               .HasConversion<int>()
                .IsRequired();
 
         builder.Property(c => c.ProductId)

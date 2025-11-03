@@ -1,5 +1,6 @@
 ﻿using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
@@ -11,8 +12,8 @@ public class OrderItem : AuditableBaseEntity
     public Guid ProductId { get; private set; }
     public virtual Product? Product { get; private set; }
 
-    public int Quantity { get; private set; }
-    public decimal UnitPrice { get; private set; }
+    public UnitQuantity UnitQuantity { get; private set; }
+    public UnitPrice UnitPrice { get; private set; }
 
 
     private OrderItem() { }
@@ -21,12 +22,16 @@ public class OrderItem : AuditableBaseEntity
     {
         DomainValidatorHelper.ThrowIfEmptyGuid(productId, nameof(productId));
 
-        return new OrderItem
-        {
-            Id = Guid.NewGuid(),
-            ProductId = productId,
-            Quantity = quantity,
-            UnitPrice = price
-        };
+        var productQuantity = UnitQuantity.Create(quantity);
+        var productPrice = UnitPrice.Create(price);
+
+        var orderItem = new OrderItem();
+
+        orderItem.Id = Guid.NewGuid();
+        orderItem.ProductId = productId;
+        orderItem.UnitQuantity = productQuantity;
+        orderItem.UnitPrice = productPrice;
+
+        return orderItem;
     }
 }

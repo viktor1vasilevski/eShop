@@ -24,7 +24,7 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
             {
                 Rating = c.Rating,
                 Created = c.Created,
-                CommentText = c.CommentText,
+                CommentText = c.CommentText.Value,
                 CreatedBy = c.CreatedBy
             },
             orderBy: orderBy,
@@ -71,7 +71,7 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
 
         var resultDto = new CommentCustomerResponse
         {
-            CommentText = comment.CommentText,
+            CommentText = comment.CommentText.Value,
             CreatedBy = comment.CreatedBy,
             Created = comment.Created,
             Rating = comment.Rating
