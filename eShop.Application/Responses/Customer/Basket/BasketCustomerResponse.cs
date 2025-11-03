@@ -1,8 +1,8 @@
-﻿using eShop.Application.Responses.Customer.BasketItem;
+﻿using eShop.Application.DTOs.Customer.BasketItem;
 
 namespace eShop.Application.Responses.Customer.Basket;
 
-public class BasketCustomerDto
+public class BasketCustomerResponse
 {
     public List<BasketItemCustomerDto> Items { get; set; } = [];
 }

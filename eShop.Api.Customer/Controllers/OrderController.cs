@@ -1,5 +1,7 @@
 ﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
+using eShop.Application.Responses.Customer.Order;
+using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,17 +15,17 @@ public class OrderController(IOrderCustomerService _orderCustomerService) : Base
 {
 
 
-    [HttpPost]
-    public async Task<IActionResult> PlaceOrderAsync([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
+    [HttpGet("{userId}")]
+    public async Task<ActionResult<ApiResponse<List<OrderDetailsCustomerResponse>>>> GetOrdersForUser([FromRoute] Guid userId)
     {
-        var response = await _orderCustomerService.PlaceOrderAsync(request, cancellationToken);
+        var response = await _orderCustomerService.GetOrdersForUserIdAsync(userId);
         return HandleResponse(response);
     }
 
-    [HttpGet("{userId}")]
-    public async Task<IActionResult> GetOrdersForUser([FromRoute] Guid userId)
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<OrderDetailsCustomerResponse>>> PlaceOrderAsync([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
     {
-        var response = await _orderCustomerService.GetOrdersForUserIdAsync(userId);
+        var response = await _orderCustomerService.PlaceOrderAsync(request, cancellationToken);
         return HandleResponse(response);
     }
 }

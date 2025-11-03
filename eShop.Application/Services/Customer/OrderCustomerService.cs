@@ -18,13 +18,13 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
     ILogger<OrderCustomerService> _logger, IEmailQueue _emailQueue) : IOrderCustomerService
 {
 
-    public async Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<List<OrderDetailsCustomerResponse>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var (query, totalCount) = await _orderRepository.QueryAsync(
             queryBuilder: x => x.Where(a => a.UserId == userId),
             orderBy: x => x.OrderByDescending(x => x.Created),
             includeBuilder: x => x.Include(oi => oi.OrderItems).ThenInclude(p => p.Product),
-            selector: x => new OrderDetailsCustomerDto
+            selector: x => new OrderDetailsCustomerResponse
                 {
                     FirstName = x.User.FullName.FirstName,
                     LastName = x.User.FullName.LastName,
@@ -43,14 +43,14 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
 
         if (query is null || totalCount == 0)
         {
-            return new ApiResponse<List<OrderDetailsCustomerDto>>
+            return new ApiResponse<List<OrderDetailsCustomerResponse>>
             {
                 Data = [],
                 Status = ResponseStatus.Success,
             };
         }
 
-        return new ApiResponse<List<OrderDetailsCustomerDto>>
+        return new ApiResponse<List<OrderDetailsCustomerResponse>>
         {
             Data = query.ToList(),
             Status = ResponseStatus.Success,
@@ -58,7 +58,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         };
     }
 
-    public async Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<OrderDetailsCustomerResponse>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == request.UserId,
@@ -67,7 +67,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
 
         if (user is null)
         {
-            return new ApiResponse<OrderDetailsCustomerDto>
+            return new ApiResponse<OrderDetailsCustomerResponse>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CustomerAuthConstants.UserNotFound
@@ -91,7 +91,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         {
             if (!productDict.TryGetValue(itemRequest.ProductId, out var product))
             {
-                return new ApiResponse<OrderDetailsCustomerDto>
+                return new ApiResponse<OrderDetailsCustomerResponse>
                 {
                     Status = ResponseStatus.NotFound,
                     Message = string.Format(CustomerOrderConstants.ProductNotFound, itemRequest.ProductId)
@@ -133,11 +133,11 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             _logger.LogWarning(ex, "Order {OrderId}: failed to queue confirmation email for {Email}", order.Id, user.Email);
         }
 
-        return new ApiResponse<OrderDetailsCustomerDto>
+        return new ApiResponse<OrderDetailsCustomerResponse>
         {
             Status = ResponseStatus.Success,
             Message = CustomerOrderConstants.OrderPlaced,
-            Data = new OrderDetailsCustomerDto
+            Data = new OrderDetailsCustomerResponse
             {
                 OrderId = order.Id,
                 TotalAmount = order.TotalAmount,

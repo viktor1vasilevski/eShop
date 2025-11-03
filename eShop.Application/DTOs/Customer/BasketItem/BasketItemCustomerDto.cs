@@ -1,4 +1,4 @@
-﻿namespace eShop.Application.Responses.Customer.BasketItem;
+﻿namespace eShop.Application.DTOs.Customer.BasketItem;
 
 public class BasketItemCustomerDto
 {

@@ -6,7 +6,7 @@ namespace eShop.Application.Interfaces.Customer;
 
 public interface IProductCustomerService
 {
-    Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ProductDetailsCustomerDto>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<List<ProductCustomerResponse>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductDetailsCustomerResponse>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default);
 
 }
