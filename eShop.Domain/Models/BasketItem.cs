@@ -16,7 +16,6 @@ public class BasketItem : AuditableBaseEntity
     public UnitQuantity UnitQuantity { get; private set; }
 
 
-
     private BasketItem() { }
 
     public static BasketItem Create(Guid basketId, Guid productId, int quantity)

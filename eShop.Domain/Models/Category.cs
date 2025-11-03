@@ -1,12 +1,13 @@
 ﻿using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
 using eShop.Domain.ValueObject;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
 public class Category : AuditableBaseEntity
 {
-    public string Name { get; private set; } = string.Empty;
+    public CategoryName Name { get; private set; }
     public Image Image { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 
@@ -27,12 +28,12 @@ public class Category : AuditableBaseEntity
 
     public static Category Create(string name, Image image, Guid? parentCategoryId)
     {
-        Validate(name, parentCategoryId);
+        DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
 
         return new Category
         {
             Id = Guid.NewGuid(),
-            Name = name,
+            Name = CategoryName.Create(name),
             Image = image,
             ParentCategoryId = parentCategoryId,
             IsDeleted = false
@@ -41,20 +42,13 @@ public class Category : AuditableBaseEntity
 
     public void Update(string name, Image image, Guid? parentCategoryId)
     {
-        Validate(name, parentCategoryId);
+        DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
 
-        Name = name;
         ParentCategoryId = parentCategoryId;
         if (image != null)
         {
             Image = image;
         }
-    }
-
-    private static void Validate(string name, Guid? parentCategoryId)
-    {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
-        DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
     }
 
     public void SoftDelete() => IsDeleted = true;
@@ -98,7 +92,7 @@ public class Category : AuditableBaseEntity
 
         while (lookup.TryGetValue(currentId, out var current))
         {
-            result.Insert(0, new CategoryPathItem(current.Id, current.Name));
+            result.Insert(0, new CategoryPathItem(current.Id, current.Name.Value));
 
             if (current.ParentCategoryId == null)
                 break;

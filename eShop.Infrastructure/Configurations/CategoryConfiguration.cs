@@ -10,11 +10,15 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Name)
-               .HasMaxLength(200)
-               .IsRequired();
+        builder.OwnsOne(c => c.Name, n =>
+        {
+            n.Property(p => p.Value)
+             .HasColumnName("Name")
+             .HasMaxLength(200)
+             .IsRequired();
 
-        builder.HasIndex(x => x.Name);
+            n.HasIndex(p => p.Value).IsUnique();
+        });
 
         builder.OwnsOne(x => x.Image, img =>
         {

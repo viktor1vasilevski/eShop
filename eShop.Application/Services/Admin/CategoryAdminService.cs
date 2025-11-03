@@ -27,11 +27,11 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         var (categories, totalCount) = await _categoryRepository.QueryAsync(
             queryBuilder: q => q
                 .Where(x => !x.IsDeleted)
-                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
+                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.Value.ToLower().Contains(request.Name.ToLower())),
             selector: c => new CategoryAdminResponse
             {
                 Id = c.Id,
-                Name = c.Name,
+                Name = c.Name.Value,
                 Created = c.Created,
                 LastModified = c.LastModified
             },
@@ -55,7 +55,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         var normalizedName = trimmedName.ToLower();
 
         if (await _categoryRepository.ExistsAsync(
-                x => x.Name.ToLower() == normalizedName &&
+                x => x.Name.Value.ToLower() == normalizedName &&
                      x.ParentCategoryId == request.ParentCategoryId &&
                      !x.IsDeleted,
                 cancellationToken))
@@ -84,7 +84,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 Data = new CategoryAdminResponse
                 {
                     Id = category.Id,
-                    Name = category.Name,
+                    Name = category.Name.Value,
                     Created = category.Created,
                     ParentCategoryId = category.ParentCategoryId
                 }
@@ -116,7 +116,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         if (await _categoryRepository.ExistsAsync(x =>
                 x.Id != id &&
                 x.ParentCategoryId == request.ParentCategoryId &&
-                x.Name.ToLower() == normalizedName &&
+                x.Name.Value.ToLower() == normalizedName &&
                 !x.IsDeleted,
                 cancellationToken))
         {
@@ -176,7 +176,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 Data = new CategoryAdminResponse
                 {
                     Id = category.Id,
-                    Name = category.Name,
+                    Name = category.Name.Value,
                     Created = category.Created,
                     LastModified = category.LastModified,
                     ParentCategoryId = category.ParentCategoryId
@@ -203,7 +203,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             selector: c => new CategoryDetailsAdminResponse
             {
                 Id = c.Id,
-                Name = c.Name,
+                Name = c.Name.Value,
                 Image = ImageDataUriBuilder.FromImage(c.Image),
                 ParentCategoryId = c.ParentCategoryId,
                 Created = c.Created,
@@ -221,7 +221,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                     .Select(c => new CategoryRefDto
                     {
                         Id = c.Id,
-                        Name = c.Name
+                        Name = c.Name.Value
                     })
                     .ToList()
             },
@@ -249,7 +249,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             selector: c => new CategoryFlatDto
             {
                 Id = c.Id,
-                Name = c.Name,
+                Name = c.Name.Value,
                 ParentCategoryId = c.ParentCategoryId,
                 ProductCount = c.Products.Count
             },
@@ -283,7 +283,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         var dto = new CategoryEditAdminResponse
         {
             Id = entity.Id,
-            Name = entity.Name,
+            Name = entity.Name.Value,
             ParentCategoryId = entity.ParentCategoryId,
             Image = ImageDataUriBuilder.FromImage(entity.Image),
             ValidParentTree = validTree
@@ -323,7 +323,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             selector: c => new CategoryFlatDto
             {
                 Id = c.Id,
-                Name = c.Name,
+                Name = c.Name.Value,
                 ParentCategoryId = c.ParentCategoryId,
                 ProductCount = c.Products.Count
             },

@@ -27,7 +27,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
                 Name = x.Name.Value,
                 Price = x.UnitPrice.Value,
                 Image = ImageDataUriBuilder.FromImage(x.Image),
-                Category = x.Category.Name
+                Category = x.Category.Name.Value
             },
             includeBuilder: q => q.Include(x => x.Category),
             skip: request.Skip,
@@ -110,7 +110,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
             Price = product.UnitPrice.Value,
             UnitQuantity = product.UnitQuantity.Value,
             Image = ImageDataUriBuilder.FromImage(product.Image),
-            Category = product.Category?.Name,
+            Category = product.Category?.Name.Value,
             CanComment = canComment
         };
 

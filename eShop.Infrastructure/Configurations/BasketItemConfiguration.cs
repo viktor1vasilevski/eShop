@@ -17,7 +17,6 @@ public class BasketItemConfiguration : IEntityTypeConfiguration<BasketItem>
              .IsRequired();
         });
 
-
         builder.HasOne(i => i.Product)
                .WithMany(p => p.BasketItems)
                .HasForeignKey(i => i.ProductId)

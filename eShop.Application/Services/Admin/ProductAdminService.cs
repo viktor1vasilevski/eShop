@@ -35,7 +35,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 UnitPrice = x.UnitPrice.Value,
                 UnitQuantity = x.UnitQuantity.Value,
                 Image = ImageDataUriBuilder.FromImage(x.Image),
-                Category = x.Category.Name,
+                Category = x.Category.Name.Value,
                 Created = x.Created,
                 LastModified = x.LastModified
             },
