@@ -6,8 +6,8 @@ namespace eShop.Application.Interfaces.Customer;
 
 public interface IBasketCustomerService
 {
-    Task<ApiResponse<BasketCustomerResponse>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<BasketCustomerResponse>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<ApiResponse<BasketCustomerResponse>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<ApiResponse<BasketCustomerResponse>> RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default);
+    Task<ApiResponse<BasketCustomerDto>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<BasketCustomerDto>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<ApiResponse<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<ApiResponse<BasketCustomerDto>> RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default);
 }

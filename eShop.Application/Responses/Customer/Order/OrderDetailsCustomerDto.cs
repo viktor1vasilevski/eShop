@@ -2,7 +2,7 @@
 
 namespace eShop.Application.Responses.Customer.Order;
 
-public class OrderDetailsCustomerResponse
+public class OrderDetailsCustomerDto
 {
     public Guid OrderId { get; set; }
     public string FirstName { get; set; } = string.Empty;

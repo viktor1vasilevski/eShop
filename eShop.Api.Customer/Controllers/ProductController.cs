@@ -1,7 +1,5 @@
 ﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
-using eShop.Application.Responses.Customer.Product;
-using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -14,14 +12,14 @@ public class ProductController(IProductCustomerService _productCustomerService) 
 
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<ProductCustomerResponse>>>> Get([FromQuery] ProductCustomerRequest request)
+    public async Task<IActionResult> Get([FromQuery] ProductCustomerRequest request)
     {
         var response = await _productCustomerService.GetProductsAsync(request);
         return HandleResponse(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<ProductDetailsCustomerResponse>>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         Guid? userId = null;
 

@@ -15,13 +15,13 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
     IEfRepository<Category> _categoryRepository, IEfRepository<Order> _orderRepository) : IProductCustomerService
 {
 
-    public async Task<ApiResponse<List<ProductCustomerResponse>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
     {
         var categoryIds = await GetAllCategoryIdsAsync(request.CategoryId, cancellationToken);
 
         var (products, totalCount) = await _productRepository.QueryAsync(
             queryBuilder: q => q.Where(x => !x.IsDeleted && categoryIds.Contains(x.CategoryId)),
-            selector: x => new ProductCustomerResponse
+            selector: x => new ProductCustomerDto
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -35,7 +35,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
             cancellationToken: cancellationToken
         );
 
-        return new ApiResponse<List<ProductCustomerResponse>>
+        return new ApiResponse<List<ProductCustomerDto>>
         {
             Data = products.ToList(),
             TotalCount = totalCount,
@@ -76,7 +76,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
         }
     }
 
-    public async Task<ApiResponse<ProductDetailsCustomerResponse>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ProductDetailsCustomerDto>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: x => x.Id == productId && !x.IsDeleted,
@@ -86,7 +86,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
 
         if (product == null)
         {
-            return new ApiResponse<ProductDetailsCustomerResponse>
+            return new ApiResponse<ProductDetailsCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CustomerProductConstants.ProductNotFound,
@@ -102,7 +102,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
                 cancellationToken);
         }
 
-        var productDto = new ProductDetailsCustomerResponse
+        var productDto = new ProductDetailsCustomerDto
         {
             Id = product.Id,
             Name = product.Name,
@@ -114,7 +114,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
             CanComment = canComment
         };
 
-        return new ApiResponse<ProductDetailsCustomerResponse>
+        return new ApiResponse<ProductDetailsCustomerDto>
         {
             Data = productDto,
             Status = ResponseStatus.Success

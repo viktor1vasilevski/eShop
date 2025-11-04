@@ -1,10 +1,10 @@
 ﻿using eShop.Application.Constants.Customer;
-using eShop.Application.DTOs.Customer.BasketItem;
 using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
 using eShop.Application.Responses.Customer.Basket;
+using eShop.Application.Responses.Customer.BasketItem;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
@@ -16,7 +16,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
     IEfRepository<Product> _productRepository, IEfRepository<User> _userRepository) : IBasketCustomerService
 {
 
-    public async Task<ApiResponse<BasketCustomerResponse>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
@@ -29,7 +29,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         if (user is null)
         {
-            return new ApiResponse<BasketCustomerResponse>
+            return new ApiResponse<BasketCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CustomerAuthConstants.UserNotFound
@@ -40,18 +40,18 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<BasketCustomerResponse>
+        return new ApiResponse<BasketCustomerDto>
         {
             Status = ResponseStatus.Success,
             Message = CustomerBasketConstants.BasketCleared
         };
     }
 
-    public async Task<ApiResponse<BasketCustomerResponse>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<BasketCustomerDto>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var basketDto = await _basketRepository.GetSingleAsync(
             filter: b => b.UserId == userId,
-            selector: b => new BasketCustomerResponse
+            selector: b => new BasketCustomerDto
             {
                 Items = b.BasketItems.Select(i => new BasketItemCustomerDto
                 {
@@ -68,29 +68,28 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
             cancellationToken: cancellationToken
         );
 
-        basketDto ??= new BasketCustomerResponse { Items = new List<BasketItemCustomerDto>() };
+        basketDto ??= new BasketCustomerDto { Items = new List<BasketItemCustomerDto>() };
 
-        return new ApiResponse<BasketCustomerResponse>
+        return new ApiResponse<BasketCustomerDto>
         {
             Status = ResponseStatus.Success,
             Data = basketDto
         };
     }
 
-    public async Task<ApiResponse<BasketCustomerResponse>> RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<BasketCustomerDto>> RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
             includeBuilder: q => q.Include(u => u.Basket)
                                   .ThenInclude(b => b.BasketItems),
             selector: u => u,
-            cancellationToken: cancellationToken,
-            asNoTracking: false
+            cancellationToken: cancellationToken
         );
 
         if (user is null)
         {
-            return new ApiResponse<BasketCustomerResponse>
+            return new ApiResponse<BasketCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CustomerAuthConstants.UserNotFound
@@ -100,7 +99,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
         var basket = user.Basket;
         if (basket is null)
         {
-            return new ApiResponse<BasketCustomerResponse>
+            return new ApiResponse<BasketCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CustomerBasketConstants.BasketNotFoundForUser
@@ -110,7 +109,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
         var itemToRemove = basket.BasketItems.FirstOrDefault(x => x.ProductId == productId);
         if (itemToRemove is null)
         {
-            return new ApiResponse<BasketCustomerResponse>
+            return new ApiResponse<BasketCustomerDto>
             {
                 Status = ResponseStatus.NotFound,
                 Message = CustomerBasketItemConstants.BasketItemNotFound
@@ -121,18 +120,18 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<BasketCustomerResponse>
+        return new ApiResponse<BasketCustomerDto>
         {
             Status = ResponseStatus.Success,
             Message = CustomerBasketItemConstants.BasketItemRemoved
         };
     }
 
-    public async Task<ApiResponse<BasketCustomerResponse>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<BasketCustomerDto>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default)
     {
         if (!await _userRepository.ExistsAsync(u => u.Id == userId, cancellationToken))
         {
-            return new ApiResponse<BasketCustomerResponse>
+            return new ApiResponse<BasketCustomerDto>
             {
                 Message = CustomerAuthConstants.UserNotFound,
                 Status = ResponseStatus.NotFound
@@ -174,7 +173,7 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<BasketCustomerResponse>
+        return new ApiResponse<BasketCustomerDto>
         {
             Message = CustomerBasketConstants.BasketUpdated,
             Status = ResponseStatus.Success

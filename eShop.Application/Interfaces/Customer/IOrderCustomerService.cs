@@ -6,6 +6,6 @@ namespace eShop.Application.Interfaces.Customer;
 
 public interface IOrderCustomerService
 {
-    Task<ApiResponse<List<OrderDetailsCustomerResponse>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<ApiResponse<OrderDetailsCustomerResponse>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }
