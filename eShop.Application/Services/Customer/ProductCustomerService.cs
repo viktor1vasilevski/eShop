@@ -24,8 +24,8 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
             selector: x => new ProductCustomerDto
             {
                 Id = x.Id,
-                Name = x.Name,
-                Price = x.UnitPrice,
+                Name = x.Name.Value,
+                Price = x.UnitPrice.Value,
                 Image = ImageDataUriBuilder.FromImage(x.Image),
                 Category = x.Category.Name.Value
             },
@@ -105,10 +105,10 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
         var productDto = new ProductDetailsCustomerDto
         {
             Id = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            Price = product.UnitPrice,
-            UnitQuantity = product.UnitQuantity,
+            Name = product.Name.Value,
+            Description = product.Description.Value,
+            Price = product.UnitPrice.Value,
+            UnitQuantity = product.UnitQuantity.Value,
             Image = ImageDataUriBuilder.FromImage(product.Image),
             Category = product.Category?.Name.Value,
             CanComment = canComment

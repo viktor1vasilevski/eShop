@@ -5,7 +5,7 @@ namespace eShop.Domain.ValueObjects;
 public sealed class CategoryName : Primitives.ValueObject
 {
     public string Value { get; }
-
+    private CategoryName() { }
     private CategoryName(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

@@ -2,15 +2,16 @@
 using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
 using eShop.Domain.ValueObject;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
 public class Product : AuditableBaseEntity
 {
-    public string Name { get; private set; }
-    public string Description { get; private set; }
-    public decimal UnitPrice { get; private set; }
-    public int UnitQuantity { get; private set; }
+    public ProductName Name { get; private set; } = null!;
+    public ProductDescription Description { get; private set; } = null!;
+    public UnitPrice UnitPrice { get; private set; } = null!;
+    public UnitQuantity UnitQuantity { get; private set; } = null!;
     public Image Image { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 
@@ -42,12 +43,12 @@ public class Product : AuditableBaseEntity
 
     public void Update(string name, string description, decimal unitPrice, int unitQuantity, Guid categoryId, Image image)
     {
-        Validate(name, description, unitPrice, unitQuantity, categoryId);
+        DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
 
-        Name = name;
-        Description = description;
-        UnitPrice = unitPrice;
-        UnitQuantity = unitQuantity;
+        Name = ProductName.Create(name);
+        Description = ProductDescription.Create(description);
+        UnitPrice = UnitPrice.Create(unitPrice);
+        UnitQuantity = UnitQuantity.Create(unitQuantity);
 
         if (image != null)
         {
@@ -60,27 +61,8 @@ public class Product : AuditableBaseEntity
 
     public void SubtrackQuantity(int requestedQuantity)
     {
-        UnitQuantity -= requestedQuantity;
+        UnitQuantity = UnitQuantity.Subtract(requestedQuantity);
     }
 
     public void SoftDelete() => IsDeleted = true;
-
-    private void Validate(string name, string description, decimal unitPrice, int unitQuantity, Guid categoryId)
-    {
-        DomainValidatorHelper.ThrowIfEmptyGuid(categoryId, nameof(categoryId));
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(name, nameof(name));
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(description, nameof(description));
-
-        if (name.Length > 50)
-            throw new DomainValidationException("Product name cannot exceed 50 characters.");
-
-        if (description.Length > 2500)
-            throw new DomainValidationException("Description cannot exceed 2500 characters.");
-
-        if (unitPrice <= 0)
-            throw new DomainValidationException("Unit price must be greater than zero.");
-
-        if (unitQuantity <= 0)
-            throw new DomainValidationException("Unit quantity must be greater than zero.");
-    }
 }

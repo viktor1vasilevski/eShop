@@ -10,8 +10,12 @@ public class BasketItemConfiguration : IEntityTypeConfiguration<BasketItem>
     {
         builder.HasKey(i => i.Id);
 
-        builder.Property(i => i.Quantity)
-               .IsRequired();
+        builder.OwnsOne(i => i.UnitQuantity, q =>
+        {
+            q.Property(v => v.Value)
+             .HasColumnName("UnitQuantity")
+             .IsRequired();
+        });
 
         builder.HasOne(i => i.Product)
                .WithMany(p => p.BasketItems)

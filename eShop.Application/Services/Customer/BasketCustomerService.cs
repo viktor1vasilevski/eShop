@@ -56,10 +56,10 @@ public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
                 Items = b.BasketItems.Select(i => new BasketItemCustomerDto
                 {
                     ProductId = i.ProductId,
-                    ProductName = i.Product.Name,
-                    Quantity = i.Quantity,
-                    Price = i.Product.UnitPrice,
-                    UnitQuantity = i.Product.UnitQuantity,
+                    ProductName = i.Product.Name.Value,
+                    Quantity = i.UnitQuantity.Value,
+                    Price = i.Product.UnitPrice.Value,
+                    UnitQuantity = i.Product.UnitQuantity.Value,
                     Image = ImageDataUriBuilder.FromImage(i.Product.Image)
                 }).ToList()
             },

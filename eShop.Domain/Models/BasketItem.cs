@@ -1,5 +1,6 @@
 ﻿using eShop.Domain.Exceptions;
 using eShop.Domain.Models.Base;
+using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
@@ -11,7 +12,7 @@ public class BasketItem : AuditableBaseEntity
     public Guid ProductId { get; private set; }
     public virtual Product? Product { get; private set; }
 
-    public int Quantity { get; private set; }
+    public UnitQuantity UnitQuantity { get; private set; }
 
 
     private BasketItem() { }
@@ -20,14 +21,12 @@ public class BasketItem : AuditableBaseEntity
     {
         if (productId == Guid.Empty)
             throw new DomainException("ProductId cannot be empty.");
-        if (quantity <= 0)
-            throw new DomainException("Quantity must be greater than zero.");
 
         return new BasketItem
         {
             BasketId = basketId,
             ProductId = productId,
-            Quantity = quantity
+            UnitQuantity = UnitQuantity.Create(quantity)
         };
     }
 
@@ -36,10 +35,12 @@ public class BasketItem : AuditableBaseEntity
         if (newQuantity <= 0)
             throw new DomainException("Quantity must be greater than zero.");
 
-        if (maxQuantity.HasValue)
-            Quantity = Math.Min(newQuantity, maxQuantity.Value);
-        else
-            Quantity = newQuantity;
+        var finalQuantity = maxQuantity.HasValue
+            ? Math.Min(newQuantity, maxQuantity.Value)
+            : newQuantity;
+
+        UnitQuantity = UnitQuantity.Create(finalQuantity);
     }
+
 
 }
