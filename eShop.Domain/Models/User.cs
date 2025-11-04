@@ -8,9 +8,9 @@ namespace eShop.Domain.Models;
 public class User : AuditableBaseEntity
 {
     public FullName FullName { get; private set; }
-    public string Username { get; private set; }
+    public Username Username { get; private set; }
     public Role Role { get; private set; }
-    public string Email { get; private set; }
+    public Email Email { get; private set; }
     public string PasswordHash { get; private set; }
     public string SaltKey { get; private set; }
     public bool IsDeleted { get; private set; }
@@ -42,15 +42,12 @@ public class User : AuditableBaseEntity
 
     private void ApplyUserData(UserData user)
     {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Username, nameof(user.Username));
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Email, nameof(user.Email));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.PasswordHash, nameof(user.PasswordHash));
         DomainValidatorHelper.ThrowIfNullOrWhiteSpace(user.Salt, nameof(user.Salt));
-
         DomainValidatorHelper.ThrowIfEnumIsNotDefined(user.Role, nameof(user.Role));
 
-        Username = user.Username.ToLower();
-        Email = user.Email.ToLower();
+        Username = Username.Create(user.Username);
+        Email = Email.Create(user.Email);
         FullName = FullName.Create(user.FirstName, user.LastName);
         Role = user.Role;
         PasswordHash = user.PasswordHash;

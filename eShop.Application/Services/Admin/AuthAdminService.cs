@@ -20,9 +20,9 @@ public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepos
 
     public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request)
     {
-        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username == request.Username);
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username);
 
-        if (user is null || user?.Username != request.Username || user?.Role != Role.Admin || 
+        if (user is null || user?.Username.Value != request.Username || user?.Role != Role.Admin || 
             !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
         {
             return new ApiResponse<LoginResponse>
@@ -42,8 +42,8 @@ public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepos
             {
                 Id = user.Id,
                 Token = token,
-                Email = user.Email,
-                Username = user.Username,
+                Email = user.Email.Value,
+                Username = user.Username.Value,
                 Role = user.Role
             }
         };

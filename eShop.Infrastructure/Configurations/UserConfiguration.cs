@@ -23,17 +23,25 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                     .HasColumnName("LastName");
         });
 
-        builder.Property(u => u.Username)
-               .IsRequired()
-               .HasMaxLength(100);
+        builder.OwnsOne(u => u.Username, uName =>
+        {
+            uName.Property(u => u.Value)
+                 .HasColumnName("Username")
+                 .HasMaxLength(50)
+                 .IsRequired();
 
-        builder.HasIndex(u => u.Username).IsUnique();
+            uName.HasIndex(u => u.Value).IsUnique();
+        });
 
-        builder.Property(u => u.Email)
-               .IsRequired()
-               .HasMaxLength(256);
+        builder.OwnsOne(u => u.Email, e =>
+        {
+            e.Property(em => em.Value)
+             .HasColumnName("Email")
+             .HasMaxLength(150)
+             .IsRequired();
 
-        builder.HasIndex(u => u.Email).IsUnique();
+            e.HasIndex(em => em.Value).IsUnique();
+        });
 
         builder.Property(u => u.PasswordHash)
                .IsRequired();

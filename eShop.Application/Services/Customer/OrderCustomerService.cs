@@ -28,7 +28,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
                 {
                     FirstName = x.User.FullName.FirstName,
                     LastName = x.User.FullName.LastName,
-                    Username = x.User.Username,
+                    Username = x.User.Username.Value,
                     TotalAmount = x.TotalAmount,
                     OrderCreatedOn = x.Created,
                     Items = x.OrderItems.Select(item => new OrderItemCustomerDto
@@ -121,7 +121,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             var subject = $"Order Confirmation #{order.Id}";
 
             var emailMessage = new EmailMessage(
-                To: user.Email,
+                To: user.Email.Value,
                 Subject: subject,
                 HtmlBody: html);
 
@@ -168,7 +168,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         sb.AppendLine("</style>");
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
-        sb.AppendLine($"<h2>Thanks for your order, {System.Net.WebUtility.HtmlEncode(user.FullName.FirstName ?? user.Email)}!</h2>");
+        sb.AppendLine($"<h2>Thanks for your order, {System.Net.WebUtility.HtmlEncode(user.FullName.FirstName ?? user.Email.Value)}!</h2>");
         sb.AppendLine($"<p>Order ID: <strong>{order.Id}</strong></p>");
         sb.AppendLine("<table role=\"presentation\" aria-hidden=\"true\">");
         sb.AppendLine("<thead><tr><th>Product</th><th style='text-align:center'>Qty</th><th style='text-align:right'>Price</th></tr></thead>");

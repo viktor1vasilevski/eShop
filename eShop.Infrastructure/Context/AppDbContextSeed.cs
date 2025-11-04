@@ -35,7 +35,7 @@ public static class AppDbContextSeed
     {
         context.Database.Migrate();
 
-        if (context.Users.Any(x => x.Role == Role.Customer && x.Username.ToLower() == "testuser"))
+        if (context.Users.Any(x => x.Role == Role.Customer && x.Username.Value.ToLower() == "testuser"))
             return;
 
         var passwordHash = _passwordHasher.HashPassword("Test@123", out string salt);

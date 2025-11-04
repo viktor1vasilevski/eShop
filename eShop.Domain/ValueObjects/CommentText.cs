@@ -19,7 +19,7 @@ public sealed class CommentText : Primitives.ValueObject
         Value = value.Trim();
     }
 
-    public static CommentText Create(string value) => new CommentText(value);
+    public static CommentText Create(string value) => new(value);
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
