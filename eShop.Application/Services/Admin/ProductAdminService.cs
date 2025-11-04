@@ -26,14 +26,14 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var (products, totalCount) = await _productRepository.QueryAsync(
             queryBuilder: q => q
                 .Where(x => !x.IsDeleted)
-                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.Value.ToLower().Contains(request.Name.ToLower())),
+                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.ToLower().Contains(request.Name.ToLower())),
             selector: x => new ProductAdminResponse
             {
                 Id = x.Id,
-                Name = x.Name.Value,
-                Description = x.Description.Value,
-                UnitPrice = x.UnitPrice.Value,
-                UnitQuantity = x.UnitQuantity.Value,
+                Name = x.Name,
+                Description = x.Description,
+                UnitPrice = x.UnitPrice,
+                UnitQuantity = x.UnitQuantity,
                 Image = ImageDataUriBuilder.FromImage(x.Image),
                 Category = x.Category.Name.Value,
                 Created = x.Created,
@@ -83,10 +83,10 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var productDto = new ProductDetailsAdminResponse
         {
             Id = product.Id,
-            Name = product.Name.Value,
-            Description = product.Description.Value,
-            UnitPrice = product.UnitPrice.Value,
-            UnitQuantity = product.UnitQuantity.Value,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
             Image = ImageDataUriBuilder.FromImage(product.Image),
             Categories = pathItems.Select(p => new CategoryRefDto { Id = p.Id, Name = p.Name }).ToList(),
             Created = product.Created,
@@ -118,10 +118,10 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var dto = new ProductEditAdminResponse
         {
             Id = product.Id,
-            Name = product.Name.Value,
-            Description = product.Description.Value,
-            UnitPrice = product.UnitPrice.Value,
-            UnitQuantity = product.UnitQuantity.Value,
+            Name = product.Name,
+            Description = product.Description,
+            UnitPrice = product.UnitPrice,
+            UnitQuantity = product.UnitQuantity,
             Image = ImageDataUriBuilder.FromImage(product.Image),
             CategoryId = product.CategoryId
         };
@@ -165,7 +165,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var nameTaken = await _productRepository.ExistsAsync(
             p => p.CategoryId == request.CategoryId &&
                  !p.IsDeleted &&
-                 p.Name.Value.ToLower() == normalizedName,
+                 p.Name.ToLower() == normalizedName,
             cancellationToken: cancellationToken
         );
 
@@ -200,10 +200,10 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 Data = new ProductAdminResponse
                 {
                     Id = product.Id,
-                    Name = product.Name.Value,
-                    Description = product.Description.Value,
-                    UnitPrice = product.UnitPrice.Value,
-                    UnitQuantity = product.UnitQuantity.Value,
+                    Name = product.Name,
+                    Description = product.Description,
+                    UnitPrice = product.UnitPrice,
+                    UnitQuantity = product.UnitQuantity,
                     Created = product.Created
                 }
             };
@@ -260,12 +260,12 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             };
         }
 
-        if (!string.Equals(product.Name.Value, request.Name, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(product.Name, request.Name, StringComparison.OrdinalIgnoreCase))
         {
             var nameTaken = await _productRepository.ExistsAsync(
                 p => p.CategoryId == request.CategoryId &&
                      !p.IsDeleted &&
-                     p.Name.Value.ToLower() == request.Name.Trim().ToLower() &&
+                     p.Name.ToLower() == request.Name.Trim().ToLower() &&
                      p.Id != id,
                 cancellationToken: cancellationToken
             );

@@ -213,7 +213,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                     .Select(p => new ProductRefDto
                     {
                         Id = p.Id,
-                        Name = p.Name.Value
+                        Name = p.Name
                     })
                     .ToList(),
                 Children = c.Children

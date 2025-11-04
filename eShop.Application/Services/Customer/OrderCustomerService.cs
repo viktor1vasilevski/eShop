@@ -33,9 +33,9 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
                     OrderCreatedOn = x.Created,
                     Items = x.OrderItems.Select(item => new OrderItemCustomerDto
                     {
-                        ProductName = item.Product!.Name.Value,
-                        Quantity = item.UnitQuantity.Value,
-                        UnitPrice = item.UnitPrice.Value,
+                        ProductName = item.Product!.Name,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
                         Image = ImageDataUriBuilder.FromImage(item.Product.Image)
                     }).ToList()
                 }
@@ -100,13 +100,13 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
 
             product.SubtrackQuantity(itemRequest.Quantity);
 
-            var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice.Value);
+            var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice);
             order.AddOrderItem(orderItem);
 
             productLines.Add((
-                ProductName: product.Name.Value ?? $"Product {product.Id}",
+                ProductName: product.Name ?? $"Product {product.Id}",
                 Quantity: itemRequest.Quantity,
-                UnitPrice: product.UnitPrice.Value
+                UnitPrice: product.UnitPrice
             ));
         }
 

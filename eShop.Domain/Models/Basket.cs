@@ -46,15 +46,17 @@ public class Basket : AuditableBaseEntity
         var existingItem = _basketItems.FirstOrDefault(i => i.ProductId == product.Id);
         if (existingItem != null)
         {
-            int totalQuantity = existingItem.UnitQuantity.Value + quantityToAdd;
-            existingItem.UpdateQuantity(totalQuantity, product.UnitQuantity.Value);
+            int totalQuantity = existingItem.Quantity + quantityToAdd;
+            existingItem.UpdateQuantity(totalQuantity, product.UnitQuantity);
         }
         else
         {
-            var newItem = BasketItem.Create(this.Id, product.Id, Math.Min(quantityToAdd, product.UnitQuantity.Value));
+            var newItem = BasketItem.CreateNew(this.Id, product.Id, Math.Min(quantityToAdd, product.UnitQuantity));
             _basketItems.Add(newItem);
         }
     }
+
+
 
 
     public void UpdateItemQuantity(Guid productId, int quantity)
@@ -63,6 +65,6 @@ public class Basket : AuditableBaseEntity
         if (existingItem == null)
             throw new DomainException("Item not found in the basket.");
 
-        existingItem.UpdateQuantity(quantity, existingItem.UnitQuantity.Value);
+        existingItem.UpdateQuantity(quantity, existingItem.Quantity);
     }
 }
