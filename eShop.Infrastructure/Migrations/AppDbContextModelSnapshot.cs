@@ -296,6 +296,12 @@ namespace eShop.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -562,51 +568,6 @@ namespace eShop.Infrastructure.Migrations
 
                             b1.ToTable("Products");
 
-                            b1.WithOwner()
-                                .HasForeignKey("ProductId");
-                        });
-
-                    b.OwnsOne("eShop.Domain.ValueObjects.UnitQuantity", "UnitQuantity", b1 =>
-                        {
-                            b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Value")
-                                .HasColumnType("int")
-                                .HasColumnName("UnitQuantity");
-
-                            b1.HasKey("ProductId");
-
-                            b1.ToTable("Products");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ProductId");
-                        });
-
-                    b.OwnsOne("eShop.Domain.ValueObjects.ProductDescription", "Description", b1 =>
-                        {
-                            b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(2500)
-                                .HasColumnType("nvarchar(2500)")
-                                .HasColumnName("Description");
-
-                            b1.HasKey("ProductId");
-
-                            b1.ToTable("Products");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ProductId");
-                        });
-
-                    b.OwnsOne("eShop.Domain.ValueObjects.ProductName", "Name", b1 =>
-                        {
-                            b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
-
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(50)
@@ -700,9 +661,6 @@ namespace eShop.Infrastructure.Migrations
                                 .HasColumnName("Username");
 
                             b1.HasKey("UserId");
-
-                            b1.HasIndex("Value")
-                                .IsUnique();
 
                             b1.ToTable("Users");
 
