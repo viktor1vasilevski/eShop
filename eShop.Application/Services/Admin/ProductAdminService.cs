@@ -248,6 +248,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var product = await _productRepository.GetSingleAsync(
             filter: p => !p.IsDeleted && p.Id == id,
             selector: p => p,
+            asNoTracking: false,
             cancellationToken: cancellationToken
         );
 
@@ -298,6 +299,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 image
             );
 
+            _productRepository.Update(product);
             await _uow.SaveChangesAsync(cancellationToken);
 
             return new ApiResponse<ProductAdminResponse>

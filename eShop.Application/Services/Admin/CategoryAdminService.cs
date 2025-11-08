@@ -209,7 +209,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 Created = c.Created,
                 LastModified = c.LastModified,
                 Products = c.Products
-                    .OrderBy(p => p.Name)
+                    .OrderBy(p => p.Name.Value)
                     .Select(p => new ProductRefDto
                     {
                         Id = p.Id,
@@ -217,7 +217,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                     })
                     .ToList(),
                 Children = c.Children
-                    .OrderBy(c => c.Name)
+                    .OrderBy(c => c.Name.Value)
                     .Select(c => new CategoryRefDto
                     {
                         Id = c.Id,
@@ -373,6 +373,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         var (categoriesToDelete, _) = await _categoryRepository.QueryAsync(
             queryBuilder: c => c.Where(c => idsToDelete.Contains(c.Id)),
             selector: c => c,
+            asNoTracking: false,
             cancellationToken: cancellationToken
         );
 

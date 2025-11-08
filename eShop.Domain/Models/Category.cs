@@ -25,8 +25,6 @@ public class Category : AuditableBaseEntity
 
 
 
-
-
     private Category() { }
 
     public static Category Create(string name, Image image, Guid? parentCategoryId)
@@ -47,6 +45,7 @@ public class Category : AuditableBaseEntity
     {
         DomainValidatorHelper.ThrowIfEmptyGuid(parentCategoryId, nameof(parentCategoryId));
 
+        Name = CategoryName.Create(name);
         ParentCategoryId = parentCategoryId;
         if (image != null)
         {
