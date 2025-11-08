@@ -1,5 +1,7 @@
 ﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
+using eShop.Application.Responses.Customer.Basket;
+using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.Api.Customer.Controllers;
@@ -10,28 +12,28 @@ public class BasketController(IBasketCustomerService _basketCustomerService) : B
 {
 
     [HttpGet("{userId}")]
-    public async Task<IActionResult> GetByUserId([FromRoute] Guid userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> GetByUserId([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
         var response = await _basketCustomerService.GetBasketByUserIdAsync(userId, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpPost("{userId}/merge")]
-    public async Task<IActionResult> UpdateUserBasket([FromRoute] Guid userId, [FromBody] UpdateBasketCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> UpdateUserBasket([FromRoute] Guid userId, [FromBody] UpdateBasketCustomerRequest request, CancellationToken cancellationToken)
     {
         var response = await _basketCustomerService.UpdateUserBasketAsync(userId, request, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpDelete("{userId}/items")]
-    public async Task<IActionResult> ClearItems([FromRoute] Guid userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> ClearItems([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
         var response = await _basketCustomerService.ClearBasketItemsForUserAsync(userId, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpDelete("{userId}/items/{productId}")]
-    public async Task<IActionResult> RemoveItem([FromRoute] Guid userId, [FromRoute] Guid productId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> RemoveItem([FromRoute] Guid userId, [FromRoute] Guid productId, CancellationToken cancellationToken)
     {
         var response = await _basketCustomerService.RemoveItemAsync(userId, productId, cancellationToken);
         return HandleResponse(response);
