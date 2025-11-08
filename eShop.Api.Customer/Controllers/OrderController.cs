@@ -21,9 +21,9 @@ public class OrderController(IOrderCustomerService _orderCustomerService) : Base
     }
 
     [HttpGet("{userId}")]
-    public async Task<IActionResult> GetOrdersForUser([FromRoute] Guid userId)
+    public async Task<IActionResult> GetOrdersForUser([FromRoute] Guid userId, CancellationToken cancellationToken)
     {
-        var response = await _orderCustomerService.GetOrdersForUserIdAsync(userId);
+        var response = await _orderCustomerService.GetOrdersForUserIdAsync(userId, cancellationToken);
         return HandleResponse(response);
     }
 }
