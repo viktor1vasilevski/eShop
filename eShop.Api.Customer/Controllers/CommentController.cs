@@ -1,5 +1,7 @@
 ﻿using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Comment;
+using eShop.Application.Responses.Customer.Comment;
+using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +14,7 @@ public class CommentController(ICommentCustomerService _commentCustomerService) 
 {
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] CommentCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<List<CommentCustomerDto>>>> Get([FromQuery] CommentCustomerRequest request, CancellationToken cancellationToken)
     {
         var response = await _commentCustomerService.GetCommentsAsync(request, cancellationToken);
         return HandleResponse(response);
@@ -20,7 +22,7 @@ public class CommentController(ICommentCustomerService _commentCustomerService) 
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
-    public async Task<IActionResult> Create([FromBody] CreateCommentCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<CommentCustomerDto>>> Create([FromBody] CreateCommentCustomerRequest request, CancellationToken cancellationToken)
     {
         var response = await _commentCustomerService.CreateCommentAsync(request, cancellationToken);
         return HandleResponse(response);
