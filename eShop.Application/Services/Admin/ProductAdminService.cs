@@ -53,12 +53,12 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             Status = ResponseStatus.Success
         };
     }
-
     public async Task<ApiResponse<ProductDetailsAdminResponse>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
-            includeBuilder: q => q.Include(p => p.Category),
+            includeBuilder: q => q.Include(p => p.Category)
+                                  .Include(p => p.Comments).ThenInclude(c => c.User),
             selector: p => p,
             cancellationToken: cancellationToken
         );
@@ -88,9 +88,22 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             UnitPrice = product.UnitPrice.Value,
             UnitQuantity = product.UnitQuantity.Value,
             Image = ImageDataUriBuilder.FromImage(product.Image),
-            Categories = pathItems.Select(p => new CategoryRefDto { Id = p.Id, Name = p.Name }).ToList(),
+            Categories = pathItems.Select(p => new CategoryRefDto
+            { Id = p.Id, Name = p.Name }).ToList(),
             Created = product.Created,
-            LastModified = product.LastModified
+            LastModified = product.LastModified,
+            Comments = product.Comments
+                .OrderByDescending(c => c.Created) // optional: newest first
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    UserId = c.UserId,
+                    Username = c.User.Username.Value,
+                    CommentText = c.Text.Value,
+                    Rating = c.Rating,
+                    Created = c.Created
+                })
+                .ToList()
         };
 
         return new ApiResponse<ProductDetailsAdminResponse>

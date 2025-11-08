@@ -97,7 +97,7 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
         }
 
         public async Task<TResult?> GetSingleAsync<TResult>(
-            Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, bool>> filter,
             Expression<Func<TEntity, TResult>>? selector = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
             bool asNoTracking = true,
@@ -108,7 +108,7 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
             if (includeBuilder != null)
                 query = includeBuilder(query);
 
-            query = query.Where(predicate);
+            query = query.Where(filter);
 
             if (selector != null)
                 return await query.Select(selector).FirstOrDefaultAsync(cancellationToken);
