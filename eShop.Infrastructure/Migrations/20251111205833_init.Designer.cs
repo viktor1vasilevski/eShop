@@ -12,7 +12,7 @@ using eShop.Infrastructure.Context;
 namespace eShop.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251108182144_init")]
+    [Migration("20251111205833_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -394,8 +394,7 @@ namespace eShop.Infrastructure.Migrations
 
                             b1.HasKey("CategoryId");
 
-                            b1.HasIndex("Value")
-                                .IsUnique();
+                            b1.HasIndex("Value");
 
                             b1.ToTable("Categories");
 

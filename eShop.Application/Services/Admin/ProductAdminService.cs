@@ -93,7 +93,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             Created = product.Created,
             LastModified = product.LastModified,
             Comments = product.Comments
-                .OrderByDescending(c => c.Created) // optional: newest first
+                .OrderByDescending(c => c.Created)
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,

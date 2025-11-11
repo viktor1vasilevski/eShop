@@ -391,8 +391,7 @@ namespace eShop.Infrastructure.Migrations
 
                             b1.HasKey("CategoryId");
 
-                            b1.HasIndex("Value")
-                                .IsUnique();
+                            b1.HasIndex("Value");
 
                             b1.ToTable("Categories");
 
