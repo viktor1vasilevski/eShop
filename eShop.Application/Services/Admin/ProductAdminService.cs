@@ -236,6 +236,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
             selector: p => p,
+            asNoTracking: false,
             cancellationToken: cancellationToken
         );
 
@@ -246,7 +247,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 Message = AdminProductConstants.ProductDoesNotExist
             };
 
-        product.SoftDelete();
+        product.SoftDelete();  
         await _uow.SaveChangesAsync(cancellationToken);
 
         return new ApiResponse<ProductAdminResponse>
