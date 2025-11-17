@@ -7,14 +7,15 @@ namespace eShop.Infrastructure.Context;
 
 public static class AppDbContextSeed
 {
-    public static void SeedAdminUser(AppDbContext context, string password, IPasswordHasher _passwordHasher)
+    public static void SeedAdminUser(AppDbContext context, string password, IPasswordService _passwordService)
     {
         context.Database.Migrate();
 
         if (context.Users.Any(x => x.Role == Role.Admin))
             return;
 
-        var passwordHash = _passwordHasher.HashPassword(password, out string salt);
+        _passwordService.ValidatePassword(password);
+        var passwordHash = _passwordService.HashPassword(password, out string salt);
 
         var adminData = new UserData(
             firstName: "Admin",
@@ -31,14 +32,14 @@ public static class AppDbContextSeed
         context.SaveChanges();
     }
 
-    public static void SeedTestUser(AppDbContext context, IPasswordHasher _passwordHasher)
+    public static void SeedTestUser(AppDbContext context, IPasswordService _passwordService)
     {
         context.Database.Migrate();
 
         if (context.Users.Any(x => x.Role == Role.Customer && x.Username.Value.ToLower() == "testuser"))
             return;
 
-        var passwordHash = _passwordHasher.HashPassword("Test@123", out string salt);
+        var passwordHash = _passwordService.HashPassword("Test@123", out string salt);
 
         var userData = new UserData(
             firstName: "Test",

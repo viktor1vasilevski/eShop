@@ -46,7 +46,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    var _passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+    var _passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordService>();
 
     try
     {

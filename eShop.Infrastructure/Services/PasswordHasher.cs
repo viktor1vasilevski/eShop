@@ -1,10 +1,27 @@
 ﻿using eShop.Application.Interfaces.Shared;
+using eShop.Domain.Exceptions;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace eShop.Infrastructure.Services;
 
-public class PasswordHasher : IPasswordHasher
+public class PasswordHasher : IPasswordService
 {
+    private const string PasswordPattern =
+    @"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{4,}$";
+
+    public void ValidatePassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+            throw new DomainValidationException("Password cannot be empty.");
+
+        if (!Regex.IsMatch(password, PasswordPattern))
+            throw new DomainValidationException(
+                "Password must contain at least one uppercase letter, one lowercase letter, " +
+                "one number, one special character, and be at least 4 characters long."
+            );
+    }
+
     public string HashPassword(string password, out string salt)
     {
         byte[] saltBytes = GenerateSalt();

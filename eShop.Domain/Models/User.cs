@@ -1,7 +1,9 @@
 ﻿using eShop.Domain.Enums;
+using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
 using eShop.Domain.ValueObjects;
+using System.Text.RegularExpressions;
 
 namespace eShop.Domain.Models;
 
@@ -53,6 +55,14 @@ public class User : AuditableBaseEntity
         PasswordHash = user.PasswordHash;
         SaltKey = user.Salt;
     }
+
+    public static void ValidatePassword(string password)
+    {
+        const string passwordPattern = @"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{4,}$";
+        if (!Regex.IsMatch(password, passwordPattern))
+            throw new DomainValidationException("Password must contain at least one uppercase, one lowercase, one number, one special character, and be at least 4 characters long.");
+    }
+
 }
 
 

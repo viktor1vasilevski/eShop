@@ -15,7 +15,7 @@ using Microsoft.Extensions.Configuration;
 namespace eShop.Application.Services.Admin;
 
 public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, 
-    IPasswordHasher _passwordHasher, IConfiguration _configuration) : IAuthAdminService
+    IPasswordService _passwordHasher, IConfiguration _configuration) : IAuthAdminService
 {
 
     public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request)

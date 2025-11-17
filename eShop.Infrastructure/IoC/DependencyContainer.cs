@@ -23,7 +23,7 @@ public static class DependencyContainer
         services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         services.AddScoped<IProductAdminService, ProductAdminService>();
         services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IPasswordService, PasswordHasher>();
 
         return services;
     }
@@ -53,7 +53,7 @@ public static class DependencyContainer
         services.AddScoped(typeof(IDapperRepository<>), typeof(DapperRepository<>));
         services.AddScoped<IDapperUnitOfWork, DapperUnitOfWork>();
 
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IPasswordService, PasswordHasher>();
 
         return services;
     }
