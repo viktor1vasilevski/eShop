@@ -7,7 +7,6 @@ public static class ImageParsing
         if (string.IsNullOrWhiteSpace(base64String))
             return (Array.Empty<byte>(), string.Empty);
 
-        // extract data
         string base64Data = base64String.Contains("base64,")
             ? base64String[(base64String.IndexOf("base64,") + 7)..]
             : base64String;

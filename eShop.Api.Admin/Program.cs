@@ -34,7 +34,7 @@ builder.Services.AddScoped<IEfUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped(typeof(IEfRepository<>), typeof(EfRepository<>));
 builder.Services.AddAdminIoCServices();
 
-builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>(ServiceLifetime.Transient);
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryAdminRequestValidator>(ServiceLifetime.Transient);
 builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
