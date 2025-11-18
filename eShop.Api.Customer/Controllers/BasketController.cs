@@ -2,12 +2,15 @@
 using eShop.Application.Requests.Customer.Basket;
 using eShop.Application.Responses.Customer.Basket;
 using eShop.Application.Responses.Shared.Base;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.Api.Customer.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
 public class BasketController(IBasketCustomerService _basketCustomerService) : BaseController
 {
 

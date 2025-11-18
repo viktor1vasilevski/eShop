@@ -12,7 +12,6 @@ namespace eShop.Api.Customer.Controllers;
 public class OrderController(IOrderCustomerService _orderCustomerService) : BaseController
 {
 
-
     [HttpPost]
     public async Task<IActionResult> PlaceOrderAsync([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
     {
