@@ -19,49 +19,49 @@ namespace eShop.Api.Admin.Controllers
         public async Task<ActionResult<ApiResponse<ProductAdminResponse>>> Get([FromQuery] ProductAdminRequest request, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.GetProductsAsync(request, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ProductDetailsAdminResponse>>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.GetProductByIdAsync(id, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
 
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ProductAdminResponse>>> Create([FromBody] CreateProductAdminRequest request, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.CreateProductAsync(request, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ProductAdminResponse>>> Update([FromRoute] Guid id, [FromBody] UpdateProductAdminRequest request, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.UpdateProductAsync(id, request, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
 
         [HttpGet("{id}/edit")]
         public async Task<ActionResult<ApiResponse<ProductEditAdminResponse>>> GetProductForEdit(Guid id, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.GetProductForEditAsync(id, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<ProductAdminResponse>>> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.DeleteProductAsync(id, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
 
         [HttpGet("generate")]
         public async Task<ActionResult<ApiResponse<string>>> GenerateDescription([FromQuery] GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)
         {
             var response = await _productAdminService.GenerateAIProductDescriptionAsync(request, cancellationToken);
-            return HandleResponsee(response);
+            return HandleResponse(response);
         }
     }
 }

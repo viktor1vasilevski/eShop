@@ -1,11 +1,14 @@
 using eShop.Api.Customer.Extensions;
 using eShop.Api.Customer.Middlewares;
+using eShop.Application.Validations.Admin.Category;
 using eShop.Domain.Interfaces.Dapper;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Infrastructure.Context;
 using eShop.Infrastructure.IoC;
 using eShop.Infrastructure.Repositories.Dapper;
 using eShop.Infrastructure.Repositories.EntityFramework;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +38,9 @@ builder.Services.AddScoped(typeof(IDapperRepository<>), typeof(DapperRepository<
 builder.Services.AddScoped<IDapperUnitOfWork, DapperUnitOfWork>();
 
 builder.Services.AddCustomerIoCService(builder.Configuration);
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryAdminRequestValidator>(ServiceLifetime.Transient);
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

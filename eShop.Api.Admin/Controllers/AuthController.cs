@@ -18,6 +18,6 @@ public class AuthController(IAuthAdminService _authAdminService) : BaseControlle
     public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] UserLoginRequest request)
     {
         var response = await _authAdminService.LoginAsync(request);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 }

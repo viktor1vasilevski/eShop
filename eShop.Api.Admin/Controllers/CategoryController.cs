@@ -18,48 +18,48 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
     public async Task<ActionResult<ApiResponse<CategoryAdminResponse>>> Get([FromQuery] CategoryAdminRequest request)
     {
         var response = await _categoryAdminService.GetCategoriesAsync(request);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> GetById([FromRoute] Guid id)
     {
         var response = await _categoryAdminService.GetCategoryByIdAsync(id);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Create([FromBody] CreateCategoryAdminRequest request)
     {
         var response = await _categoryAdminService.CreateCategoryAsync(request);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Update([FromRoute] Guid id, [FromBody] UpdateCategoryAdminRequest request)
     {
         var response = await _categoryAdminService.UpdateCategoryAsync(id, request);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 
     [HttpGet("{id}/edit")]
     public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryForEdit(Guid id)
     {
         var response = await _categoryAdminService.GetCategoryForEditAsync(id);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Delete([FromRoute] Guid id)
     {
         var response = await _categoryAdminService.DeleteCategoryAsync(id);
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 
     [HttpGet("tree")]
     public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryTree()
     {
         var response = await _categoryAdminService.GetCategoryTreeAsync();
-        return HandleResponsee(response);
+        return HandleResponse(response);
     }
 }

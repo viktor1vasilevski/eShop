@@ -7,7 +7,7 @@ namespace eShop.Api.Admin.Controllers;
 [ApiController]
 public abstract class BaseController : ControllerBase
 {
-    protected ActionResult HandleResponsee<T>(ApiResponse<T> response) where T : class
+    protected ActionResult HandleResponse<T>(ApiResponse<T> response) where T : class
     {
         return response.Status switch
         {
