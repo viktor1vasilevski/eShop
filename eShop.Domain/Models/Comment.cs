@@ -20,7 +20,6 @@ public class Comment : AuditableBaseEntity
     private Comment() { }
     public static Comment Create(string commentText, Rating rating, Guid productId, Guid userId)
     {
-        DomainValidatorHelper.ThrowIfNullOrWhiteSpace(commentText, nameof(commentText));
         DomainValidatorHelper.ThrowIfEmptyGuid(productId, nameof(productId));
         DomainValidatorHelper.ThrowIfEmptyGuid(userId, nameof(userId));
 

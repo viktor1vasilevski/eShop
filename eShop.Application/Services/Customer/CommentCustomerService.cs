@@ -7,6 +7,7 @@ using eShop.Application.Responses.Customer.Comment;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
@@ -20,12 +21,13 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
 
         var (comments, totalCount) = await _commentRepository.QueryAsync(
             queryBuilder: q => q.Where(c => c.ProductId == request.ProductId),
+            includeBuilder: x => x.Include(x => x.User),
             selector: c => new CommentCustomerDto
             {
                 Rating = c.Rating,
                 Created = c.Created,
                 CommentText = c.Text.Value,
-                CreatedBy = c.CreatedBy
+                CreatedBy = c.User.Username.Value
             },
             orderBy: orderBy,
             skip: request.Skip,
