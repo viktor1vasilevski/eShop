@@ -7,5 +7,5 @@ namespace eShop.Application.Interfaces.Customer;
 public interface ICommentCustomerService
 {
     Task<ApiResponse<List<CommentCustomerDto>>> GetCommentsAsync(CommentCustomerRequest request, CancellationToken cancellationToken = default);
-    Task<ApiResponse<CommentCustomerDto>> CreateCommentAsync(CreateCommentCustomerRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CommentCustomerDto>> CreateCommentAsync(Guid userId, CreateCommentCustomerRequest request, CancellationToken cancellationToken = default);
 }

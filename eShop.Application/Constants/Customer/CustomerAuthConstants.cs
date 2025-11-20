@@ -6,5 +6,5 @@ public static class CustomerAuthConstants
     public const string UserNotFound = "User not found.";
     public const string AccountAlreadyExists = "An account with the provided credentials already exists.";
     public const string CustomerRegisterSuccess = "User registered successfully.";
-
+    public const string UserNotAuthenticated = "User not authenticated.";
 }

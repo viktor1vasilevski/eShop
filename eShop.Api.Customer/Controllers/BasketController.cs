@@ -1,4 +1,6 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Enums;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
 using eShop.Application.Responses.Customer.Basket;
 using eShop.Application.Responses.Shared.Base;
@@ -14,31 +16,63 @@ namespace eShop.Api.Customer.Controllers;
 public class BasketController(IBasketCustomerService _basketCustomerService) : BaseController
 {
 
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> GetByUserId([FromRoute] Guid userId, CancellationToken cancellationToken)
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> Get(CancellationToken cancellationToken)
     {
-        var response = await _basketCustomerService.GetBasketByUserIdAsync(userId, cancellationToken);
+        var userId = GetUserId();
+        if (userId is null)
+            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            {
+                Status = ResponseStatus.Unauthorized,
+                Message = CustomerAuthConstants.UserNotAuthenticated
+            });
+
+        var response = await _basketCustomerService.GetBasketByUserIdAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
     }
 
-    [HttpPost("{userId}/merge")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> UpdateUserBasket([FromRoute] Guid userId, [FromBody] UpdateBasketCustomerRequest request, CancellationToken cancellationToken)
+    [HttpPost("merge")]
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> UpdateUserBasket([FromBody] UpdateBasketCustomerRequest request, CancellationToken cancellationToken)
     {
-        var response = await _basketCustomerService.UpdateUserBasketAsync(userId, request, cancellationToken);
+        var userId = GetUserId();
+        if (userId is null)
+            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            {
+                Status = ResponseStatus.Unauthorized,
+                Message = CustomerAuthConstants.UserNotAuthenticated
+            });
+
+        var response = await _basketCustomerService.UpdateUserBasketAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
     }
 
-    [HttpDelete("{userId}/items")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> ClearItems([FromRoute] Guid userId, CancellationToken cancellationToken)
+    [HttpDelete("items")]
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> ClearItems(CancellationToken cancellationToken)
     {
-        var response = await _basketCustomerService.ClearBasketItemsForUserAsync(userId, cancellationToken);
+        var userId = GetUserId();
+        if (userId is null)
+            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            {
+                Status = ResponseStatus.Unauthorized,
+                Message = CustomerAuthConstants.UserNotAuthenticated
+            });
+
+        var response = await _basketCustomerService.ClearBasketItemsForUserAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
     }
 
-    [HttpDelete("{userId}/items/{productId}")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> RemoveItem([FromRoute] Guid userId, [FromRoute] Guid productId, CancellationToken cancellationToken)
+    [HttpDelete("items/{productId}")]
+    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> RemoveItem([FromRoute] Guid productId, CancellationToken cancellationToken)
     {
-        var response = await _basketCustomerService.RemoveItemAsync(userId, productId, cancellationToken);
+        var userId = GetUserId();
+        if (userId is null)
+            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            {
+                Status = ResponseStatus.Unauthorized,
+                Message = CustomerAuthConstants.UserNotAuthenticated
+            });
+
+        var response = await _basketCustomerService.RemoveItemAsync(userId.Value, productId, cancellationToken);
         return HandleResponse(response);
     }
 }

@@ -40,7 +40,6 @@ public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepos
             Message = AdminAuthConstants.AdminLoggedSuccessfully,
             Data = new LoginResponse
             {
-                Id = user.Id,
                 Token = token,
                 Email = user.Email.Value,
                 Username = user.Username.Value,

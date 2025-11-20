@@ -11,10 +11,6 @@ public class CreateCommentCustomerRequestValidator : AbstractValidator<CreateCom
             .Must(id => id != Guid.Empty)
             .WithMessage("ProductId must be a valid GUID");
 
-        RuleFor(x => x.UserId)
-            .Must(id => id != Guid.Empty)
-            .WithMessage("UserId must be a valid GUID");
-
         RuleFor(x => x.CommentText)
             .NotEmpty().WithMessage("Comment text is required")
             .MaximumLength(2500).WithMessage("Comment text cannot exceed 2500 characters");

@@ -41,11 +41,11 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
         };
     }
 
-    public async Task<ApiResponse<CommentCustomerDto>> CreateCommentAsync(CreateCommentCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<CommentCustomerDto>> CreateCommentAsync(Guid userId, CreateCommentCustomerRequest request, CancellationToken cancellationToken = default)
     {
         bool hasBought = await _orderRepository
             .QueryAsync(
-                q => q.Where(o => o.UserId == request.UserId &&
+                q => q.Where(o => o.UserId == userId &&
                                   o.OrderItems.Any(oi => oi.ProductId == request.ProductId)),
                 selector: o => o.Id,
                 cancellationToken: cancellationToken
@@ -63,7 +63,7 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
             request.CommentText,
             request.Rating,
             request.ProductId,
-            request.UserId
+            userId
         );
 
         await _commentRepository.AddAsync(comment, cancellationToken);

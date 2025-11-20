@@ -58,10 +58,10 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         };
     }
 
-    public async Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(Guid userId, PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
-            filter: u => u.Id == request.UserId,
+            filter: u => u.Id == userId,
             selector: s => s,
             cancellationToken: cancellationToken);
 
@@ -74,7 +74,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             };
         }
 
-        var order = Order.Create(request.UserId);
+        var order = Order.Create(userId);
         var productLines = new List<(string ProductName, int Quantity, decimal UnitPrice)>();
 
         var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();

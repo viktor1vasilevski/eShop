@@ -43,7 +43,6 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
             Message = CustomerAuthConstants.CustomerLoggedSuccessfully,
             Data = new LoginResponse
             {
-                Id = user.Id,
                 Token = token,
                 Email = user.Email.Value,
                 Username = user.Username.Value,

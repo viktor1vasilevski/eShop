@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Enums;
+using eShop.Application.Extensions;
 using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,4 +23,6 @@ public abstract class BaseController : ControllerBase
             _ => Ok(response),
         };
     }
+
+    protected Guid? GetUserId() => User.GetUserId();
 }

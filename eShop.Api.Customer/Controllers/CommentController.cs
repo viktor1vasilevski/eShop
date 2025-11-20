@@ -1,5 +1,8 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Enums;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Comment;
+using eShop.Application.Responses.Customer.Basket;
 using eShop.Application.Responses.Customer.Comment;
 using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +27,15 @@ public class CommentController(ICommentCustomerService _commentCustomerService) 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
     public async Task<ActionResult<ApiResponse<CommentCustomerDto>>> Create([FromBody] CreateCommentCustomerRequest request, CancellationToken cancellationToken)
     {
-        var response = await _commentCustomerService.CreateCommentAsync(request, cancellationToken);
+        var userId = GetUserId();
+        if (userId is null)
+            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            {
+                Status = ResponseStatus.Unauthorized,
+                Message = CustomerAuthConstants.UserNotAuthenticated
+            });
+
+        var response = await _commentCustomerService.CreateCommentAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
     }
 }
