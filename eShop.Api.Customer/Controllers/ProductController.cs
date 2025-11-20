@@ -1,9 +1,10 @@
-﻿using eShop.Application.Interfaces.Customer;
+﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Enums;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
 using eShop.Application.Responses.Customer.Product;
 using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace eShop.Api.Customer.Controllers;
 
@@ -23,18 +24,15 @@ public class ProductController(IProductCustomerService _productCustomerService) 
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<ProductDetailsCustomerDto>>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        Guid? userId = null;
-
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim != null && Guid.TryParse(claim.Value, out var parsedId))
+        var userId = GetUserId();
+        if (userId is null)
+            return HandleResponse(new ApiResponse<ProductDetailsCustomerDto>
             {
-                userId = parsedId;
-            }
-        }
+                Status = ResponseStatus.Unauthorized,
+                Message = CustomerAuthConstants.UserNotAuthenticated
+            });
 
-        var response = await _productCustomerService.GetProductByIdAsync(id, userId, cancellationToken);
+        var response = await _productCustomerService.GetProductByIdAsync(id, userId.Value, cancellationToken);
         return HandleResponse(response);
     }
 }

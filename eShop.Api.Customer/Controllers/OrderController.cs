@@ -2,7 +2,7 @@
 using eShop.Application.Enums;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
-using eShop.Application.Responses.Customer.Basket;
+using eShop.Application.Responses.Customer.Order;
 using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -17,11 +17,11 @@ public class OrderController(IOrderCustomerService _orderCustomerService) : Base
 {
 
     [HttpPost]
-    public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<OrderDetailsCustomerDto>>> PlaceOrder([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            return HandleResponse(new ApiResponse<OrderDetailsCustomerDto>
             {
                 Status = ResponseStatus.Unauthorized,
                 Message = CustomerAuthConstants.UserNotAuthenticated
@@ -31,12 +31,12 @@ public class OrderController(IOrderCustomerService _orderCustomerService) : Base
         return HandleResponse(response);
     }
 
-    [HttpGet("{userId}")]
-    public async Task<IActionResult> GetOrdersForUser(CancellationToken cancellationToken)
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<List<OrderDetailsCustomerDto>>>> GetOrdersForUser(CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<BasketCustomerDto>
+            return HandleResponse(new ApiResponse<List<OrderDetailsCustomerDto>>
             {
                 Status = ResponseStatus.Unauthorized,
                 Message = CustomerAuthConstants.UserNotAuthenticated
