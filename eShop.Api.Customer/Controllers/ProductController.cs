@@ -25,14 +25,7 @@ public class ProductController(IProductCustomerService _productCustomerService) 
     public async Task<ActionResult<ApiResponse<ProductDetailsCustomerDto>>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
-        if (userId is null)
-            return HandleResponse(new ApiResponse<ProductDetailsCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
-
-        var response = await _productCustomerService.GetProductByIdAsync(id, userId.Value, cancellationToken);
+        var response = await _productCustomerService.GetProductByIdAsync(id, userId, cancellationToken);
         return HandleResponse(response);
     }
 }
