@@ -37,7 +37,7 @@ public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _
 
         return new ApiResponse<List<CommentCustomerDto>>
         {
-            Data = comments.ToList(),
+            Data = comments,
             TotalCount = totalCount,
             Status = ResponseStatus.Success
         };

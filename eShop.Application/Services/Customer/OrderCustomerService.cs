@@ -52,7 +52,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
 
         return new ApiResponse<List<OrderDetailsCustomerDto>>
         {
-            Data = query.ToList(),
+            Data = query,
             Status = ResponseStatus.Success,
             TotalCount = totalCount,
         };

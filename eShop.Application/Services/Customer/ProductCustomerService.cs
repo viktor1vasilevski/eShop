@@ -37,7 +37,7 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
 
         return new ApiResponse<List<ProductCustomerDto>>
         {
-            Data = products.ToList(),
+            Data = products,
             TotalCount = totalCount,
             Status = ResponseStatus.Success
         };
@@ -81,8 +81,8 @@ public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _
         var product = await _productRepository.GetSingleAsync(
             filter: x => x.Id == productId && !x.IsDeleted,
             selector: x => x,
-            includeBuilder: x => x.Include(x => x.Category)
-            );
+            includeBuilder: x => x.Include(x => x.Category), 
+            cancellationToken: cancellationToken);
 
         if (product == null)
         {
