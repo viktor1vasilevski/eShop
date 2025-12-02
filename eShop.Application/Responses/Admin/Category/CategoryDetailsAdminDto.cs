@@ -3,7 +3,7 @@ using eShop.Application.DTOs.Admin.Product;
 
 namespace eShop.Application.Responses.Admin.Category;
 
-public class CategoryDetailsAdminResponse
+public class CategoryDetailsAdminDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

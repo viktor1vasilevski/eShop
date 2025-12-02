@@ -15,7 +15,7 @@ public class AuthController(IAuthAdminService _authAdminService) : BaseControlle
 
 
     [HttpPost("admin/login")]
-    public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] UserLoginRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<LoginDto>>> Login([FromBody] UserLoginRequest request, CancellationToken cancellationToken)
     {
         var response = await _authAdminService.LoginAsync(request, cancellationToken);
         return HandleResponse(response);

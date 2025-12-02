@@ -5,5 +5,5 @@ namespace eShop.Application.Interfaces.Customer;
 
 public interface ICategoryCustomerService
 {
-    Task<ApiResponse<List<CategoryTreeResponse>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default);
 }

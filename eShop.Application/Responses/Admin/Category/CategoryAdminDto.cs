@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Responses.Admin.Category;
 
-public class CategoryAdminResponse
+public class CategoryAdminDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

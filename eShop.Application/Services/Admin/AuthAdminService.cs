@@ -18,14 +18,14 @@ public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepos
     IPasswordService _passwordHasher, IConfiguration _configuration) : IAuthAdminService
 {
 
-    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username, cancellationToken);
 
         if (user is null || user?.Username.Value != request.Username || user?.Role != Role.Admin || 
             !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
         {
-            return new ApiResponse<LoginResponse>
+            return new ApiResponse<LoginDto>
             {
                 Message = SharedConstants.InvalidCredentials,
                 Status = ResponseStatus.Unauthorized
@@ -34,11 +34,11 @@ public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepos
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
-        return new ApiResponse<LoginResponse>
+        return new ApiResponse<LoginDto>
         {
             Status = ResponseStatus.Success,
             Message = AdminAuthConstants.AdminLoggedSuccessfully,
-            Data = new LoginResponse
+            Data = new LoginDto
             {
                 Token = token,
                 Email = user.Email.Value,

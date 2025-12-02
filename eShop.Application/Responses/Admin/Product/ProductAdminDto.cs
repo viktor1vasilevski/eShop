@@ -1,6 +1,6 @@
 ﻿namespace eShop.Application.Responses.Admin.Product;
 
-public class ProductEditAdminResponse
+public class ProductAdminDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -8,5 +8,7 @@ public class ProductEditAdminResponse
     public decimal UnitPrice { get; set; }
     public int UnitQuantity { get; set; }
     public string Image { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public DateTime Created { get; set; }
+    public DateTime? LastModified { get; set; }
 }

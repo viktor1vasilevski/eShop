@@ -3,7 +3,7 @@ using eShop.Domain.Enums;
 
 namespace eShop.Application.Responses.Admin.Product;
 
-public class ProductDetailsAdminResponse
+public class ProductDetailsAdminDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

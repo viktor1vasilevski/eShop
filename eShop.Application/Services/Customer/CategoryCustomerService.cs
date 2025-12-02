@@ -9,7 +9,7 @@ namespace eShop.Application.Services.Customer;
 
 public class CategoryCustomerService(IDapperRepository<Category> _categoryDapperRepository) : ICategoryCustomerService
 {
-    public async Task<ApiResponse<List<CategoryTreeResponse>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
     {
         const string categoriesSql = @"
             SELECT Id, Name, ParentCategoryId
@@ -18,7 +18,7 @@ public class CategoryCustomerService(IDapperRepository<Category> _categoryDapper
             ORDER BY Name;";
 
         var allCategories = (await _categoryDapperRepository
-            .QueryAsync<CategoryTreeResponse>(categoriesSql, cancellationToken: cancellationToken))
+            .QueryAsync<CategoryTreeDto>(categoriesSql, cancellationToken: cancellationToken))
             .ToList();
 
         const string productCategoriesSql = @"
@@ -32,19 +32,19 @@ public class CategoryCustomerService(IDapperRepository<Category> _categoryDapper
 
         var tree = BuildCategoryTree(allCategories, categoriesWithProducts);
 
-        return new ApiResponse<List<CategoryTreeResponse>>
+        return new ApiResponse<List<CategoryTreeDto>>
         {
             Data = tree,
             Status = ResponseStatus.Success
         };
     }
 
-    private static List<CategoryTreeResponse> BuildCategoryTree(
-    List<CategoryTreeResponse> allCategories,
+    private static List<CategoryTreeDto> BuildCategoryTree(
+    List<CategoryTreeDto> allCategories,
     HashSet<Guid> categoriesWithProducts,
     Guid? parentId = null)
     {
-        var result = new List<CategoryTreeResponse>();
+        var result = new List<CategoryTreeDto>();
 
         foreach (var category in allCategories.Where(c => c.ParentCategoryId == parentId))
         {

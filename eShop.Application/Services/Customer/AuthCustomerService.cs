@@ -22,14 +22,14 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
     IConfiguration _configuration) : IAuthCustomerService
 {
 
-    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username, cancellationToken);
 
         if (user is null || user?.Username.Value != request.Username || user?.Role != Role.Customer ||
             !_passwordService.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
         {
-            return new ApiResponse<LoginResponse>
+            return new ApiResponse<LoginDto>
             {
                 Message = SharedConstants.InvalidCredentials,
                 Status = ResponseStatus.Unauthorized
@@ -38,11 +38,11 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
-        return new ApiResponse<LoginResponse>
+        return new ApiResponse<LoginDto>
         {
             Status = ResponseStatus.Success,
             Message = CustomerAuthConstants.CustomerLoggedSuccessfully,
-            Data = new LoginResponse
+            Data = new LoginDto
             {
                 Token = token,
                 Email = user.Email.Value,
@@ -52,7 +52,7 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
         };
     }
 
-    public async Task<ApiResponse<RegisterCustomerResponse>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default)
     {
         var normalizedUsername = request.Username.Trim().ToLowerInvariant();
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
@@ -60,7 +60,7 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
         var usersExist = await _userRepository.ExistsAsync(x => x.Username.Value == normalizedUsername || x.Email.Value == normalizedEmail, cancellationToken);
 
         if (usersExist)
-            return new ApiResponse<RegisterCustomerResponse>
+            return new ApiResponse<RegisterCustomerDto>
             {
                 Status = ResponseStatus.Conflict,
                 Message = CustomerAuthConstants.AccountAlreadyExists
@@ -85,11 +85,11 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
             await _userRepository.AddAsync(user, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return new ApiResponse<RegisterCustomerResponse>
+            return new ApiResponse<RegisterCustomerDto>
             {
                 Status = ResponseStatus.Success,
                 Message = CustomerAuthConstants.CustomerRegisterSuccess,
-                Data = new RegisterCustomerResponse
+                Data = new RegisterCustomerDto
                 {
                     Id = user.Id,
                     FirstName = user.FullName.FirstName,
@@ -101,7 +101,7 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<RegisterCustomerResponse>
+            return new ApiResponse<RegisterCustomerDto>
             {
                 Status = ResponseStatus.BadRequest,
                 Message = ex.Message
