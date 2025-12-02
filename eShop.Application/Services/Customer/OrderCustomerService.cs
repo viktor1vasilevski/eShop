@@ -1,10 +1,10 @@
 ﻿using eShop.Application.Constants.Customer;
+using eShop.Application.DTOs.Customer.OrderItem;
 using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
 using eShop.Application.Responses.Customer.Order;
-using eShop.Application.Responses.Customer.OrderItem;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
@@ -31,7 +31,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
                     Username = x.User.Username.Value,
                     TotalAmount = x.TotalAmount,
                     OrderCreatedOn = x.Created,
-                    Items = x.OrderItems.Select(item => new OrderItemCustomerDto
+                    Items = x.OrderItems.Select(item => new OrderItemCustomerResponseDto
                     {
                         ProductName = item.Product!.Name.Value,
                         Quantity = item.UnitQuantity.Value,
@@ -142,7 +142,7 @@ public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
                 OrderId = order.Id,
                 TotalAmount = order.TotalAmount,
                 OrderCreatedOn = order.Created,
-                Items = productLines.Select(p => new OrderItemCustomerDto
+                Items = productLines.Select(p => new OrderItemCustomerResponseDto
                 {
                     ProductName = p.ProductName,
                     Quantity = p.Quantity,

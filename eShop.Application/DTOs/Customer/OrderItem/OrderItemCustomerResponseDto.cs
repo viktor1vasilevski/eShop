@@ -1,6 +1,6 @@
-﻿namespace eShop.Application.Responses.Customer.OrderItem;
+﻿namespace eShop.Application.DTOs.Customer.OrderItem;
 
-public class OrderItemCustomerDto
+public class OrderItemCustomerResponseDto
 {
     public string ProductName { get; set; } = string.Empty;
     public int Quantity { get; set; }
