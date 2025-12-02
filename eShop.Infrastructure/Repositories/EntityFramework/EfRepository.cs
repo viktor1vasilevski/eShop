@@ -63,7 +63,7 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
         }
 
 
-        public async Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
+        public async Task<(List<TResult> Items, int TotalCount)> QueryAsync<TResult>(
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
             Expression<Func<TEntity, TResult>>? selector = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,
@@ -93,7 +93,7 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
                 return (await query.Select(selector).ToListAsync(cancellationToken), totalCount);
 
             var result = await query.ToListAsync(cancellationToken);
-            return ((IEnumerable<TResult>)result, totalCount);
+            return (result.Cast<TResult>().ToList(), totalCount);
         }
 
         public async Task<TResult?> GetSingleAsync<TResult>(

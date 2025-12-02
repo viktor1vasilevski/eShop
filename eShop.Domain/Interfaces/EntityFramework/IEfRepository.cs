@@ -12,7 +12,7 @@ public interface IEfRepository<TEntity> where TEntity : class
     void Update(TEntity entity);
     void Delete(TEntity entity);
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
-    Task<(IEnumerable<TResult> Items, int TotalCount)> QueryAsync<TResult>(
+    Task<(List<TResult> Items, int TotalCount)> QueryAsync<TResult>(
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryBuilder = null,
         Expression<Func<TEntity, TResult>>? selector = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeBuilder = null,

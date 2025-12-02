@@ -14,6 +14,7 @@ using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading;
 
 namespace eShop.Application.Services.Customer;
 
@@ -21,9 +22,9 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
     IConfiguration _configuration) : IAuthCustomerService
 {
 
-    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request)
+    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username);
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username, cancellationToken);
 
         if (user is null || user?.Username.Value != request.Username || user?.Role != Role.Customer ||
             !_passwordService.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
@@ -51,12 +52,12 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
         };
     }
 
-    public async Task<ApiResponse<RegisterCustomerResponse>> RegisterCustomerAsync(CustomerRegisterRequest request)
+    public async Task<ApiResponse<RegisterCustomerResponse>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default)
     {
         var normalizedUsername = request.Username.Trim().ToLowerInvariant();
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-        var usersExist = await _userRepository.ExistsAsync(x => x.Username.Value == normalizedUsername || x.Email.Value == normalizedEmail);
+        var usersExist = await _userRepository.ExistsAsync(x => x.Username.Value == normalizedUsername || x.Email.Value == normalizedEmail, cancellationToken);
 
         if (usersExist)
             return new ApiResponse<RegisterCustomerResponse>
@@ -81,8 +82,8 @@ public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
 
             var user = User.CreateNew(userData);
 
-            await _userRepository.AddAsync(user);
-            await _uow.SaveChangesAsync();
+            await _userRepository.AddAsync(user, cancellationToken);
+            await _uow.SaveChangesAsync(cancellationToken);
 
             return new ApiResponse<RegisterCustomerResponse>
             {

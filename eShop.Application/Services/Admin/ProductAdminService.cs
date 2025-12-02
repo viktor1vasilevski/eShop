@@ -48,7 +48,7 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
 
         return new ApiResponse<List<ProductAdminResponse>>
         {
-            Data = products.ToList(),
+            Data = products,
             TotalCount = totalCount,
             Status = ResponseStatus.Success
         };

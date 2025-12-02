@@ -18,9 +18,9 @@ public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepos
     IPasswordService _passwordHasher, IConfiguration _configuration) : IAuthAdminService
 {
 
-    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request)
+    public async Task<ApiResponse<LoginResponse>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username);
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username, cancellationToken);
 
         if (user is null || user?.Username.Value != request.Username || user?.Role != Role.Admin || 
             !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))

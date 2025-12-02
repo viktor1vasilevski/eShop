@@ -43,7 +43,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
 
         return new ApiResponse<List<CategoryAdminResponse>>
         {
-            Data = categories.ToList(),
+            Data = categories,
             TotalCount = totalCount,
             Status = ResponseStatus.Success
         };
@@ -58,7 +58,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 x => x.Name.Value.ToLower() == normalizedName &&
                      x.ParentCategoryId == request.ParentCategoryId &&
                      !x.IsDeleted,
-                cancellationToken))
+                cancellationToken: cancellationToken))
         {
             return new ApiResponse<CategoryAdminResponse>
             {
@@ -168,7 +168,6 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             _categoryRepository.Update(category);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            // 6️⃣ Return result
             return new ApiResponse<CategoryAdminResponse>
             {
                 Status = ResponseStatus.Success,
@@ -312,8 +311,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                     ProductCount = c.ProductCount,
                     Children = children
                 };
-            })
-            .ToList();
+            }).ToList();
     }
 
     public async Task<ApiResponse<List<CategoryTreeResponse>>> GetCategoryTreeAsync(CancellationToken cancellationToken = default)
@@ -330,7 +328,7 @@ public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             cancellationToken: cancellationToken
         );
 
-        var tree = BuildCategoryTree(allCategories.ToList());
+        var tree = BuildCategoryTree(allCategories);
 
         return new ApiResponse<List<CategoryTreeResponse>>
         {

@@ -15,51 +15,51 @@ public class CategoryController(ICategoryAdminService _categoryAdminService) : B
 {
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<CategoryAdminResponse>>> Get([FromQuery] CategoryAdminRequest request)
+    public async Task<ActionResult<ApiResponse<CategoryAdminResponse>>> Get([FromQuery] CategoryAdminRequest request, CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.GetCategoriesAsync(request);
+        var response = await _categoryAdminService.GetCategoriesAsync(request, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> GetById([FromRoute] Guid id)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.GetCategoryByIdAsync(id);
+        var response = await _categoryAdminService.GetCategoryByIdAsync(id, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Create([FromBody] CreateCategoryAdminRequest request)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Create([FromBody] CreateCategoryAdminRequest request, CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.CreateCategoryAsync(request);
+        var response = await _categoryAdminService.CreateCategoryAsync(request, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Update([FromRoute] Guid id, [FromBody] UpdateCategoryAdminRequest request)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Update([FromRoute] Guid id, [FromBody] UpdateCategoryAdminRequest request, CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.UpdateCategoryAsync(id, request);
+        var response = await _categoryAdminService.UpdateCategoryAsync(id, request, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpGet("{id}/edit")]
-    public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryForEdit(Guid id)
+    public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryForEdit(Guid id, CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.GetCategoryForEditAsync(id);
+        var response = await _categoryAdminService.GetCategoryForEditAsync(id, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Delete([FromRoute] Guid id)
+    public async Task<ActionResult<ApiResponse<CategoryDetailsAdminResponse>>> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.DeleteCategoryAsync(id);
+        var response = await _categoryAdminService.DeleteCategoryAsync(id, cancellationToken);
         return HandleResponse(response);
     }
 
     [HttpGet("tree")]
-    public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryTree()
+    public async Task<ActionResult<ApiResponse<CategoryEditAdminResponse>>> GetCategoryTree(CancellationToken cancellationToken)
     {
-        var response = await _categoryAdminService.GetCategoryTreeAsync();
+        var response = await _categoryAdminService.GetCategoryTreeAsync(cancellationToken);
         return HandleResponse(response);
     }
 }
