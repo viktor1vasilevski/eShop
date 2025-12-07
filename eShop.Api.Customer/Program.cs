@@ -60,6 +60,8 @@ app.UseHttpsRedirection();
 
 app.UseCors("MyPolicy");
 
+app.UseExceptionHandler();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
