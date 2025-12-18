@@ -22,7 +22,14 @@ public static class DependencyContainer
         services.AddScoped<IAuthAdminService, AuthAdminService>();
         services.AddScoped<ICategoryAdminService, CategoryAdminService>();
         services.AddScoped<IProductAdminService, ProductAdminService>();
-        services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>();
+
+        services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.openai.com/");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
         services.AddScoped<IPasswordService, PasswordHasher>();
 
         return services;

@@ -2,6 +2,8 @@
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
 using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
@@ -36,22 +38,22 @@ public class OpenAIProductDescriptionGenerator(HttpClient httpClient, IConfigura
                 }
             };
 
-            var json = JsonSerializer.Serialize(requestBody);
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions")
-            {
-                Headers = { { "Authorization", $"Bearer {_apiKey}" } },
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            };
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions");
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
-            var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            requestMessage.Content = JsonContent.Create(requestBody);
+
+            var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new ExternalDependencyException($"OpenAI returned error: {response.StatusCode}");
+                throw new ExternalDependencyException(
+                    $"OpenAI returned error: {response.StatusCode}");
             }
 
-            using var doc = JsonDocument.Parse(responseContent);
+            using var doc = JsonDocument.Parse(
+                await response.Content.ReadAsStringAsync(cancellationToken));
+
             var description = doc.RootElement
                 .GetProperty("choices")[0]
                 .GetProperty("message")
@@ -60,7 +62,8 @@ public class OpenAIProductDescriptionGenerator(HttpClient httpClient, IConfigura
 
             if (string.IsNullOrWhiteSpace(description))
             {
-                throw new ExternalDependencyException("OpenAI did not generate any description.");
+                throw new ExternalDependencyException(
+                    "OpenAI did not generate any description.");
             }
 
             return description.Trim();
