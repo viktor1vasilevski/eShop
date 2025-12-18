@@ -1,4 +1,5 @@
-﻿using eShop.Application.Interfaces.Admin;
+﻿using eShop.Application.Exceptions;
+using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
 using Microsoft.Extensions.Configuration;
 using System.Text;
@@ -14,61 +15,59 @@ public class OpenAIProductDescriptionGenerator(HttpClient httpClient, IConfigura
 
     public async Task<string> GenerateOpenAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)
     {
-        var requestBody = new
+        try
         {
-            model = "gpt-4o-mini",
-            messages = new[]
+            var requestBody = new
             {
-                new { role = "system", content = "You write natural, concise product descriptions for ecommerce." },
-                new
+                model = "gpt-4o-mini",
+                messages = new[]
                 {
-                    role = "user",
-                    content = $"Write a short product description (max 2500 characters) for a product named \"{request.ProductName}\" in the category path \"{request.Categories}\". " +
-                              "Do not include a title or heading—only the description text."
+                    new 
+                    { 
+                        role = "system", 
+                        content = "You write natural, concise product descriptions for ecommerce." 
+                    },
+                    new
+                    {
+                        role = "user",
+                        content = $"Write a short product description (max 2500 characters) for a product named \"{request.ProductName}\" in the category path \"{request.Categories}\". " +
+                                  "Do not include a title or heading—only the description text."
+                    }
                 }
-            }
-        };
+            };
 
-        var json = JsonSerializer.Serialize(requestBody);
-        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions")
-        {
-            Headers = { { "Authorization", $"Bearer {_apiKey}" } },
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-
-        var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            try
+            var json = JsonSerializer.Serialize(requestBody);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions")
             {
-                using var errorDoc = JsonDocument.Parse(responseContent);
-                var errorMessage = errorDoc.RootElement
-                    .GetProperty("error")
-                    .GetProperty("message")
-                    .GetString();
+                Headers = { { "Authorization", $"Bearer {_apiKey}" } },
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
 
-                return $"OpenAI API error: {errorMessage}";
-            }
-            catch
+            var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
             {
-                return $"OpenAI API error: {response.StatusCode} : {responseContent}";
+                throw new ExternalDependencyException($"OpenAI returned error: {response.StatusCode}");
             }
+
+            using var doc = JsonDocument.Parse(responseContent);
+            var description = doc.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString();
+
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                throw new ExternalDependencyException("OpenAI did not generate any description.");
+            }
+
+            return description.Trim();
         }
-
-        using var doc = JsonDocument.Parse(responseContent);
-        var description = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString();
-
-        if (string.IsNullOrWhiteSpace(description))
+        catch (Exception ex)
         {
-            return "No description generated.";
-        }
-
-        return description.Trim();
+            throw new ExternalDependencyException("OpenAI API unreachable.", ex);
+        }       
     }
 }

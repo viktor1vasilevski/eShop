@@ -1,4 +1,5 @@
 ﻿using eShop.Application.Enums;
+using eShop.Application.Exceptions;
 using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -10,14 +11,25 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> _logger) : I
     {
         _logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
 
+        int statusCode = StatusCodes.Status500InternalServerError;
+        string message = "An unexpected error occurred.";
+
+        switch (exception)
+        {
+            case ExternalDependencyException ex:
+                statusCode = StatusCodes.Status503ServiceUnavailable;
+                message = ex.Message;
+                break;
+        }
+
         var response = new ApiResponse<object>
         {
             Data = null,
-            Message = "An unexpected error occurred.",
+            Message = message,
             Status = ResponseStatus.Error,
         };
 
-        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 

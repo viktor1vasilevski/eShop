@@ -334,22 +334,8 @@ public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
 
     public async Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)
     {
-        var response = await _openAIProductDescriptionGenerator.GenerateOpenAIProductDescriptionAsync(request, cancellationToken);
-
-        if (response.StartsWith("OpenAI API error:", StringComparison.OrdinalIgnoreCase))
-        {
-            return new ApiResponse<string>
-            {
-                Status = ResponseStatus.Error,
-                Message = response
-            };
-        }
-
-        return new ApiResponse<string>
-        {
-            Status = ResponseStatus.Success,
-            Data = response
-        };
+        var description = await _openAIProductDescriptionGenerator.GenerateOpenAIProductDescriptionAsync(request, cancellationToken);
+        return new ApiResponse<string> { Status = ResponseStatus.Success, Data = description };
     }
 
 }
