@@ -22,6 +22,7 @@ public static class DependencyContainer
         services.AddScoped<IAdminAuthService, AdminAuthService>();
         services.AddScoped<IAdminCategoryService, AdminCategoryService>();
         services.AddScoped<IAdminProductService, AdminProductService>();
+        services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
         services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>(client =>
         {
