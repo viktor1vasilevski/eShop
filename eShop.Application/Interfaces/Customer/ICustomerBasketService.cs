@@ -4,7 +4,7 @@ using eShop.Application.Responses.Shared.Base;
 
 namespace eShop.Application.Interfaces.Customer;
 
-public interface IBasketCustomerService
+public interface ICustomerBasketService
 {
     Task<ApiResponse<BasketCustomerDto>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<BasketCustomerDto>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);

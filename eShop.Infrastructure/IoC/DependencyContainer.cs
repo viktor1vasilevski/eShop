@@ -19,9 +19,9 @@ public static class DependencyContainer
 {
     public static IServiceCollection AddAdminIoCServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthAdminService, AuthAdminService>();
-        services.AddScoped<ICategoryAdminService, CategoryAdminService>();
-        services.AddScoped<IProductAdminService, ProductAdminService>();
+        services.AddScoped<IAdminAuthService, AdminAuthService>();
+        services.AddScoped<IAdminCategoryService, AdminCategoryService>();
+        services.AddScoped<IAdminProductService, AdminProductService>();
 
         services.AddHttpClient<IOpenAIProductDescriptionGenerator, OpenAIProductDescriptionGenerator>(client =>
         {
@@ -40,12 +40,12 @@ public static class DependencyContainer
         services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
         services.AddScoped<IEmailService, MailKitEmailService>();
         services.AddHostedService<EmailBackgroundService>();
-        services.AddScoped<IAuthCustomerService, AuthCustomerService>();
-        services.AddScoped<ICategoryCustomerService, CategoryCustomerService>();
-        services.AddScoped<IProductCustomerService, ProductCustomerService>();
-        services.AddScoped<IBasketCustomerService, BasketCustomerService>();
-        services.AddScoped<IOrderCustomerService, OrderCustomerService>();
-        services.AddScoped<ICommentCustomerService, CommentCustomerService>();
+        services.AddScoped<ICustomerAuthService, CustomerAuthService>();
+        services.AddScoped<ICustomerCategoryService, CustomerCategoryService>();
+        services.AddScoped<ICustomerProductService, CustomerProductService>();
+        services.AddScoped<ICustomerBasketService, CustomerBasketService>();
+        services.AddScoped<ICustomerOrderService, CustomerOrderService>();
+        services.AddScoped<ICustomerCommentService, CustomerCommentService>();
 
         services.AddScoped<IDbConnection>(sp =>
         {

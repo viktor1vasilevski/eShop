@@ -13,7 +13,7 @@ namespace eShop.Api.Customer.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
-public class BasketController(IBasketCustomerService _basketCustomerService) : BaseController
+public class BasketController(ICustomerBasketService _basketCustomerService) : BaseController
 {
 
     [HttpGet]

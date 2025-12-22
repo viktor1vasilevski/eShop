@@ -15,8 +15,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Admin;
 
-public class ProductAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, 
-    IEfRepository<Product> _productRepository, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IProductAdminService
+public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, 
+    IEfRepository<Product> _productRepository, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IAdminProductService
 {
 
     public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)

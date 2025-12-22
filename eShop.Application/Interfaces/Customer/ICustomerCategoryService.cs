@@ -3,7 +3,7 @@ using eShop.Application.Responses.Shared.Base;
 
 namespace eShop.Application.Interfaces.Customer;
 
-public interface ICategoryCustomerService
+public interface ICustomerCategoryService
 {
     Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default);
 }

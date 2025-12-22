@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class ProductCustomerService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository, 
-    IEfRepository<Category> _categoryRepository, IEfRepository<Order> _orderRepository) : IProductCustomerService
+public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository, 
+    IEfRepository<Category> _categoryRepository, IEfRepository<Order> _orderRepository) : ICustomerProductService
 {
 
     public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)

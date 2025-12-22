@@ -14,8 +14,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Admin;
 
-public class AuthAdminService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, 
-    IPasswordService _passwordHasher, IConfiguration _configuration) : IAuthAdminService
+public class AdminAuthService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, 
+    IPasswordService _passwordHasher, IConfiguration _configuration) : IAdminAuthService
 {
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)

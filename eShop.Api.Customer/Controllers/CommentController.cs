@@ -12,7 +12,7 @@ namespace eShop.Api.Customer.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(ICommentCustomerService _commentCustomerService) : BaseController
+public class CommentController(ICustomerCommentService _commentCustomerService) : BaseController
 {
 
     [HttpGet]

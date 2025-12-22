@@ -4,7 +4,7 @@ using eShop.Application.Responses.Shared.Base;
 
 namespace eShop.Application.Interfaces.Customer;
 
-public interface IOrderCustomerService
+public interface ICustomerOrderService
 {
     Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(Guid userId, PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default);

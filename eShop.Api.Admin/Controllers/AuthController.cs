@@ -10,7 +10,7 @@ namespace eShop.Api.Admin.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [AllowAnonymous]
-public class AuthController(IAuthAdminService _authAdminService) : BaseController
+public class AuthController(IAdminAuthService _authAdminService) : BaseController
 {
 
 

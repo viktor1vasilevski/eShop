@@ -18,8 +18,8 @@ using System.Threading;
 
 namespace eShop.Application.Services.Customer;
 
-public class AuthCustomerService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordService _passwordService, 
-    IConfiguration _configuration) : IAuthCustomerService
+public class CustomerAuthService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordService _passwordService, 
+    IConfiguration _configuration) : ICustomerAuthService
 {
 
     public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)

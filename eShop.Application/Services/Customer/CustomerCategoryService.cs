@@ -7,7 +7,7 @@ using eShop.Domain.Models;
 
 namespace eShop.Application.Services.Customer;
 
-public class CategoryCustomerService(IDapperRepository<Category> _categoryDapperRepository) : ICategoryCustomerService
+public class CustomerCategoryService(IDapperRepository<Category> _categoryDapperRepository) : ICustomerCategoryService
 {
     public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
     {

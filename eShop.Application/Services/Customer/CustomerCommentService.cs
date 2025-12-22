@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class CommentCustomerService(IEfUnitOfWork _uow, IEfRepository<Comment> _commentRepository, 
-    IEfRepository<Order> _orderRepository) : ICommentCustomerService
+public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _commentRepository, 
+    IEfRepository<Order> _orderRepository) : ICustomerCommentService
 {
 
     public async Task<ApiResponse<List<CommentCustomerDto>>> GetCommentsAsync(CommentCustomerRequest request, CancellationToken cancellationToken = default)

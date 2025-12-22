@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class BasketCustomerService(IEfUnitOfWork _uow, IEfRepository<Basket> _basketRepository, 
-    IEfRepository<Product> _productRepository, IEfRepository<User> _userRepository) : IBasketCustomerService
+public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _basketRepository, 
+    IEfRepository<Product> _productRepository, IEfRepository<User> _userRepository) : ICustomerBasketService
 {
 
     public async Task<ApiResponse<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)

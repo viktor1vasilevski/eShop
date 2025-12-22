@@ -17,7 +17,7 @@ using static eShop.Domain.Models.Category;
 
 namespace eShop.Application.Services.Admin;
 
-public class CategoryAdminService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, IEfRepository<Product> _productRepository) : ICategoryAdminService
+public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, IEfRepository<Product> _productRepository) : IAdminCategoryService
 {
 
     public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)

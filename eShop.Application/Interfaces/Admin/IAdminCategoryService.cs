@@ -6,7 +6,7 @@ using eShop.Domain.Interfaces;
 
 namespace eShop.Application.Interfaces.Admin;
 
-public interface ICategoryAdminService
+public interface IAdminCategoryService
 {
     Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default);

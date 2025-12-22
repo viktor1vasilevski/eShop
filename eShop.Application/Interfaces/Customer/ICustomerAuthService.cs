@@ -5,7 +5,7 @@ using eShop.Application.Responses.Shared.Base;
 
 namespace eShop.Application.Interfaces.Customer;
 
-public interface IAuthCustomerService : IAuthService
+public interface ICustomerAuthService : IAuthService
 {
     Task<ApiResponse<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default);
 }

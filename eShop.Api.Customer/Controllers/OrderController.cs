@@ -13,7 +13,7 @@ namespace eShop.Api.Customer.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
-public class OrderController(IOrderCustomerService _orderCustomerService) : BaseController
+public class OrderController(ICustomerOrderService _orderCustomerService) : BaseController
 {
 
     [HttpPost]

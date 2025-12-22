@@ -4,7 +4,7 @@ using eShop.Application.Responses.Shared.Base;
 
 namespace eShop.Application.Interfaces.Admin;
 
-public interface IProductAdminService
+public interface IAdminProductService
 {
     Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default);

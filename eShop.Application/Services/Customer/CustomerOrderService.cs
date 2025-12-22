@@ -14,8 +14,8 @@ using System.Text;
 
 namespace eShop.Application.Services.Customer;
 
-public class OrderCustomerService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository, IEfRepository<Product> _productRepository, 
-    ILogger<OrderCustomerService> _logger, IEmailQueue _emailQueue) : IOrderCustomerService
+public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository, IEfRepository<Product> _productRepository, 
+    ILogger<CustomerOrderService> _logger, IEmailQueue _emailQueue) : ICustomerOrderService
 {
 
     public async Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)

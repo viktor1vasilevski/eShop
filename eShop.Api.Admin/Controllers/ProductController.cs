@@ -11,7 +11,7 @@ namespace eShop.Api.Admin.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class ProductController(IProductAdminService _productAdminService) : BaseController
+public class ProductController(IAdminProductService _productAdminService) : BaseController
 {
 
     [HttpGet]

@@ -10,7 +10,7 @@ namespace eShop.Api.Customer.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ProductController(IProductCustomerService _productCustomerService) : BaseController
+public class ProductController(ICustomerProductService _productCustomerService) : BaseController
 {
 
 

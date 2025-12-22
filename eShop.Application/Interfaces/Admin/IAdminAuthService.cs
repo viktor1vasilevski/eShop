@@ -2,6 +2,6 @@
 
 namespace eShop.Application.Interfaces.Admin;
 
-public interface IAuthAdminService : IAuthService
+public interface IAdminAuthService : IAuthService
 {
 }
