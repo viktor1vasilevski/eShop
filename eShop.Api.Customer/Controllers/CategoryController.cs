@@ -7,14 +7,14 @@ namespace eShop.Api.Customer.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(ICustomerCategoryService _categoryCustomerService) : BaseController
+public class CategoryController(ICustomerCategoryService _customerCategoryService) : BaseController
 {
 
 
     [HttpGet("category-tree-for-menu")]
     public async Task<ActionResult<ApiResponse<List<CategoryTreeDto>>>> GetCategoryTreeForMenu(CancellationToken cancellationToken)
     {
-        var response = await _categoryCustomerService.GetCategoryTreeForMenuAsync(cancellationToken);
+        var response = await _customerCategoryService.GetCategoryTreeForMenuAsync(cancellationToken);
         return HandleResponse(response);
     }
 }

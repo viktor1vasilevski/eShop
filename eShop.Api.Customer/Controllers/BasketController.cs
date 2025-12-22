@@ -13,7 +13,7 @@ namespace eShop.Api.Customer.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
-public class BasketController(ICustomerBasketService _basketCustomerService) : BaseController
+public class BasketController(ICustomerBasketService _customerBasketService) : BaseController
 {
 
     [HttpGet]
@@ -27,7 +27,7 @@ public class BasketController(ICustomerBasketService _basketCustomerService) : B
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _basketCustomerService.GetBasketByUserIdAsync(userId.Value, cancellationToken);
+        var response = await _customerBasketService.GetBasketByUserIdAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
     }
 
@@ -42,7 +42,7 @@ public class BasketController(ICustomerBasketService _basketCustomerService) : B
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _basketCustomerService.UpdateUserBasketAsync(userId.Value, request, cancellationToken);
+        var response = await _customerBasketService.UpdateUserBasketAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
     }
 
@@ -57,7 +57,7 @@ public class BasketController(ICustomerBasketService _basketCustomerService) : B
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _basketCustomerService.ClearBasketItemsForUserAsync(userId.Value, cancellationToken);
+        var response = await _customerBasketService.ClearBasketItemsForUserAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
     }
 
@@ -72,7 +72,7 @@ public class BasketController(ICustomerBasketService _basketCustomerService) : B
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _basketCustomerService.RemoveItemAsync(userId.Value, productId, cancellationToken);
+        var response = await _customerBasketService.RemoveItemAsync(userId.Value, productId, cancellationToken);
         return HandleResponse(response);
     }
 }

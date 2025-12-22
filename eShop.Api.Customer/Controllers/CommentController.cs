@@ -12,13 +12,13 @@ namespace eShop.Api.Customer.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(ICustomerCommentService _commentCustomerService) : BaseController
+public class CommentController(ICustomerCommentService _customerCommentService) : BaseController
 {
 
     [HttpGet]
     public async Task<ActionResult<ApiResponse<List<CommentCustomerDto>>>> Get([FromQuery] CommentCustomerRequest request, CancellationToken cancellationToken)
     {
-        var response = await _commentCustomerService.GetCommentsAsync(request, cancellationToken);
+        var response = await _customerCommentService.GetCommentsAsync(request, cancellationToken);
         return HandleResponse(response);
     }
 
@@ -34,7 +34,7 @@ public class CommentController(ICustomerCommentService _commentCustomerService) 
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _commentCustomerService.CreateCommentAsync(userId.Value, request, cancellationToken);
+        var response = await _customerCommentService.CreateCommentAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
     }
 }

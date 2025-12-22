@@ -10,14 +10,14 @@ namespace eShop.Api.Admin.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [AllowAnonymous]
-public class AuthController(IAdminAuthService _authAdminService) : BaseController
+public class AuthController(IAdminAuthService _adminAuthService) : BaseController
 {
 
 
     [HttpPost("admin/login")]
     public async Task<ActionResult<ApiResponse<LoginDto>>> Login([FromBody] UserLoginRequest request, CancellationToken cancellationToken)
     {
-        var response = await _authAdminService.LoginAsync(request, cancellationToken);
+        var response = await _adminAuthService.LoginAsync(request, cancellationToken);
         return HandleResponse(response);
     }
 }

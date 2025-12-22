@@ -13,7 +13,7 @@ namespace eShop.Api.Customer.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
-public class OrderController(ICustomerOrderService _orderCustomerService) : BaseController
+public class OrderController(ICustomerOrderService _customerOrderService) : BaseController
 {
 
     [HttpPost]
@@ -27,7 +27,7 @@ public class OrderController(ICustomerOrderService _orderCustomerService) : Base
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _orderCustomerService.PlaceOrderAsync(userId.Value, request, cancellationToken);
+        var response = await _customerOrderService.PlaceOrderAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
     }
 
@@ -42,7 +42,7 @@ public class OrderController(ICustomerOrderService _orderCustomerService) : Base
                 Message = CustomerAuthConstants.UserNotAuthenticated
             });
 
-        var response = await _orderCustomerService.GetOrdersForUserIdAsync(userId.Value, cancellationToken);
+        var response = await _customerOrderService.GetOrdersForUserIdAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
     }
 }
