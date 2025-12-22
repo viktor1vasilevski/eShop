@@ -152,7 +152,6 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         };
     }
 
-
     private string BuildOrderHtml(Order order, User user, List<(string ProductName, int Quantity, decimal UnitPrice)> productLines)
     {
         var sb = new StringBuilder();
