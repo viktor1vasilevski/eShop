@@ -13,7 +13,7 @@ public sealed class Email : Primitives.ValueObject
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainValidationException("Email cannot be empty.");
 
-        var emailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z]{2,})+$", RegexOptions.Compiled);
+        var emailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$", RegexOptions.Compiled);
         if (!emailRegex.IsMatch(value))
             throw new DomainValidationException("Email format is invalid.");
 

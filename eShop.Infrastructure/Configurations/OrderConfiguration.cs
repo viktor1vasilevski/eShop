@@ -14,8 +14,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
                .HasColumnType("decimal(18,2)")
                .IsRequired();
 
-        builder.Property(o => o.UserId)
-               .IsRequired();
+        builder.Property(o => o.Status).IsRequired();
+
+        builder.Property(o => o.UserId).IsRequired();
 
         builder.HasOne(o => o.User)
                .WithMany(u => u.Orders)

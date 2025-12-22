@@ -21,7 +21,7 @@ public static class JwtServiceCollectionExtension
             ValidateAudience = false,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
-            NameClaimType = ClaimTypes.NameIdentifier,
+            NameClaimType = ClaimTypes.Name,
             RoleClaimType = ClaimTypes.Role
         };
 

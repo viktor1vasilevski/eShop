@@ -1,4 +1,5 @@
-﻿using eShop.Domain.Exceptions;
+﻿using eShop.Domain.Enums;
+using eShop.Domain.Exceptions;
 using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
 
@@ -10,7 +11,7 @@ public class Order : AuditableBaseEntity
     public virtual User? User { get; private set; }
 
     public decimal TotalAmount { get; private set; }
-
+    public OrderStatus Status { get; private set; }
 
     private readonly List<OrderItem> _orderItems = [];
     public virtual IReadOnlyCollection<OrderItem>? OrderItems => _orderItems.AsReadOnly();
@@ -25,7 +26,8 @@ public class Order : AuditableBaseEntity
 
         return new Order
         {
-            UserId = userId
+            UserId = userId,
+            Status = OrderStatus.Paid
         };
     }
 
