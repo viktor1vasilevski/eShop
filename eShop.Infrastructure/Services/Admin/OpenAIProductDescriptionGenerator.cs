@@ -1,10 +1,9 @@
-﻿using eShop.Application.Exceptions;
-using eShop.Application.Interfaces.Admin;
+﻿using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
+using eShop.Infrastructure.Exceptions;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
 
 namespace eShop.Infrastructure.Services.Admin;
