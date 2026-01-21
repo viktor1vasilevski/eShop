@@ -189,46 +189,35 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 Message = AdminProductConstants.ProductExist
             };
 
-        try
+        var (bytes, type) = ImageParsing.FromBase64(request.Image);
+        var image = Image.FromBytes(bytes, type);
+
+        var product = Product.Create(
+            name: trimmedName,
+            description: request.Description?.Trim() ?? string.Empty,
+            unitPrice: request.Price,
+            unitQuantity: request.Quantity,
+            categoryId: request.CategoryId,
+            image: image!
+        );
+
+        await _productRepository.AddAsync(product, cancellationToken);
+        await _uow.SaveChangesAsync(cancellationToken);
+
+        return new ApiResponse<ProductAdminDto>
         {
-            var (bytes, type) = ImageParsing.FromBase64(request.Image);
-            var image = Image.FromBytes(bytes, type);
-
-            var product = Product.Create(
-                name: trimmedName,
-                description: request.Description?.Trim() ?? string.Empty,
-                unitPrice: request.Price,
-                unitQuantity: request.Quantity,
-                categoryId: request.CategoryId,
-                image: image!
-            );
-
-            await _productRepository.AddAsync(product, cancellationToken);
-            await _uow.SaveChangesAsync(cancellationToken);
-
-            return new ApiResponse<ProductAdminDto>
+            Status = ResponseStatus.Created,
+            Message = AdminProductConstants.ProductSuccessfullyCreated,
+            Data = new ProductAdminDto
             {
-                Status = ResponseStatus.Created,
-                Message = AdminProductConstants.ProductSuccessfullyCreated,
-                Data = new ProductAdminDto
-                {
-                    Id = product.Id,
-                    Name = product.Name.Value,
-                    Description = product.Description.Value,
-                    UnitPrice = product.UnitPrice.Value,
-                    UnitQuantity = product.UnitQuantity.Value,
-                    Created = product.Created
-                }
-            };
-        }
-        catch (DomainValidationException ex)
-        {
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.BadRequest,
-                Message = ex.Message
-            };
-        }
+                Id = product.Id,
+                Name = product.Name.Value,
+                Description = product.Description.Value,
+                UnitPrice = product.UnitPrice.Value,
+                UnitQuantity = product.UnitQuantity.Value,
+                Created = product.Created
+            }
+        };
     }
 
     public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
@@ -295,41 +284,30 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             }
         }
 
-        try
+        Image? image = null;
+        if (!string.IsNullOrEmpty(request.Image))
         {
-            Image? image = null;
-            if (!string.IsNullOrEmpty(request.Image))
-            {
-                var (bytes, type) = ImageParsing.FromBase64(request.Image);
-                image = Image.FromBytes(bytes, type);
-            }
-
-            product.Update(
-                request.Name.Trim(),
-                request.Description?.Trim() ?? string.Empty,
-                request.Price,
-                request.Quantity,
-                request.CategoryId,
-                image
-            );
-
-            _productRepository.Update(product);
-            await _uow.SaveChangesAsync(cancellationToken);
-
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.Success,
-                Message = AdminProductConstants.ProductSuccessfullyUpdated
-            };
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            image = Image.FromBytes(bytes, type);
         }
-        catch (DomainValidationException ex)
+
+        product.Update(
+            request.Name.Trim(),
+            request.Description?.Trim() ?? string.Empty,
+            request.Price,
+            request.Quantity,
+            request.CategoryId,
+            image
+        );
+
+        _productRepository.Update(product);
+        await _uow.SaveChangesAsync(cancellationToken);
+
+        return new ApiResponse<ProductAdminDto>
         {
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.BadRequest,
-                Message = ex.Message
-            };
-        }
+            Status = ResponseStatus.Success,
+            Message = AdminProductConstants.ProductSuccessfullyUpdated
+        };
     }
 
     public async Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)

@@ -1,5 +1,6 @@
 ﻿using eShop.Application.Enums;
 using eShop.Application.Responses.Shared.Base;
+using eShop.Domain.Exceptions;
 using eShop.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -9,16 +10,31 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> _logger) : I
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
-
-        int statusCode = StatusCodes.Status500InternalServerError;
-        string message = "An unexpected error occurred.";
+        int statusCode;
+        string message;
+        ResponseStatus responseStatus;
 
         switch (exception)
         {
-            case ExternalDependencyException ex:
-                statusCode = StatusCodes.Status503ServiceUnavailable;
+            case DomainValidationException ex:
+                _logger.LogWarning(ex, "Domain validation failed: {Message}", ex.Message);
+                statusCode = StatusCodes.Status400BadRequest;
                 message = ex.Message;
+                responseStatus = ResponseStatus.BadRequest;
+                break;
+
+            case ExternalDependencyException ex:
+                _logger.LogError(ex, "External dependency failure");
+                statusCode = StatusCodes.Status503ServiceUnavailable;
+                message = "Service temporarily unavailable.";
+                responseStatus = ResponseStatus.Error;
+                break;
+
+            default:
+                _logger.LogError(exception, "Unhandled exception");
+                statusCode = StatusCodes.Status500InternalServerError;
+                message = "An unexpected error occurred.";
+                responseStatus = ResponseStatus.Error;
                 break;
         }
 
@@ -26,7 +42,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> _logger) : I
         {
             Data = null,
             Message = message,
-            Status = ResponseStatus.Error,
+            Status = responseStatus
         };
 
         httpContext.Response.StatusCode = statusCode;

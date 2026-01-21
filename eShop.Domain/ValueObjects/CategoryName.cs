@@ -12,7 +12,7 @@ public sealed class CategoryName : Primitives.ValueObject
             throw new DomainValidationException("Category name cannot be empty.");
 
         if (value.Length < 2)
-            throw new DomainValidationException("Category name must be at least 2 characters long..");
+            throw new DomainValidationException("Category name must be at least 2 characters long.");
 
         if (value.Length > 200)
             throw new DomainValidationException("Category name cannot exceed 200 characters.");

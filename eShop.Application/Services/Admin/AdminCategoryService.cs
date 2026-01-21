@@ -8,7 +8,6 @@ using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Category;
 using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
-using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObject;
@@ -67,37 +66,26 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             };
         }
 
-        try
+        var (bytes, type) = ImageParsing.FromBase64(request.Image);
+        var image = Image.FromBytes(bytes, type);
+
+        var category = Category.Create(trimmedName, image, request.ParentCategoryId);
+
+        await _categoryRepository.AddAsync(category, cancellationToken);
+        await _uow.SaveChangesAsync(cancellationToken);
+
+        return new ApiResponse<CategoryAdminDto>
         {
-            var (bytes, type) = ImageParsing.FromBase64(request.Image);
-            var image = Image.FromBytes(bytes, type);
-
-            var category = Category.Create(trimmedName, image, request.ParentCategoryId);
-
-            await _categoryRepository.AddAsync(category, cancellationToken);
-            await _uow.SaveChangesAsync(cancellationToken);
-
-            return new ApiResponse<CategoryAdminDto>
+            Status = ResponseStatus.Created,
+            Message = AdminCategoryConstants.CategorySuccessfullyCreated,
+            Data = new CategoryAdminDto
             {
-                Status = ResponseStatus.Created,
-                Message = AdminCategoryConstants.CategorySuccessfullyCreated,
-                Data = new CategoryAdminDto
-                {
-                    Id = category.Id,
-                    Name = category.Name.Value,
-                    Created = category.Created,
-                    ParentCategoryId = category.ParentCategoryId
-                }
-            };
-        }
-        catch (DomainValidationException ex)
-        {
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.BadRequest,
-                Message = ex.Message
-            };
-        }
+                Id = category.Id,
+                Name = category.Name.Value,
+                Created = category.Created,
+                ParentCategoryId = category.ParentCategoryId
+            }
+        };
     }
 
     public async Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryAdminRequest request, CancellationToken cancellationToken = default)
@@ -127,69 +115,58 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             };
         }
 
-        try
+        Image? image = null;
+        if (!string.IsNullOrEmpty(request.Image))
         {
-            Image? image = null;
-            if (!string.IsNullOrEmpty(request.Image))
+            var (bytes, type) = ImageParsing.FromBase64(request.Image);
+            image = Image.FromBytes(bytes, type);
+        }
+
+        if (request.ParentCategoryId.HasValue)
+        {
+            if (request.ParentCategoryId.Value == id)
             {
-                var (bytes, type) = ImageParsing.FromBase64(request.Image);
-                image = Image.FromBytes(bytes, type);
+                return new ApiResponse<CategoryAdminDto>
+                {
+                    Status = ResponseStatus.BadRequest,
+                    Message = AdminCategoryConstants.CategoryCannotBeOwnParent
+                };
             }
 
-            if (request.ParentCategoryId.HasValue)
+            var allCategories = await _categoryRepository.QueryAsync(
+                queryBuilder: q => q.Where(c => !c.IsDeleted),
+                selector: c => new Category.CategoryNode(c.Id, c.ParentCategoryId),
+                cancellationToken: cancellationToken
+            );
+
+            var descendants = Category.GetDescendantIds(allCategories.Items, id);
+            if (descendants.Contains(request.ParentCategoryId.Value))
             {
-                if (request.ParentCategoryId.Value == id)
+                return new ApiResponse<CategoryAdminDto>
                 {
-                    return new ApiResponse<CategoryAdminDto>
-                    {
-                        Status = ResponseStatus.BadRequest,
-                        Message = AdminCategoryConstants.CategoryCannotBeOwnParent
-                    };
-                }
-
-                var allCategories = await _categoryRepository.QueryAsync(
-                    queryBuilder: q => q.Where(c => !c.IsDeleted),
-                    selector: c => new Category.CategoryNode(c.Id, c.ParentCategoryId),
-                    cancellationToken: cancellationToken
-                );
-
-                var descendants = Category.GetDescendantIds(allCategories.Items, id);
-                if (descendants.Contains(request.ParentCategoryId.Value))
-                {
-                    return new ApiResponse<CategoryAdminDto>
-                    {
-                        Status = ResponseStatus.BadRequest,
-                        Message = AdminCategoryConstants.CategoryCannotBeMovedUnderDescendant
-                    };
-                }
+                    Status = ResponseStatus.BadRequest,
+                    Message = AdminCategoryConstants.CategoryCannotBeMovedUnderDescendant
+                };
             }
-
-            category.Update(trimmedName, image, request.ParentCategoryId);
-            _categoryRepository.Update(category);
-            await _uow.SaveChangesAsync(cancellationToken);
-
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.Success,
-                Message = AdminCategoryConstants.CategorySuccessfullyUpdated,
-                Data = new CategoryAdminDto
-                {
-                    Id = category.Id,
-                    Name = category.Name.Value,
-                    Created = category.Created,
-                    LastModified = category.LastModified,
-                    ParentCategoryId = category.ParentCategoryId
-                }
-            };
         }
-        catch (DomainValidationException ex)
+
+        category.Update(trimmedName, image, request.ParentCategoryId);
+        _categoryRepository.Update(category);
+        await _uow.SaveChangesAsync(cancellationToken);
+
+        return new ApiResponse<CategoryAdminDto>
         {
-            return new ApiResponse<CategoryAdminDto>
+            Status = ResponseStatus.Success,
+            Message = AdminCategoryConstants.CategorySuccessfullyUpdated,
+            Data = new CategoryAdminDto
             {
-                Status = ResponseStatus.BadRequest,
-                Message = ex.Message
-            };
-        }
+                Id = category.Id,
+                Name = category.Name.Value,
+                Created = category.Created,
+                LastModified = category.LastModified,
+                ParentCategoryId = category.ParentCategoryId
+            }
+        };
     }
 
     public async Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
