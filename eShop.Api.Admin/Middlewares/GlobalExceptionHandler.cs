@@ -1,7 +1,7 @@
 ﻿using eShop.Application.Enums;
+using eShop.Application.Exceptions;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Exceptions;
-using eShop.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace eShop.Api.Admin.Middlewares;
