@@ -7,5 +7,9 @@
     <Project Path="eShop.Domain/eShop.Domain.csproj" />
     <Project Path="eShop.Infrastructure/eShop.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="eShop.Application.Tests/eShop.Application.Tests.csproj" Id="dfafd08e-43bb-442e-b21e-ef951b375fc2" />
+    <Project Path="eShop.Domain.Tests/eShop.Domain.Tests.csproj" Id="723ba867-76a9-4c0b-839c-4d64269a58d4" />
+    <Project Path="eShop.Infrastructure.Tests/eShop.Infrastructure.Tests.csproj" Id="bd1c18c8-057b-42f7-aa37-c572ef4ffdd0" />
+  </Folder>
 </Solution>
