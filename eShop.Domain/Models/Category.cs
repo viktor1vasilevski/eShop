@@ -1,7 +1,6 @@
 ﻿using eShop.Domain.Helpers;
 using eShop.Domain.Models.Base;
 using eShop.Domain.ValueObjects;
-using eShop.Domain.ValueObjects;
 
 namespace eShop.Domain.Models;
 
