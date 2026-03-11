@@ -70,11 +70,11 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
         {
             IQueryable<TEntity> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
 
-            if (includeBuilder != null)
-                query = includeBuilder(query);
-
             if (queryBuilder != null)
                 query = queryBuilder(query);
+
+            if (includeBuilder != null)
+                query = includeBuilder(query);
 
             int totalCount = await query.CountAsync(cancellationToken);
 
