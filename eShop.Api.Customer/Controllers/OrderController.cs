@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants.Customer;
-using eShop.Application.Enums;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
 using eShop.Application.Responses.Customer.Order;
@@ -21,11 +20,7 @@ public class OrderController(ICustomerOrderService _customerOrderService) : Base
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<OrderDetailsCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<OrderDetailsCustomerDto>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerOrderService.PlaceOrderAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
@@ -36,11 +31,7 @@ public class OrderController(ICustomerOrderService _customerOrderService) : Base
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<List<OrderDetailsCustomerDto>>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<List<OrderDetailsCustomerDto>>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerOrderService.GetOrdersForUserIdAsync(userId.Value, cancellationToken);
         return HandleResponse(response);

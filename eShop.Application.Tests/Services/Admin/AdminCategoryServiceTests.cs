@@ -39,7 +39,7 @@ public class AdminCategoryServiceTests
 
         var result = await _sut.CreateCategoryAsync(request);
 
-        Assert.Equal(ResponseStatus.Conflict, result.Status);
+        Assert.Equal(ResultStatus.Conflict, result.Status);
         Assert.Equal(AdminCategoryConstants.CategoryExist, result.Message);
     }
 
@@ -54,7 +54,7 @@ public class AdminCategoryServiceTests
 
         var result = await _sut.UpdateCategoryAsync(Guid.NewGuid(), new UpdateCategoryAdminRequest { Name = "Test" });
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(AdminCategoryConstants.CategoryDoesNotExist, result.Message);
     }
 
@@ -80,7 +80,7 @@ public class AdminCategoryServiceTests
 
         var result = await _sut.UpdateCategoryAsync(id, request);
 
-        Assert.Equal(ResponseStatus.BadRequest, result.Status);
+        Assert.Equal(ResultStatus.BadRequest, result.Status);
         Assert.Equal(AdminCategoryConstants.CategoryCannotBeOwnParent, result.Message);
     }
 
@@ -95,7 +95,7 @@ public class AdminCategoryServiceTests
 
         var result = await _sut.DeleteCategoryAsync(Guid.NewGuid());
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(AdminCategoryConstants.CategoryDoesNotExist, result.Message);
     }
 
@@ -130,7 +130,7 @@ public class AdminCategoryServiceTests
 
         var result = await _sut.DeleteCategoryAsync(categoryId);
 
-        Assert.Equal(ResponseStatus.Conflict, result.Status);
+        Assert.Equal(ResultStatus.Conflict, result.Status);
     }
 
     // --- GetCategoryByIdAsync ---
@@ -149,7 +149,7 @@ public class AdminCategoryServiceTests
 
         var result = await _sut.GetCategoryByIdAsync(Guid.NewGuid());
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(AdminCategoryConstants.CategoryDoesNotExist, result.Message);
     }
 

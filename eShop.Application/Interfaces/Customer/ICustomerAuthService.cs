@@ -7,5 +7,5 @@ namespace eShop.Application.Interfaces.Customer;
 
 public interface ICustomerAuthService : IAuthService
 {
-    Task<ApiResponse<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default);
+    Task<Result<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default);
 }

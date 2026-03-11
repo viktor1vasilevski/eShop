@@ -42,7 +42,7 @@ public class CustomerAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = "john", Password = "pass" });
 
-        Assert.Equal(ResponseStatus.Unauthorized, result.Status);
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
         Assert.Equal(SharedConstants.InvalidCredentials, result.Message);
     }
 
@@ -57,7 +57,7 @@ public class CustomerAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = admin.Username.Value, Password = "pass" });
 
-        Assert.Equal(ResponseStatus.Unauthorized, result.Status);
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class CustomerAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = customer.Username.Value, Password = "wrong" });
 
-        Assert.Equal(ResponseStatus.Unauthorized, result.Status);
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class CustomerAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = customer.Username.Value, Password = "Customer1@" });
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.NotNull(result.Data?.Token);
         Assert.Equal(Role.Customer, result.Data?.Role);
     }
@@ -122,7 +122,7 @@ public class CustomerAuthServiceTests
 
         var result = await _sut.RegisterCustomerAsync(request);
 
-        Assert.Equal(ResponseStatus.Conflict, result.Status);
+        Assert.Equal(ResultStatus.Conflict, result.Status);
         Assert.Equal(CustomerAuthConstants.AccountAlreadyExists, result.Message);
     }
 
@@ -153,7 +153,7 @@ public class CustomerAuthServiceTests
 
         var result = await _sut.RegisterCustomerAsync(request);
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(CustomerAuthConstants.CustomerRegisterSuccess, result.Message);
         Assert.Equal("john", result.Data?.Username);
     }

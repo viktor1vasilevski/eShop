@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants.Customer;
-using eShop.Application.Enums;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
 using eShop.Application.Responses.Customer.Basket;
@@ -21,11 +20,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<BasketCustomerDto>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerBasketService.GetBasketByUserIdAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
@@ -36,11 +31,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<BasketCustomerDto>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerBasketService.UpdateUserBasketAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);
@@ -51,11 +42,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<BasketCustomerDto>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerBasketService.ClearBasketItemsForUserAsync(userId.Value, cancellationToken);
         return HandleResponse(response);
@@ -66,11 +53,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<BasketCustomerDto>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerBasketService.RemoveItemAsync(userId.Value, productId, cancellationToken);
         return HandleResponse(response);

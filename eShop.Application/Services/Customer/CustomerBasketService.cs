@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants.Customer;
-using eShop.Application.Enums;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Basket;
@@ -12,42 +11,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _basketRepository, 
+public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _basketRepository,
     IEfRepository<Product> _productRepository, IEfRepository<User> _userRepository) : ICustomerBasketService
 {
-
-    public async Task<ApiResponse<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<BasketCustomerDto>> ClearBasketItemsForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
-            includeBuilder: q => q.Include(u => u.Basket)
-                                  .ThenInclude(b => b.BasketItems),
+            includeBuilder: q => q.Include(u => u.Basket).ThenInclude(b => b.BasketItems),
             selector: x => x,
             asNoTracking: false,
             cancellationToken: cancellationToken
         );
 
         if (user is null)
-        {
-            return new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerAuthConstants.UserNotFound
-            };
-        }
+            return Result<BasketCustomerDto>.NotFound(CustomerAuthConstants.UserNotFound);
 
         user.ClearBasket();
-
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<BasketCustomerDto>
-        {
-            Status = ResponseStatus.Success,
-            Message = CustomerBasketConstants.BasketCleared
-        };
+        return Result<BasketCustomerDto>.Success(null!, message: CustomerBasketConstants.BasketCleared);
     }
 
-    public async Task<ApiResponse<BasketCustomerDto>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<BasketCustomerDto>> GetBasketByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var basketDto = await _basketRepository.GetSingleAsync(
             filter: b => b.UserId == userId,
@@ -63,80 +49,45 @@ public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
                     Image = ImageDataUriBuilder.FromImage(i.Product.Image)
                 }).ToList()
             },
-            includeBuilder: q => q.Include(b => b.BasketItems)
-                                  .ThenInclude(i => i.Product),
+            includeBuilder: q => q.Include(b => b.BasketItems).ThenInclude(i => i.Product),
             cancellationToken: cancellationToken
         );
 
         basketDto ??= new BasketCustomerDto { Items = new List<BasketItemCustomerDto>() };
 
-        return new ApiResponse<BasketCustomerDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = basketDto
-        };
+        return Result<BasketCustomerDto>.Success(basketDto);
     }
 
-    public async Task<ApiResponse<BasketCustomerDto>> RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default)
+    public async Task<Result<BasketCustomerDto>> RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
-            includeBuilder: q => q.Include(u => u.Basket)
-                                  .ThenInclude(b => b.BasketItems),
+            includeBuilder: q => q.Include(u => u.Basket).ThenInclude(b => b.BasketItems),
             selector: u => u,
             cancellationToken: cancellationToken
         );
 
         if (user is null)
-        {
-            return new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerAuthConstants.UserNotFound
-            };
-        }
+            return Result<BasketCustomerDto>.NotFound(CustomerAuthConstants.UserNotFound);
 
         var basket = user.Basket;
         if (basket is null)
-        {
-            return new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerBasketConstants.BasketNotFoundForUser
-            };
-        }
+            return Result<BasketCustomerDto>.NotFound(CustomerBasketConstants.BasketNotFoundForUser);
 
         var itemToRemove = basket.BasketItems.FirstOrDefault(x => x.ProductId == productId);
         if (itemToRemove is null)
-        {
-            return new ApiResponse<BasketCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerBasketItemConstants.BasketItemNotFound
-            };
-        }
+            return Result<BasketCustomerDto>.NotFound(CustomerBasketItemConstants.BasketItemNotFound);
 
         basket.RemoveItem(productId);
-
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<BasketCustomerDto>
-        {
-            Status = ResponseStatus.Success,
-            Message = CustomerBasketItemConstants.BasketItemRemoved
-        };
+        return Result<BasketCustomerDto>.Success(null!, message: CustomerBasketItemConstants.BasketItemRemoved);
     }
 
-    public async Task<ApiResponse<BasketCustomerDto>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<BasketCustomerDto>> UpdateUserBasketAsync(Guid userId, UpdateBasketCustomerRequest request, CancellationToken cancellationToken = default)
     {
         if (!await _userRepository.ExistsAsync(u => u.Id == userId, cancellationToken))
-        {
-            return new ApiResponse<BasketCustomerDto>
-            {
-                Message = CustomerAuthConstants.UserNotFound,
-                Status = ResponseStatus.NotFound
-            };
-        }
+            return Result<BasketCustomerDto>.NotFound(CustomerAuthConstants.UserNotFound);
 
         var basket = await _basketRepository.GetSingleAsync(
             filter: b => b.UserId == userId,
@@ -173,12 +124,6 @@ public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
 
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<BasketCustomerDto>
-        {
-            Message = CustomerBasketConstants.BasketUpdated,
-            Status = ResponseStatus.Success
-        };
+        return Result<BasketCustomerDto>.Success(null!, message: CustomerBasketConstants.BasketUpdated);
     }
-
-
 }

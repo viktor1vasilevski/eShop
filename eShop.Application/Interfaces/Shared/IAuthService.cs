@@ -6,5 +6,5 @@ namespace eShop.Application.Interfaces.Shared;
 
 public interface IAuthService
 {
-    Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default);
+    Task<Result<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default);
 }

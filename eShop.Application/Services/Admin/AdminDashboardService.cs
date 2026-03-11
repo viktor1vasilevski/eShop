@@ -1,4 +1,3 @@
-﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Responses.Admin.Dashboard;
 using eShop.Application.Responses.Shared.Base;
@@ -9,7 +8,7 @@ namespace eShop.Application.Services.Admin;
 
 public class AdminDashboardService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository) : IAdminDashboardService
 {
-    public async Task<ApiResponse<OrdersTodayDto>> GetOrdersTodayAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<OrdersTodayDto>> GetOrdersTodayAsync(CancellationToken cancellationToken = default)
     {
         var today = DateTime.UtcNow.Date;
 
@@ -19,17 +18,10 @@ public class AdminDashboardService(IEfUnitOfWork _uow, IEfRepository<Order> _ord
             asNoTracking: true,
             cancellationToken: cancellationToken);
 
-        var count = items.Count;
-
-        return new ApiResponse<OrdersTodayDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = new OrdersTodayDto { Count = count }
-        };
-
+        return Result<OrdersTodayDto>.Success(new OrdersTodayDto { Count = items.Count });
     }
 
-    public async Task<ApiResponse<RevenueTodayDto>> GetRevenueTodayAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<RevenueTodayDto>> GetRevenueTodayAsync(CancellationToken cancellationToken = default)
     {
         var today = DateTime.UtcNow.Date;
 
@@ -39,28 +31,16 @@ public class AdminDashboardService(IEfUnitOfWork _uow, IEfRepository<Order> _ord
             asNoTracking: true,
             cancellationToken: cancellationToken);
 
-        var revenue = items.Sum();
-
-        return new ApiResponse<RevenueTodayDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = new RevenueTodayDto { Amount = revenue }
-        };
+        return Result<RevenueTodayDto>.Success(new RevenueTodayDto { Amount = items.Sum() });
     }
 
-    public async Task<ApiResponse<TotalCustomersDto>> GetTotalCustomersAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<TotalCustomersDto>> GetTotalCustomersAsync(CancellationToken cancellationToken = default)
     {
         var (items, _) = await _userRepository.QueryAsync(
             selector: u => u.Id,
             asNoTracking: true,
             cancellationToken: cancellationToken);
 
-        var total = items.Count;
-
-        return new ApiResponse<TotalCustomersDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = new TotalCustomersDto { Count = total }
-        };
+        return Result<TotalCustomersDto>.Success(new TotalCustomersDto { Count = items.Count });
     }
 }

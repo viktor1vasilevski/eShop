@@ -5,7 +5,7 @@ namespace eShop.Application.Interfaces.Admin;
 
 public interface IAdminDashboardService
 {
-    public Task<ApiResponse<OrdersTodayDto>> GetOrdersTodayAsync(CancellationToken cancellationToken = default);
-    public Task<ApiResponse<RevenueTodayDto>> GetRevenueTodayAsync(CancellationToken cancellationToken = default);
-    public Task<ApiResponse<TotalCustomersDto>> GetTotalCustomersAsync(CancellationToken cancellationToken = default);
+    public Task<Result<OrdersTodayDto>> GetOrdersTodayAsync(CancellationToken cancellationToken = default);
+    public Task<Result<RevenueTodayDto>> GetRevenueTodayAsync(CancellationToken cancellationToken = default);
+    public Task<Result<TotalCustomersDto>> GetTotalCustomersAsync(CancellationToken cancellationToken = default);
 }

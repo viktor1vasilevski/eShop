@@ -33,7 +33,7 @@ public class AdminDashboardServiceTests
 
         var result = await _sut.GetOrdersTodayAsync();
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(0, result.Data!.Count);
     }
 
@@ -53,7 +53,7 @@ public class AdminDashboardServiceTests
 
         var result = await _sut.GetOrdersTodayAsync();
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(2, result.Data!.Count);
     }
 
@@ -73,7 +73,7 @@ public class AdminDashboardServiceTests
 
         var result = await _sut.GetRevenueTodayAsync();
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(400m, result.Data!.Amount);
     }
 
@@ -93,7 +93,7 @@ public class AdminDashboardServiceTests
 
         var result = await _sut.GetTotalCustomersAsync();
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(3, result.Data!.Count);
     }
 }

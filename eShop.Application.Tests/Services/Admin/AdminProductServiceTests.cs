@@ -44,7 +44,7 @@ public class AdminProductServiceTests
 
         var result = await _sut.DeleteProductAsync(Guid.NewGuid());
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(AdminProductConstants.ProductDoesNotExist, result.Message);
     }
 
@@ -66,7 +66,7 @@ public class AdminProductServiceTests
 
         var result = await _sut.DeleteProductAsync(product.Id);
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(AdminProductConstants.ProductSuccessfullyDeleted, result.Message);
     }
 
@@ -91,7 +91,7 @@ public class AdminProductServiceTests
 
         var result = await _sut.CreateProductAsync(request);
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(AdminCategoryConstants.CategoryDoesNotExist, result.Message);
     }
 
@@ -116,7 +116,7 @@ public class AdminProductServiceTests
 
         var result = await _sut.CreateProductAsync(request);
 
-        Assert.Equal(ResponseStatus.BadRequest, result.Status);
+        Assert.Equal(ResultStatus.BadRequest, result.Status);
         Assert.Equal(AdminProductConstants.ProductsAllowedOnlyOnLeafCategories, result.Message);
     }
 
@@ -144,7 +144,7 @@ public class AdminProductServiceTests
 
         var result = await _sut.CreateProductAsync(request);
 
-        Assert.Equal(ResponseStatus.Conflict, result.Status);
+        Assert.Equal(ResultStatus.Conflict, result.Status);
         Assert.Equal(AdminProductConstants.ProductExist, result.Message);
     }
 
@@ -164,7 +164,7 @@ public class AdminProductServiceTests
 
         var result = await _sut.GetProductByIdAsync(Guid.NewGuid());
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(AdminProductConstants.ProductDoesNotExist, result.Message);
     }
 

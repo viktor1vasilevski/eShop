@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants.Customer;
-using eShop.Application.Enums;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Comment;
@@ -11,11 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _commentRepository, 
+public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _commentRepository,
     IEfRepository<Order> _orderRepository) : ICustomerCommentService
 {
-
-    public async Task<ApiResponse<List<CommentCustomerDto>>> GetCommentsAsync(CommentCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<List<CommentCustomerDto>>> GetCommentsAsync(CommentCustomerRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Comment>(request.SortBy, request.SortDirection);
 
@@ -35,15 +33,10 @@ public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _
             cancellationToken: cancellationToken
         );
 
-        return new ApiResponse<List<CommentCustomerDto>>
-        {
-            Data = comments,
-            TotalCount = totalCount,
-            Status = ResponseStatus.Success
-        };
+        return Result<List<CommentCustomerDto>>.Success(comments, totalCount);
     }
 
-    public async Task<ApiResponse<CommentCustomerDto>> CreateCommentAsync(Guid userId, CreateCommentCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<CommentCustomerDto>> CreateCommentAsync(Guid userId, CreateCommentCustomerRequest request, CancellationToken cancellationToken = default)
     {
         bool hasBought = await _orderRepository
             .QueryAsync(
@@ -55,34 +48,19 @@ public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _
             .ContinueWith(t => t.Result.Items.Any(), cancellationToken);
 
         if (!hasBought)
-            return new ApiResponse<CommentCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerCommentConstants.CannotCommentWithoutPurchase,
-            };
+            return Result<CommentCustomerDto>.NotFound(CustomerCommentConstants.CannotCommentWithoutPurchase);
 
-        var comment = Comment.Create(
-            request.CommentText,
-            request.Rating,
-            request.ProductId,
-            userId
-        );
+        var comment = Comment.Create(request.CommentText, request.Rating, request.ProductId, userId);
 
         await _commentRepository.AddAsync(comment, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        var resultDto = new CommentCustomerDto
+        return Result<CommentCustomerDto>.Success(new CommentCustomerDto
         {
             CommentText = comment.Text.Value,
             CreatedBy = comment.CreatedBy,
             Created = comment.Created,
             Rating = comment.Rating
-        };
-
-        return new ApiResponse<CommentCustomerDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = resultDto
-        };
+        });
     }
 }

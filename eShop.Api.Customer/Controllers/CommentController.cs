@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants.Customer;
-using eShop.Application.Enums;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Comment;
 using eShop.Application.Responses.Customer.Comment;
@@ -28,11 +27,7 @@ public class CommentController(ICustomerCommentService _customerCommentService) 
     {
         var userId = GetUserId();
         if (userId is null)
-            return HandleResponse(new ApiResponse<CommentCustomerDto>
-            {
-                Status = ResponseStatus.Unauthorized,
-                Message = CustomerAuthConstants.UserNotAuthenticated
-            });
+            return HandleResponse(Result<CommentCustomerDto>.Unauthorized(CustomerAuthConstants.UserNotAuthenticated));
 
         var response = await _customerCommentService.CreateCommentAsync(userId.Value, request, cancellationToken);
         return HandleResponse(response);

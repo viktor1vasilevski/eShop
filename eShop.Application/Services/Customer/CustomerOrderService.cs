@@ -1,6 +1,5 @@
-﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Constants.Customer;
 using eShop.Application.DTOs.Customer.OrderItem;
-using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Order;
@@ -14,51 +13,35 @@ using System.Text;
 
 namespace eShop.Application.Services.Customer;
 
-public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository, IEfRepository<Product> _productRepository, 
+public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository, IEfRepository<Product> _productRepository,
     ILogger<CustomerOrderService> _logger, IEmailQueue _emailQueue) : ICustomerOrderService
 {
-
-    public async Task<ApiResponse<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<OrderDetailsCustomerDto>>> GetOrdersForUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var (query, totalCount) = await _orderRepository.QueryAsync(
             queryBuilder: x => x.Where(a => a.UserId == userId),
             orderBy: x => x.OrderByDescending(x => x.Created),
             includeBuilder: x => x.Include(oi => oi.OrderItems).ThenInclude(p => p.Product),
             selector: x => new OrderDetailsCustomerDto
-                {
-                    FirstName = x.User.FullName.FirstName,
-                    LastName = x.User.FullName.LastName,
-                    Username = x.User.Username.Value,
-                    TotalAmount = x.TotalAmount,
-                    OrderCreatedOn = x.Created,
-                    Items = x.OrderItems.Select(item => new OrderItemCustomerResponseDto
-                    {
-                        ProductName = item.Product!.Name.Value,
-                        Quantity = item.UnitQuantity.Value,
-                        UnitPrice = item.UnitPrice.Value,
-                        Image = ImageDataUriBuilder.FromImage(item.Product.Image)
-                    }).ToList()
-                }
-            );
-
-        if (query is null || totalCount == 0)
-        {
-            return new ApiResponse<List<OrderDetailsCustomerDto>>
             {
-                Data = [],
-                Status = ResponseStatus.Success,
-            };
-        }
+                FirstName = x.User.FullName.FirstName,
+                LastName = x.User.FullName.LastName,
+                Username = x.User.Username.Value,
+                TotalAmount = x.TotalAmount,
+                OrderCreatedOn = x.Created,
+                Items = x.OrderItems.Select(item => new OrderItemCustomerResponseDto
+                {
+                    ProductName = item.Product!.Name.Value,
+                    Quantity = item.UnitQuantity.Value,
+                    UnitPrice = item.UnitPrice.Value,
+                    Image = ImageDataUriBuilder.FromImage(item.Product.Image)
+                }).ToList()
+            });
 
-        return new ApiResponse<List<OrderDetailsCustomerDto>>
-        {
-            Data = query,
-            Status = ResponseStatus.Success,
-            TotalCount = totalCount,
-        };
+        return Result<List<OrderDetailsCustomerDto>>.Success(query ?? [], totalCount);
     }
 
-    public async Task<ApiResponse<OrderDetailsCustomerDto>> PlaceOrderAsync(Guid userId, PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<OrderDetailsCustomerDto>> PlaceOrderAsync(Guid userId, PlaceOrderCustomerRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
@@ -66,13 +49,7 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             cancellationToken: cancellationToken);
 
         if (user is null)
-        {
-            return new ApiResponse<OrderDetailsCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerAuthConstants.UserNotFound
-            };
-        }
+            return Result<OrderDetailsCustomerDto>.NotFound(CustomerAuthConstants.UserNotFound);
 
         var order = Order.Create(userId);
         var productLines = new List<(string ProductName, int Quantity, decimal UnitPrice)>();
@@ -90,13 +67,7 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         foreach (var itemRequest in request.Items)
         {
             if (!productDict.TryGetValue(itemRequest.ProductId, out var product))
-            {
-                return new ApiResponse<OrderDetailsCustomerDto>
-                {
-                    Status = ResponseStatus.NotFound,
-                    Message = string.Format(CustomerOrderConstants.ProductNotFound, itemRequest.ProductId)
-                };
-            }
+                return Result<OrderDetailsCustomerDto>.NotFound(string.Format(CustomerOrderConstants.ProductNotFound, itemRequest.ProductId));
 
             product.SubtractQuantity(itemRequest.Quantity);
 
@@ -118,14 +89,11 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         try
         {
             var html = BuildOrderHtml(order, user, productLines);
-            var subject = $"Order Confirmation #{order.Id}";
-
-            var emailMessage = new EmailMessage(
+            await _emailQueue.EnqueueAsync(new EmailMessage(
                 To: user.Email.Value,
-                Subject: subject,
-                HtmlBody: html);
+                Subject: $"Order Confirmation #{order.Id}",
+                HtmlBody: html));
 
-            await _emailQueue.EnqueueAsync(emailMessage);
             _logger.LogInformation("Order {OrderId}: confirmation email queued for {Email}", order.Id, user.Email);
         }
         catch (Exception ex)
@@ -133,23 +101,18 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
             _logger.LogWarning(ex, "Order {OrderId}: failed to queue confirmation email for {Email}", order.Id, user.Email);
         }
 
-        return new ApiResponse<OrderDetailsCustomerDto>
+        return Result<OrderDetailsCustomerDto>.Success(new OrderDetailsCustomerDto
         {
-            Status = ResponseStatus.Success,
-            Message = CustomerOrderConstants.OrderPlaced,
-            Data = new OrderDetailsCustomerDto
+            OrderId = order.Id,
+            TotalAmount = order.TotalAmount,
+            OrderCreatedOn = order.Created,
+            Items = productLines.Select(p => new OrderItemCustomerResponseDto
             {
-                OrderId = order.Id,
-                TotalAmount = order.TotalAmount,
-                OrderCreatedOn = order.Created,
-                Items = productLines.Select(p => new OrderItemCustomerResponseDto
-                {
-                    ProductName = p.ProductName,
-                    Quantity = p.Quantity,
-                    UnitPrice = p.UnitPrice
-                }).ToList()
-            }
-        };
+                ProductName = p.ProductName,
+                Quantity = p.Quantity,
+                UnitPrice = p.UnitPrice
+            }).ToList()
+        }, message: CustomerOrderConstants.OrderPlaced);
     }
 
     private string BuildOrderHtml(Order order, User user, List<(string ProductName, int Quantity, decimal UnitPrice)> productLines)

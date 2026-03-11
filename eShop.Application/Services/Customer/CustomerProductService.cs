@@ -1,5 +1,4 @@
-﻿using eShop.Application.Constants.Customer;
-using eShop.Application.Enums;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
@@ -11,11 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository, 
+public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository,
     IEfRepository<Category> _categoryRepository, IEfRepository<Order> _orderRepository) : ICustomerProductService
 {
-
-    public async Task<ApiResponse<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
     {
         var categoryIds = await GetAllCategoryIdsAsync(request.CategoryId, cancellationToken);
 
@@ -35,12 +33,7 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
             cancellationToken: cancellationToken
         );
 
-        return new ApiResponse<List<ProductCustomerDto>>
-        {
-            Data = products,
-            TotalCount = totalCount,
-            Status = ResponseStatus.Success
-        };
+        return Result<List<ProductCustomerDto>>.Success(products, totalCount);
     }
 
     public class CustomNode
@@ -71,30 +64,21 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
             .ToList();
 
         foreach (var child in children)
-        {
             CollectCategoryIds(child.Id, allCategories, ids);
-        }
     }
 
-    public async Task<ApiResponse<ProductDetailsCustomerDto>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductDetailsCustomerDto>> GetProductByIdAsync(Guid productId, Guid? userId = null, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: x => x.Id == productId && !x.IsDeleted,
             selector: x => x,
-            includeBuilder: x => x.Include(x => x.Category), 
+            includeBuilder: x => x.Include(x => x.Category),
             cancellationToken: cancellationToken);
 
         if (product == null)
-        {
-            return new ApiResponse<ProductDetailsCustomerDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = CustomerProductConstants.ProductNotFound,
-            };
-        }
+            return Result<ProductDetailsCustomerDto>.NotFound(CustomerProductConstants.ProductNotFound);
 
         bool canComment = false;
-
         if (userId.HasValue)
         {
             canComment = await _orderRepository.ExistsAsync(
@@ -102,7 +86,7 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
                 cancellationToken);
         }
 
-        var productDto = new ProductDetailsCustomerDto
+        return Result<ProductDetailsCustomerDto>.Success(new ProductDetailsCustomerDto
         {
             Id = product.Id,
             Name = product.Name.Value,
@@ -112,12 +96,6 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
             Image = ImageDataUriBuilder.FromImage(product.Image),
             Category = product.Category?.Name.Value,
             CanComment = canComment
-        };
-
-        return new ApiResponse<ProductDetailsCustomerDto>
-        {
-            Data = productDto,
-            Status = ResponseStatus.Success
-        };
+        });
     }
 }

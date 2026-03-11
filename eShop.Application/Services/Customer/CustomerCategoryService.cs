@@ -1,4 +1,3 @@
-﻿using eShop.Application.Enums;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
@@ -9,7 +8,7 @@ namespace eShop.Application.Services.Customer;
 
 public class CustomerCategoryService(IDapperRepository<Category> _categoryDapperRepository) : ICustomerCategoryService
 {
-    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<List<CategoryTreeDto>>> GetCategoryTreeForMenuAsync(CancellationToken cancellationToken = default)
     {
         const string categoriesSql = @"
             SELECT Id, Name, ParentCategoryId
@@ -32,17 +31,13 @@ public class CustomerCategoryService(IDapperRepository<Category> _categoryDapper
 
         var tree = BuildCategoryTree(allCategories, categoriesWithProducts);
 
-        return new ApiResponse<List<CategoryTreeDto>>
-        {
-            Data = tree,
-            Status = ResponseStatus.Success
-        };
+        return Result<List<CategoryTreeDto>>.Success(tree);
     }
 
     private static List<CategoryTreeDto> BuildCategoryTree(
-    List<CategoryTreeDto> allCategories,
-    HashSet<Guid> categoriesWithProducts,
-    Guid? parentId = null)
+        List<CategoryTreeDto> allCategories,
+        HashSet<Guid> categoriesWithProducts,
+        Guid? parentId = null)
     {
         var result = new List<CategoryTreeDto>();
 
@@ -60,4 +55,3 @@ public class CustomerCategoryService(IDapperRepository<Category> _categoryDapper
         return result;
     }
 }
-

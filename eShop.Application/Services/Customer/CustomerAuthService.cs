@@ -1,6 +1,5 @@
-﻿using eShop.Application.Constants.Customer;
+using eShop.Application.Constants.Customer;
 using eShop.Application.Constants.Shared;
-using eShop.Application.Enums;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Customer;
 using eShop.Application.Interfaces.Shared;
@@ -14,57 +13,44 @@ using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using Microsoft.Extensions.Configuration;
-using System.Threading;
 
 namespace eShop.Application.Services.Customer;
 
-public class CustomerAuthService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordService _passwordService, 
+public class CustomerAuthService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository, IPasswordService _passwordService,
     IConfiguration _configuration) : ICustomerAuthService
 {
-
-    public async Task<ApiResponse<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.FirstOrDefaultAsync(x => x.Username.Value == request.Username, cancellationToken);
 
         if (user is null || user?.Username.Value != request.Username || user?.Role != Role.Customer ||
             !_passwordService.VerifyPassword(request.Password, user.PasswordHash, user.SaltKey))
         {
-            return new ApiResponse<LoginDto>
-            {
-                Message = SharedConstants.InvalidCredentials,
-                Status = ResponseStatus.Unauthorized
-            };
+            return Result<LoginDto>.Unauthorized(SharedConstants.InvalidCredentials);
         }
 
         var token = JwtTokenHelper.GenerateToken(_configuration, user);
 
-        return new ApiResponse<LoginDto>
+        return Result<LoginDto>.Success(new LoginDto
         {
-            Status = ResponseStatus.Success,
-            Message = CustomerAuthConstants.CustomerLoggedSuccessfully,
-            Data = new LoginDto
-            {
-                Token = token,
-                Email = user.Email.Value,
-                Username = user.Username.Value,
-                Role = user.Role
-            }
-        };
+            Token = token,
+            Email = user.Email.Value,
+            Username = user.Username.Value,
+            Role = user.Role
+        }, message: CustomerAuthConstants.CustomerLoggedSuccessfully);
     }
 
-    public async Task<ApiResponse<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<RegisterCustomerDto>> RegisterCustomerAsync(CustomerRegisterRequest request, CancellationToken cancellationToken = default)
     {
         var normalizedUsername = request.Username.Trim().ToLowerInvariant();
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-        var usersExist = await _userRepository.ExistsAsync(x => x.Username.Value == normalizedUsername || x.Email.Value == normalizedEmail, cancellationToken);
+        var usersExist = await _userRepository.ExistsAsync(
+            x => x.Username.Value == normalizedUsername || x.Email.Value == normalizedEmail,
+            cancellationToken);
 
         if (usersExist)
-            return new ApiResponse<RegisterCustomerDto>
-            {
-                Status = ResponseStatus.Conflict,
-                Message = CustomerAuthConstants.AccountAlreadyExists
-            };
+            return Result<RegisterCustomerDto>.Conflict(CustomerAuthConstants.AccountAlreadyExists);
 
         try
         {
@@ -85,28 +71,18 @@ public class CustomerAuthService(IEfUnitOfWork _uow, IEfRepository<User> _userRe
             await _userRepository.AddAsync(user, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return new ApiResponse<RegisterCustomerDto>
+            return Result<RegisterCustomerDto>.Success(new RegisterCustomerDto
             {
-                Status = ResponseStatus.Success,
-                Message = CustomerAuthConstants.CustomerRegisterSuccess,
-                Data = new RegisterCustomerDto
-                {
-                    Id = user.Id,
-                    FirstName = user.FullName.FirstName,
-                    LastName = user.FullName.LastName,
-                    Username = user.Username.Value,
-                    Email = user.Email.Value
-                }
-            };
+                Id = user.Id,
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                Username = user.Username.Value,
+                Email = user.Email.Value
+            }, message: CustomerAuthConstants.CustomerRegisterSuccess);
         }
         catch (DomainValidationException ex)
         {
-            return new ApiResponse<RegisterCustomerDto>
-            {
-                Status = ResponseStatus.BadRequest,
-                Message = ex.Message
-            };
+            return Result<RegisterCustomerDto>.BadRequest(ex.Message);
         }
     }
-
 }

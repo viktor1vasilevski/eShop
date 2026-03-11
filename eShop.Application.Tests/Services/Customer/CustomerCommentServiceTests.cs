@@ -43,7 +43,7 @@ public class CustomerCommentServiceTests
 
         var result = await _sut.CreateCommentAsync(Guid.NewGuid(), request);
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(CustomerCommentConstants.CannotCommentWithoutPurchase, result.Message);
     }
 
@@ -70,7 +70,7 @@ public class CustomerCommentServiceTests
 
         var result = await _sut.CreateCommentAsync(Guid.NewGuid(), request);
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal("Great product!", result.Data!.CommentText);
     }
 }

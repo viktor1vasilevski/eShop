@@ -1,13 +1,11 @@
-﻿using eShop.Application.Constants.Admin;
+using eShop.Application.Constants.Admin;
 using eShop.Application.DTOs.Admin.Category;
-using eShop.Application.Enums;
 using eShop.Application.Extensions;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Admin;
 using eShop.Application.Requests.Admin.Product;
 using eShop.Application.Responses.Admin.Product;
 using eShop.Application.Responses.Shared.Base;
-using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
 using eShop.Domain.ValueObjects;
@@ -15,11 +13,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Admin;
 
-public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, 
+public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository,
     IEfRepository<Product> _productRepository, IOpenAIProductDescriptionGenerator _openAIProductDescriptionGenerator) : IAdminProductService
 {
-
-    public async Task<ApiResponse<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<List<ProductAdminDto>>> GetProductsAsync(ProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Product>(request.SortBy, request.SortDirection);
 
@@ -46,14 +43,10 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             cancellationToken: cancellationToken
         );
 
-        return new ApiResponse<List<ProductAdminDto>>
-        {
-            Data = products,
-            TotalCount = totalCount,
-            Status = ResponseStatus.Success
-        };
+        return Result<List<ProductAdminDto>>.Success(products, totalCount);
     }
-    public async Task<ApiResponse<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
+
+    public async Task<Result<ProductDetailsAdminDto>> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
@@ -64,11 +57,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-            return new ApiResponse<ProductDetailsAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminProductConstants.ProductDoesNotExist
-            };
+            return Result<ProductDetailsAdminDto>.NotFound(AdminProductConstants.ProductDoesNotExist);
 
         var (categories, _) = await _categoryRepository.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
@@ -77,7 +66,6 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         var lookup = categories.ToDictionary(c => c.Id, c => c);
-
         var pathItems = Category.BuildPath(product.CategoryId, lookup);
 
         var productDto = new ProductDetailsAdminDto
@@ -88,8 +76,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             UnitPrice = product.UnitPrice.Value,
             UnitQuantity = product.UnitQuantity.Value,
             Image = ImageDataUriBuilder.FromImage(product.Image),
-            Categories = pathItems.Select(p => new CategoryRefDto
-            { Id = p.Id, Name = p.Name }).ToList(),
+            Categories = pathItems.Select(p => new CategoryRefDto { Id = p.Id, Name = p.Name }).ToList(),
             Created = product.Created,
             LastModified = product.LastModified,
             Comments = product.Comments
@@ -106,14 +93,10 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 .ToList()
         };
 
-        return new ApiResponse<ProductDetailsAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = productDto
-        };
+        return Result<ProductDetailsAdminDto>.Success(productDto);
     }
 
-    public async Task<ApiResponse<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductEditAdminDto>> GetProductForEditAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
@@ -122,13 +105,9 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-            return new ApiResponse<ProductEditAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminProductConstants.ProductDoesNotExist
-            };
+            return Result<ProductEditAdminDto>.NotFound(AdminProductConstants.ProductDoesNotExist);
 
-        var dto = new ProductEditAdminDto
+        return Result<ProductEditAdminDto>.Success(new ProductEditAdminDto
         {
             Id = product.Id,
             Name = product.Name.Value,
@@ -137,16 +116,10 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             UnitQuantity = product.UnitQuantity.Value,
             Image = ImageDataUriBuilder.FromImage(product.Image),
             CategoryId = product.CategoryId
-        };
-
-        return new ApiResponse<ProductEditAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = dto
-        };
+        });
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductAdminDto>> CreateProductAsync(CreateProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLowerInvariant();
@@ -157,11 +130,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (!categoryExists)
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminCategoryConstants.CategoryDoesNotExist
-            };
+            return Result<ProductAdminDto>.NotFound(AdminCategoryConstants.CategoryDoesNotExist);
 
         var hasChildren = await _categoryRepository.ExistsAsync(
             c => c.ParentCategoryId == request.CategoryId && !c.IsDeleted,
@@ -169,11 +138,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (hasChildren)
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.BadRequest,
-                Message = AdminProductConstants.ProductsAllowedOnlyOnLeafCategories
-            };
+            return Result<ProductAdminDto>.BadRequest(AdminProductConstants.ProductsAllowedOnlyOnLeafCategories);
 
         var nameTaken = await _productRepository.ExistsAsync(
             p => p.CategoryId == request.CategoryId &&
@@ -183,11 +148,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (nameTaken)
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.Conflict,
-                Message = AdminProductConstants.ProductExist
-            };
+            return Result<ProductAdminDto>.Conflict(AdminProductConstants.ProductExist);
 
         var (bytes, type) = ImageParsing.FromBase64(request.Image);
         var image = Image.FromBytes(bytes, type);
@@ -204,23 +165,18 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         await _productRepository.AddAsync(product, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<ProductAdminDto>
+        return Result<ProductAdminDto>.Created(new ProductAdminDto
         {
-            Status = ResponseStatus.Created,
-            Message = AdminProductConstants.ProductSuccessfullyCreated,
-            Data = new ProductAdminDto
-            {
-                Id = product.Id,
-                Name = product.Name.Value,
-                Description = product.Description.Value,
-                UnitPrice = product.UnitPrice.Value,
-                UnitQuantity = product.UnitQuantity.Value,
-                Created = product.Created
-            }
-        };
+            Id = product.Id,
+            Name = product.Name.Value,
+            Description = product.Description.Value,
+            UnitPrice = product.UnitPrice.Value,
+            UnitQuantity = product.UnitQuantity.Value,
+            Created = product.Created
+        }, message: AdminProductConstants.ProductSuccessfullyCreated);
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductAdminDto>> DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => p.Id == id && !p.IsDeleted,
@@ -230,23 +186,15 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminProductConstants.ProductDoesNotExist
-            };
+            return Result<ProductAdminDto>.NotFound(AdminProductConstants.ProductDoesNotExist);
 
-        product.SoftDelete();  
+        product.SoftDelete();
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<ProductAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Message = AdminProductConstants.ProductSuccessfullyDeleted
-        };
+        return Result<ProductAdminDto>.Success(null!, message: AdminProductConstants.ProductSuccessfullyDeleted);
     }
 
-    public async Task<ApiResponse<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductAdminDto>> UpdateProductAsync(Guid id, UpdateProductAdminRequest request, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetSingleAsync(
             filter: p => !p.IsDeleted && p.Id == id,
@@ -256,13 +204,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         );
 
         if (product is null)
-        {
-            return new ApiResponse<ProductAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminProductConstants.ProductDoesNotExist
-            };
-        }
+            return Result<ProductAdminDto>.NotFound(AdminProductConstants.ProductDoesNotExist);
 
         if (!string.Equals(product.Name.Value, request.Name, StringComparison.OrdinalIgnoreCase))
         {
@@ -275,13 +217,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             );
 
             if (nameTaken)
-            {
-                return new ApiResponse<ProductAdminDto>
-                {
-                    Status = ResponseStatus.Conflict,
-                    Message = AdminProductConstants.ProductExist
-                };
-            }
+                return Result<ProductAdminDto>.Conflict(AdminProductConstants.ProductExist);
         }
 
         Image? image = null;
@@ -291,29 +227,17 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             image = Image.FromBytes(bytes, type);
         }
 
-        product.Update(
-            request.Name.Trim(),
-            request.Description?.Trim() ?? string.Empty,
-            request.Price,
-            request.Quantity,
-            request.CategoryId,
-            image
-        );
+        product.Update(request.Name.Trim(), request.Description?.Trim() ?? string.Empty, request.Price, request.Quantity, request.CategoryId, image);
 
         _productRepository.Update(product);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<ProductAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Message = AdminProductConstants.ProductSuccessfullyUpdated
-        };
+        return Result<ProductAdminDto>.Success(null!, message: AdminProductConstants.ProductSuccessfullyUpdated);
     }
 
-    public async Task<ApiResponse<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)
+    public async Task<Result<string>> GenerateAIProductDescriptionAsync(GenerateAIProductDescriptionRequest request, CancellationToken cancellationToken)
     {
         var description = await _openAIProductDescriptionGenerator.GenerateOpenAIProductDescriptionAsync(request, cancellationToken);
-        return new ApiResponse<string> { Status = ResponseStatus.Success, Data = description };
+        return Result<string>.Success(description);
     }
-
 }

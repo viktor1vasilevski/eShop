@@ -53,7 +53,7 @@ public class CustomerOrderServiceTests
             Items = [new PlaceOrderItemCustomerDto { ProductId = Guid.NewGuid(), Quantity = 1, UnitPrice = 100m }]
         });
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
         Assert.Equal(CustomerAuthConstants.UserNotFound, result.Message);
     }
 
@@ -87,7 +87,7 @@ public class CustomerOrderServiceTests
             Items = [new PlaceOrderItemCustomerDto { ProductId = Guid.NewGuid(), Quantity = 1, UnitPrice = 100m }]
         });
 
-        Assert.Equal(ResponseStatus.NotFound, result.Status);
+        Assert.Equal(ResultStatus.NotFound, result.Status);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class CustomerOrderServiceTests
             Items = [new PlaceOrderItemCustomerDto { ProductId = product.Id, Quantity = 1, UnitPrice = 10m }]
         });
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.Equal(CustomerOrderConstants.OrderPlaced, result.Message);
         Assert.Single(result.Data!.Items);
     }

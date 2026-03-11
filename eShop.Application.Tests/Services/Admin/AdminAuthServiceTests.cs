@@ -37,7 +37,7 @@ public class AdminAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = "admin", Password = "pass" });
 
-        Assert.Equal(ResponseStatus.Unauthorized, result.Status);
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
         Assert.Equal(SharedConstants.InvalidCredentials, result.Message);
     }
 
@@ -52,7 +52,7 @@ public class AdminAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = customer.Username.Value, Password = "pass" });
 
-        Assert.Equal(ResponseStatus.Unauthorized, result.Status);
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class AdminAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = admin.Username.Value, Password = "wrong" });
 
-        Assert.Equal(ResponseStatus.Unauthorized, result.Status);
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class AdminAuthServiceTests
 
         var result = await _sut.LoginAsync(new UserLoginRequest { Username = admin.Username.Value, Password = "Admin1@" });
 
-        Assert.Equal(ResponseStatus.Success, result.Status);
+        Assert.Equal(ResultStatus.Success, result.Status);
         Assert.NotNull(result.Data?.Token);
         Assert.Equal(admin.Username.Value, result.Data?.Username);
         Assert.Equal(Role.Admin, result.Data?.Role);

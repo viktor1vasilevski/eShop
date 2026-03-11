@@ -1,7 +1,6 @@
-﻿using eShop.Application.Constants.Admin;
+using eShop.Application.Constants.Admin;
 using eShop.Application.DTOs.Admin.Category;
 using eShop.Application.DTOs.Admin.Product;
-using eShop.Application.Enums;
 using eShop.Application.Extensions;
 using eShop.Application.Helpers;
 using eShop.Application.Interfaces.Admin;
@@ -18,8 +17,7 @@ namespace eShop.Application.Services.Admin;
 
 public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _categoryRepository, IEfRepository<Product> _productRepository) : IAdminCategoryService
 {
-
-    public async Task<ApiResponse<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<List<CategoryAdminDto>>> GetCategoriesAsync(CategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
         var orderBy = SortHelper.BuildSort<Category>(request.SortBy, request.SortDirection);
 
@@ -40,15 +38,10 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             cancellationToken: cancellationToken
         );
 
-        return new ApiResponse<List<CategoryAdminDto>>
-        {
-            Data = categories,
-            TotalCount = totalCount,
-            Status = ResponseStatus.Success
-        };
+        return Result<List<CategoryAdminDto>>.Success(categories, totalCount);
     }
 
-    public async Task<ApiResponse<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<CategoryAdminDto>> CreateCategoryAsync(CreateCategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
         var trimmedName = request.Name.Trim();
         var normalizedName = trimmedName.ToLower();
@@ -59,11 +52,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                      !x.IsDeleted,
                 cancellationToken: cancellationToken))
         {
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.Conflict,
-                Message = AdminCategoryConstants.CategoryExist
-            };
+            return Result<CategoryAdminDto>.Conflict(AdminCategoryConstants.CategoryExist);
         }
 
         var (bytes, type) = ImageParsing.FromBase64(request.Image);
@@ -74,29 +63,20 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         await _categoryRepository.AddAsync(category, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<CategoryAdminDto>
+        return Result<CategoryAdminDto>.Created(new CategoryAdminDto
         {
-            Status = ResponseStatus.Created,
-            Message = AdminCategoryConstants.CategorySuccessfullyCreated,
-            Data = new CategoryAdminDto
-            {
-                Id = category.Id,
-                Name = category.Name.Value,
-                Created = category.Created,
-                ParentCategoryId = category.ParentCategoryId
-            }
-        };
+            Id = category.Id,
+            Name = category.Name.Value,
+            Created = category.Created,
+            ParentCategoryId = category.ParentCategoryId
+        }, message: AdminCategoryConstants.CategorySuccessfullyCreated);
     }
 
-    public async Task<ApiResponse<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryAdminRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<CategoryAdminDto>> UpdateCategoryAsync(Guid id, UpdateCategoryAdminRequest request, CancellationToken cancellationToken = default)
     {
         var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
         if (category is null)
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminCategoryConstants.CategoryDoesNotExist
-            };
+            return Result<CategoryAdminDto>.NotFound(AdminCategoryConstants.CategoryDoesNotExist);
 
         var trimmedName = request.Name?.Trim() ?? string.Empty;
         var normalizedName = trimmedName.ToLower();
@@ -108,11 +88,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 !x.IsDeleted,
                 cancellationToken))
         {
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.Conflict,
-                Message = AdminCategoryConstants.CategoryExist
-            };
+            return Result<CategoryAdminDto>.Conflict(AdminCategoryConstants.CategoryExist);
         }
 
         Image? image = null;
@@ -125,13 +101,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         if (request.ParentCategoryId.HasValue)
         {
             if (request.ParentCategoryId.Value == id)
-            {
-                return new ApiResponse<CategoryAdminDto>
-                {
-                    Status = ResponseStatus.BadRequest,
-                    Message = AdminCategoryConstants.CategoryCannotBeOwnParent
-                };
-            }
+                return Result<CategoryAdminDto>.BadRequest(AdminCategoryConstants.CategoryCannotBeOwnParent);
 
             var allCategories = await _categoryRepository.QueryAsync(
                 queryBuilder: q => q.Where(c => !c.IsDeleted),
@@ -141,35 +111,24 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
 
             var descendants = Category.GetDescendantIds(allCategories.Items, id);
             if (descendants.Contains(request.ParentCategoryId.Value))
-            {
-                return new ApiResponse<CategoryAdminDto>
-                {
-                    Status = ResponseStatus.BadRequest,
-                    Message = AdminCategoryConstants.CategoryCannotBeMovedUnderDescendant
-                };
-            }
+                return Result<CategoryAdminDto>.BadRequest(AdminCategoryConstants.CategoryCannotBeMovedUnderDescendant);
         }
 
         category.Update(trimmedName, image, request.ParentCategoryId);
         _categoryRepository.Update(category);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new ApiResponse<CategoryAdminDto>
+        return Result<CategoryAdminDto>.Success(new CategoryAdminDto
         {
-            Status = ResponseStatus.Success,
-            Message = AdminCategoryConstants.CategorySuccessfullyUpdated,
-            Data = new CategoryAdminDto
-            {
-                Id = category.Id,
-                Name = category.Name.Value,
-                Created = category.Created,
-                LastModified = category.LastModified,
-                ParentCategoryId = category.ParentCategoryId
-            }
-        };
+            Id = category.Id,
+            Name = category.Name.Value,
+            Created = category.Created,
+            LastModified = category.LastModified,
+            ParentCategoryId = category.ParentCategoryId
+        }, message: AdminCategoryConstants.CategorySuccessfullyUpdated);
     }
 
-    public async Task<ApiResponse<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<CategoryDetailsAdminDto>> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var category = await _categoryRepository.GetSingleAsync(
             filter: c => c.Id == id && !c.IsDeleted,
@@ -186,39 +145,23 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 LastModified = c.LastModified,
                 Products = c.Products
                     .OrderBy(p => p.Name.Value)
-                    .Select(p => new ProductRefDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name.Value
-                    })
+                    .Select(p => new ProductRefDto { Id = p.Id, Name = p.Name.Value })
                     .ToList(),
                 Children = c.Children
                     .OrderBy(c => c.Name.Value)
-                    .Select(c => new CategoryRefDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name.Value
-                    })
+                    .Select(c => new CategoryRefDto { Id = c.Id, Name = c.Name.Value })
                     .ToList()
             },
             cancellationToken: cancellationToken
         );
 
         if (category is null)
-            return new ApiResponse<CategoryDetailsAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminCategoryConstants.CategoryDoesNotExist
-            };
+            return Result<CategoryDetailsAdminDto>.NotFound(AdminCategoryConstants.CategoryDoesNotExist);
 
-        return new ApiResponse<CategoryDetailsAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = category
-        };
+        return Result<CategoryDetailsAdminDto>.Success(category);
     }
 
-    public async Task<ApiResponse<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<CategoryEditAdminDto>> GetCategoryForEditAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var (allCategories, _) = await _categoryRepository.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
@@ -238,38 +181,23 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         )).FirstOrDefault();
 
         if (entity == null)
-            return new ApiResponse<CategoryEditAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminCategoryConstants.CategoryDoesNotExist
-            };
+            return Result<CategoryEditAdminDto>.NotFound(AdminCategoryConstants.CategoryDoesNotExist);
 
-        var nodes = allCategories
-            .Select(c => new CategoryNode(c.Id, c.ParentCategoryId))
-            .ToList();
-
+        var nodes = allCategories.Select(c => new CategoryNode(c.Id, c.ParentCategoryId)).ToList();
         var excludedIds = GetDescendantIds(nodes, id);
 
         var validCategories = allCategories
             .Where(c => !excludedIds.Contains(c.Id) && c.ProductCount == 0)
             .ToList();
 
-        var validTree = BuildCategoryTree(validCategories);
-
-        var dto = new CategoryEditAdminDto
+        return Result<CategoryEditAdminDto>.Success(new CategoryEditAdminDto
         {
             Id = entity.Id,
             Name = entity.Name.Value,
             ParentCategoryId = entity.ParentCategoryId,
             Image = ImageDataUriBuilder.FromImage(entity.Image),
-            ValidParentTree = validTree
-        };
-
-        return new ApiResponse<CategoryEditAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Data = dto
-        };
+            ValidParentTree = BuildCategoryTree(validCategories)
+        });
     }
 
     private List<CategoryTreeDto> BuildCategoryTree(List<CategoryFlatDto> categories, Guid? parentId = null)
@@ -291,7 +219,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             }).ToList();
     }
 
-    public async Task<ApiResponse<List<CategoryTreeDto>>> GetCategoryTreeAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<List<CategoryTreeDto>>> GetCategoryTreeAsync(CancellationToken cancellationToken = default)
     {
         var (allCategories, _) = await _categoryRepository.QueryAsync(
             queryBuilder: q => q.Where(c => !c.IsDeleted),
@@ -305,24 +233,14 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             cancellationToken: cancellationToken
         );
 
-        var tree = BuildCategoryTree(allCategories);
-
-        return new ApiResponse<List<CategoryTreeDto>>
-        {
-            Data = tree,
-            Status = ResponseStatus.Success
-        };
+        return Result<List<CategoryTreeDto>>.Success(BuildCategoryTree(allCategories));
     }
 
-    public async Task<ApiResponse<CategoryAdminDto>> DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<CategoryAdminDto>> DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var exists = await _categoryRepository.ExistsAsync(c => !c.IsDeleted && c.Id == id, cancellationToken);
         if (!exists)
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.NotFound,
-                Message = AdminCategoryConstants.CategoryDoesNotExist
-            };
+            return Result<CategoryAdminDto>.NotFound(AdminCategoryConstants.CategoryDoesNotExist);
 
         var (allCategories, _) = await _categoryRepository.QueryAsync(
             queryBuilder: c => c.Where(c => !c.IsDeleted),
@@ -339,11 +257,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         );
 
         if (productIds.Any())
-            return new ApiResponse<CategoryAdminDto>
-            {
-                Status = ResponseStatus.Conflict,
-                Message = string.Format(AdminCategoryConstants.CategoryHasProducts, productIds.Count())
-            };
+            return Result<CategoryAdminDto>.Conflict(string.Format(AdminCategoryConstants.CategoryHasProducts, productIds.Count()));
 
         var (categoriesToDelete, _) = await _categoryRepository.QueryAsync(
             queryBuilder: c => c.Where(c => idsToDelete.Contains(c.Id)),
@@ -357,10 +271,6 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
 
         var pluralSuffix = categoriesToDelete.Count() == 1 ? "y" : "ies";
 
-        return new ApiResponse<CategoryAdminDto>
-        {
-            Status = ResponseStatus.Success,
-            Message = string.Format(AdminCategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count(), pluralSuffix),
-        };
+        return Result<CategoryAdminDto>.Success(null!, message: string.Format(AdminCategoryConstants.CategoriesDeletedMessage, categoriesToDelete.Count(), pluralSuffix));
     }
 }
