@@ -98,7 +98,7 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
                 };
             }
 
-            product.SubtrackQuantity(itemRequest.Quantity);
+            product.SubtractQuantity(itemRequest.Quantity);
 
             var orderItem = OrderItem.Create(product.Id, itemRequest.Quantity, product.UnitPrice.Value);
             order.AddOrderItem(orderItem);

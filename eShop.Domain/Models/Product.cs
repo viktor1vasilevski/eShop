@@ -59,7 +59,7 @@ public class Product : AuditableBaseEntity
         IsDeleted = false;
     }
 
-    public void SubtrackQuantity(int requestedQuantity)
+    public void SubtractQuantity(int requestedQuantity)
     {
         UnitQuantity = UnitQuantity.Subtract(requestedQuantity);
     }
