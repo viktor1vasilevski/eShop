@@ -10,7 +10,7 @@ using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Exceptions;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
-using eShop.Domain.ValueObject;
+using eShop.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Admin;

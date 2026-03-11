@@ -10,7 +10,7 @@ using eShop.Application.Responses.Admin.Category;
 using eShop.Application.Responses.Shared.Base;
 using eShop.Domain.Interfaces.EntityFramework;
 using eShop.Domain.Models;
-using eShop.Domain.ValueObject;
+using eShop.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using static eShop.Domain.Models.Category;
 

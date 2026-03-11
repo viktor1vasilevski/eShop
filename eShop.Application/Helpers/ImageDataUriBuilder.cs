@@ -1,4 +1,4 @@
-﻿using eShop.Domain.ValueObject;
+﻿using eShop.Domain.ValueObjects;
 
 namespace eShop.Application.Helpers;
 

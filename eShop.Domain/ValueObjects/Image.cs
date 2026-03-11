@@ -1,6 +1,6 @@
 ﻿using eShop.Domain.Exceptions;
 
-namespace eShop.Domain.ValueObject;
+namespace eShop.Domain.ValueObjects;
 
 public sealed class Image
 {
