@@ -15,11 +15,6 @@ namespace eShop.Infrastructure.Repositories.EntityFramework
             return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await _dbSet.ToListAsync(cancellationToken);
-        }
-
         public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
         {
             IQueryable<TEntity> query = _dbSet;
