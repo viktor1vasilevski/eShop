@@ -56,7 +56,6 @@ public class Product : AuditableBaseEntity
         }
 
         CategoryId = categoryId;
-        IsDeleted = false;
     }
 
     public void SubtractQuantity(int requestedQuantity)
