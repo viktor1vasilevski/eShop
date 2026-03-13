@@ -41,8 +41,8 @@ public class PasswordHasher : IPasswordService
 
     private static string Hash(string password, byte[] salt)
     {
-        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100_000, HashAlgorithmName.SHA256);
-        return Convert.ToBase64String(pbkdf2.GetBytes(32));
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 100_000, HashAlgorithmName.SHA256, 32);
+        return Convert.ToBase64String(hash);
     }
 
     private static byte[] GenerateSalt(int size = 16)

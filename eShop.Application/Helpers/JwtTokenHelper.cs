@@ -11,7 +11,8 @@ public static class JwtTokenHelper
 {
     public static string GenerateToken(IConfiguration configuration, User user)
     {
-        var secretKey = configuration["JwtSettings:Secret"];
+        var secretKey = configuration["JwtSettings:Secret"]
+            ?? throw new InvalidOperationException("JWT secret key 'JwtSettings:Secret' is not configured.");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
