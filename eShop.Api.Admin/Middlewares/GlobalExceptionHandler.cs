@@ -24,6 +24,12 @@ public class GlobalExceptionHandler(
                 message = ex.Message;
                 break;
 
+            case JwtConfigurationException ex:
+                _logger.LogCritical(ex, "JWT configuration is missing or invalid");
+                statusCode = StatusCodes.Status500InternalServerError;
+                message = "Authentication service is not configured correctly.";
+                break;
+
             case ExternalDependencyException ex:
                 _logger.LogError(ex, "External dependency failure");
                 statusCode = StatusCodes.Status503ServiceUnavailable;
