@@ -16,7 +16,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
 {
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> Get(CancellationToken cancellationToken)
+    public async Task<ActionResult> Get(CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -27,7 +27,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     }
 
     [HttpPost("merge")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> UpdateUserBasket([FromBody] UpdateBasketCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateUserBasket([FromBody] UpdateBasketCustomerRequest request, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -38,7 +38,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     }
 
     [HttpDelete("items")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> ClearItems(CancellationToken cancellationToken)
+    public async Task<ActionResult> ClearItems(CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -49,7 +49,7 @@ public class BasketController(ICustomerBasketService _customerBasketService) : B
     }
 
     [HttpDelete("items/{productId}")]
-    public async Task<ActionResult<ApiResponse<BasketCustomerDto>>> RemoveItem([FromRoute] Guid productId, CancellationToken cancellationToken)
+    public async Task<ActionResult> RemoveItem([FromRoute] Guid productId, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)

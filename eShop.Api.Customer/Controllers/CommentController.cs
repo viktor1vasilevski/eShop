@@ -15,7 +15,7 @@ public class CommentController(ICustomerCommentService _customerCommentService) 
 {
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<CommentCustomerDto>>>> Get([FromQuery] CommentCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult> Get([FromQuery] CommentCustomerRequest request, CancellationToken cancellationToken)
     {
         var response = await _customerCommentService.GetCommentsAsync(request, cancellationToken);
         return HandleResponse(response);
@@ -23,7 +23,7 @@ public class CommentController(ICustomerCommentService _customerCommentService) 
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Customer")]
-    public async Task<ActionResult<ApiResponse<CommentCustomerDto>>> Create([FromBody] CreateCommentCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult> Create([FromBody] CreateCommentCustomerRequest request, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)

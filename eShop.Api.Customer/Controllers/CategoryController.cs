@@ -1,6 +1,5 @@
-﻿using eShop.Application.Interfaces.Customer;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Responses.Admin.Category;
-using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.Api.Customer.Controllers;
@@ -10,9 +9,8 @@ namespace eShop.Api.Customer.Controllers;
 public class CategoryController(ICustomerCategoryService _customerCategoryService) : BaseController
 {
 
-
     [HttpGet("category-tree-for-menu")]
-    public async Task<ActionResult<ApiResponse<List<CategoryTreeDto>>>> GetCategoryTreeForMenu(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetCategoryTreeForMenu(CancellationToken cancellationToken)
     {
         var response = await _customerCategoryService.GetCategoryTreeForMenuAsync(cancellationToken);
         return HandleResponse(response);

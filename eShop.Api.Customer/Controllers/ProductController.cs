@@ -1,7 +1,6 @@
-﻿using eShop.Application.Interfaces.Customer;
+using eShop.Application.Interfaces.Customer;
 using eShop.Application.Requests.Customer.Product;
 using eShop.Application.Responses.Customer.Product;
-using eShop.Application.Responses.Shared.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShop.Api.Customer.Controllers;
@@ -11,16 +10,15 @@ namespace eShop.Api.Customer.Controllers;
 public class ProductController(ICustomerProductService _customerProductService) : BaseController
 {
 
-
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<ProductCustomerDto>>>> Get([FromQuery] ProductCustomerRequest request)
+    public async Task<ActionResult> Get([FromQuery] ProductCustomerRequest request)
     {
         var response = await _customerProductService.GetProductsAsync(request);
         return HandleResponse(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<ProductDetailsCustomerDto>>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         var response = await _customerProductService.GetProductByIdAsync(id, userId, cancellationToken);

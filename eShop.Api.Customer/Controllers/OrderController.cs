@@ -16,7 +16,7 @@ public class OrderController(ICustomerOrderService _customerOrderService) : Base
 {
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<OrderDetailsCustomerDto>>> PlaceOrder([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult> PlaceOrder([FromBody] PlaceOrderCustomerRequest request, CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
@@ -27,7 +27,7 @@ public class OrderController(ICustomerOrderService _customerOrderService) : Base
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<OrderDetailsCustomerDto>>>> GetOrdersForUser(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetOrdersForUser(CancellationToken cancellationToken)
     {
         var userId = GetUserId();
         if (userId is null)
