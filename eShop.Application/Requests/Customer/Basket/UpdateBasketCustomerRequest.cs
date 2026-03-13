@@ -4,5 +4,5 @@ namespace eShop.Application.Requests.Customer.Basket;
 
 public class UpdateBasketCustomerRequest
 {
-    public List<UpdateBasketItemCustomerDto> Items { get; set; }
+    public List<UpdateBasketItemCustomerDto> Items { get; set; } = [];
 }

@@ -5,8 +5,8 @@ namespace eShop.Domain.ValueObjects;
 
 public sealed class FullName : Primitives.ValueObject
 {
-    public string FirstName { get; }
-    public string LastName { get; }
+    public string FirstName { get; } = null!;
+    public string LastName { get; } = null!;
     private FullName() { }
     private FullName(string firstName, string lastName)
     {

@@ -4,8 +4,8 @@ namespace eShop.Domain.ValueObjects;
 
 public sealed class Image
 {
-    public byte[] Bytes { get; }
-    public string Type { get; }
+    public byte[] Bytes { get; } = null!;
+    public string Type { get; } = null!;
 
     private Image() { }
     private Image(byte[] bytes, string type)

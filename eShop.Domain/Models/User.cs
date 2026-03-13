@@ -9,12 +9,12 @@ namespace eShop.Domain.Models;
 
 public class User : AuditableBaseEntity
 {
-    public FullName FullName { get; private set; }
-    public Username Username { get; private set; }
+    public FullName FullName { get; private set; } = null!;
+    public Username Username { get; private set; } = null!;
     public Role Role { get; private set; }
-    public Email Email { get; private set; }
-    public string PasswordHash { get; private set; }
-    public string SaltKey { get; private set; }
+    public Email Email { get; private set; } = null!;
+    public string PasswordHash { get; private set; } = null!;
+    public string SaltKey { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 
 

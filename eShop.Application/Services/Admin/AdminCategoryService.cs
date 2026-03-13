@@ -24,7 +24,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
         var (categories, totalCount) = await _categoryRepository.QueryAsync(
             queryBuilder: q => q
                 .Where(x => !x.IsDeleted)
-                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.Value.ToLower().Contains(request.Name.ToLower())),
+                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.Value.ToLower().Contains(request.Name!.ToLower())),
             selector: c => new CategoryAdminDto
             {
                 Id = c.Id,
@@ -114,7 +114,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
                 return Result<CategoryAdminDto>.BadRequest(AdminCategoryConstants.CategoryCannotBeMovedUnderDescendant);
         }
 
-        category.Update(trimmedName, image, request.ParentCategoryId);
+        category.Update(trimmedName, image!, request.ParentCategoryId);
         _categoryRepository.Update(category);
         await _uow.SaveChangesAsync(cancellationToken);
 
@@ -139,7 +139,7 @@ public class AdminCategoryService(IEfUnitOfWork _uow, IEfRepository<Category> _c
             {
                 Id = c.Id,
                 Name = c.Name.Value,
-                Image = ImageDataUriBuilder.FromImage(c.Image),
+                Image = ImageDataUriBuilder.FromImage(c.Image)!,
                 ParentCategoryId = c.ParentCategoryId,
                 Created = c.Created,
                 LastModified = c.LastModified,

@@ -25,7 +25,7 @@ public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _
                 Rating = c.Rating,
                 Created = c.Created,
                 CommentText = c.Text.Value,
-                CreatedBy = c.User.Username.Value
+                CreatedBy = c.User!.Username.Value
             },
             orderBy: orderBy,
             skip: request.Skip,
@@ -41,11 +41,11 @@ public class CustomerCommentService(IEfUnitOfWork _uow, IEfRepository<Comment> _
         bool hasBought = await _orderRepository
             .QueryAsync(
                 q => q.Where(o => o.UserId == userId &&
-                                  o.OrderItems.Any(oi => oi.ProductId == request.ProductId)),
+                                  o.OrderItems!.Any(oi => oi.ProductId == request.ProductId)),
                 selector: o => o.Id,
                 cancellationToken: cancellationToken
             )
-            .ContinueWith(t => t.Result.Items.Any(), cancellationToken);
+            .ContinueWith(t => t.Result.Items!.Any(), cancellationToken);
 
         if (!hasBought)
             return Result<CommentCustomerDto>.NotFound(CustomerCommentConstants.CannotCommentWithoutPurchase);

@@ -5,7 +5,7 @@ namespace eShop.Domain.ValueObjects;
 
 public sealed class Email : Primitives.ValueObject
 {
-    public string Value { get; }
+    public string Value { get; } = null!;
     private Email() { }
 
     private Email(string value)

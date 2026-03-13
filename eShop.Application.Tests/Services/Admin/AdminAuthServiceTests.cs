@@ -22,7 +22,6 @@ public class AdminAuthServiceTests
     public AdminAuthServiceTests()
     {
         _sut = new AdminAuthService(
-            _uowMock.Object,
             _userRepoMock.Object,
             _passwordServiceMock.Object,
             _configMock.Object);

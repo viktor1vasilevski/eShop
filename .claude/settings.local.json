@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"E:\\\\repos\\\\eShop\\\\eShop.Infrastructure.Tests\" -type f -name \"*\" 2>/dev/null | head -20)",
+      "Bash(ls -la \"E:\\\\repos\\\\eShop\\\\eShop.Infrastructure.Tests\\\\\" 2>/dev/null | grep -v \"^d\" | grep -v \"^total\")",
+      "Bash(cd \"E:/repos/eShop\" && dotnet build 2>&1 | grep \": warning\" | sed 's/.*: warning //' | cut -d: -f1 | sort | uniq -c | sort -rn)",
+      "Bash(cd \"E:/repos/eShop\" && dotnet build 2>&1 | grep \"warning CS\" | cut -c1-120)",
+      "Bash(dotnet build:*)",
+      "Read(//tmp/**)",
+      "Bash(cd \"E:/repos/eShop\" && dotnet build 2>&1 | tee /tmp/build.txt | tail -5 && cat /tmp/build.txt | grep -i \"warn\" | head -50)"
+    ]
+  }
+}

@@ -12,7 +12,7 @@ public static class JwtServiceCollectionExtension
     {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]));
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"] ?? throw new InvalidOperationException("JWT secret key 'JwtSettings:Secret' is not configured.")));
 
         var tokenValidationParameters = new TokenValidationParameters
         {

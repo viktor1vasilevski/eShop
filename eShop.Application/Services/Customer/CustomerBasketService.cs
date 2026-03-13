@@ -18,7 +18,7 @@ public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
-            includeBuilder: q => q.Include(u => u.Basket).ThenInclude(b => b.BasketItems),
+            includeBuilder: q => q.Include(u => u.Basket!).ThenInclude(b => b.BasketItems!),
             selector: x => x,
             asNoTracking: false,
             cancellationToken: cancellationToken
@@ -39,17 +39,17 @@ public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
             filter: b => b.UserId == userId,
             selector: b => new BasketCustomerDto
             {
-                Items = b.BasketItems.Select(i => new BasketItemCustomerDto
+                Items = b.BasketItems!.Select(i => new BasketItemCustomerDto
                 {
                     ProductId = i.ProductId,
-                    ProductName = i.Product.Name.Value,
+                    ProductName = i.Product!.Name.Value,
                     Quantity = i.UnitQuantity.Value,
-                    Price = i.Product.UnitPrice.Value,
-                    UnitQuantity = i.Product.UnitQuantity.Value,
-                    Image = ImageDataUriBuilder.FromImage(i.Product.Image)
+                    Price = i.Product!.UnitPrice.Value,
+                    UnitQuantity = i.Product!.UnitQuantity.Value,
+                    Image = ImageDataUriBuilder.FromImage(i.Product!.Image)
                 }).ToList()
             },
-            includeBuilder: q => q.Include(b => b.BasketItems).ThenInclude(i => i.Product),
+            includeBuilder: q => q.Include(b => b.BasketItems!).ThenInclude(i => i.Product),
             cancellationToken: cancellationToken
         );
 
@@ -62,7 +62,7 @@ public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
     {
         var user = await _userRepository.GetSingleAsync(
             filter: u => u.Id == userId,
-            includeBuilder: q => q.Include(u => u.Basket).ThenInclude(b => b.BasketItems),
+            includeBuilder: q => q.Include(u => u.Basket!).ThenInclude(b => b.BasketItems!),
             selector: u => u,
             cancellationToken: cancellationToken
         );
@@ -74,7 +74,7 @@ public class CustomerBasketService(IEfUnitOfWork _uow, IEfRepository<Basket> _ba
         if (basket is null)
             return Result<BasketCustomerDto>.NotFound(CustomerBasketConstants.BasketNotFoundForUser);
 
-        var itemToRemove = basket.BasketItems.FirstOrDefault(x => x.ProductId == productId);
+        var itemToRemove = basket.BasketItems!.FirstOrDefault(x => x.ProductId == productId);
         if (itemToRemove is null)
             return Result<BasketCustomerDto>.NotFound(CustomerBasketItemConstants.BasketItemNotFound);
 

@@ -53,7 +53,7 @@ public class AppDbContextAuditTests : IDisposable
     [Fact]
     public async Task SaveChangesAsync_NoHttpContext_SetsCreatedByToSystem()
     {
-        _httpContextAccessorMock.Setup(a => a.HttpContext).Returns((HttpContext?)null);
+        _httpContextAccessorMock.Setup(a => a.HttpContext).Returns(value: null!);
         var user = CreateUser("alice");
 
         await _context.Users.AddAsync(user);

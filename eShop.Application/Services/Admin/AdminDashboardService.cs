@@ -6,7 +6,7 @@ using eShop.Domain.Models;
 
 namespace eShop.Application.Services.Admin;
 
-public class AdminDashboardService(IEfUnitOfWork _uow, IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository) : IAdminDashboardService
+public class AdminDashboardService(IEfRepository<Order> _orderRepository, IEfRepository<User> _userRepository) : IAdminDashboardService
 {
     public async Task<Result<OrdersTodayDto>> GetOrdersTodayAsync(CancellationToken cancellationToken = default)
     {

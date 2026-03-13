@@ -12,8 +12,8 @@ public class OrderItem : AuditableBaseEntity
     public Guid ProductId { get; private set; }
     public virtual Product? Product { get; private set; }
 
-    public UnitQuantity UnitQuantity { get; private set; }
-    public UnitPrice UnitPrice { get; private set; }
+    public UnitQuantity UnitQuantity { get; private set; } = null!;
+    public UnitPrice UnitPrice { get; private set; } = null!;
 
 
     private OrderItem() { }

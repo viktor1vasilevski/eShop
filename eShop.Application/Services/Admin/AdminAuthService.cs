@@ -13,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace eShop.Application.Services.Admin;
 
-public class AdminAuthService(IEfUnitOfWork _uow, IEfRepository<User> _userRepository,
+public class AdminAuthService(IEfRepository<User> _userRepository,
     IPasswordService _passwordHasher, IConfiguration _configuration) : IAdminAuthService
 {
     public async Task<Result<LoginDto>> LoginAsync(UserLoginRequest request, CancellationToken cancellationToken = default)

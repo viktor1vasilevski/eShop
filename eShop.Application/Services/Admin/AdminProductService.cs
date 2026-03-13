@@ -23,7 +23,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
         var (products, totalCount) = await _productRepository.QueryAsync(
             queryBuilder: q => q
                 .Where(x => !x.IsDeleted)
-                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.Value.ToLower().Contains(request.Name.ToLower())),
+                .WhereIf(!string.IsNullOrEmpty(request.Name), x => x.Name.Value.ToLower().Contains(request.Name!.ToLower())),
             selector: x => new ProductAdminDto
             {
                 Id = x.Id,
@@ -31,7 +31,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 Description = x.Description.Value,
                 UnitPrice = x.UnitPrice.Value,
                 UnitQuantity = x.UnitQuantity.Value,
-                Image = ImageDataUriBuilder.FromImage(x.Image),
+                Image = ImageDataUriBuilder.FromImage(x.Image)!,
                 Category = x.Category.Name.Value,
                 Created = x.Created,
                 LastModified = x.LastModified
@@ -75,7 +75,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             Description = product.Description.Value,
             UnitPrice = product.UnitPrice.Value,
             UnitQuantity = product.UnitQuantity.Value,
-            Image = ImageDataUriBuilder.FromImage(product.Image),
+            Image = ImageDataUriBuilder.FromImage(product.Image)!,
             Categories = pathItems.Select(p => new CategoryRefDto { Id = p.Id, Name = p.Name }).ToList(),
             Created = product.Created,
             LastModified = product.LastModified,
@@ -85,7 +85,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
                 {
                     Id = c.Id,
                     UserId = c.UserId,
-                    Username = c.User.Username.Value,
+                    Username = c.User!.Username.Value,
                     CommentText = c.Text.Value,
                     Rating = c.Rating,
                     Created = c.Created
@@ -114,7 +114,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             Description = product.Description.Value,
             UnitPrice = product.UnitPrice.Value,
             UnitQuantity = product.UnitQuantity.Value,
-            Image = ImageDataUriBuilder.FromImage(product.Image),
+            Image = ImageDataUriBuilder.FromImage(product.Image)!,
             CategoryId = product.CategoryId
         });
     }
@@ -227,7 +227,7 @@ public class AdminProductService(IEfUnitOfWork _uow, IEfRepository<Category> _ca
             image = Image.FromBytes(bytes, type);
         }
 
-        product.Update(request.Name.Trim(), request.Description?.Trim() ?? string.Empty, request.Price, request.Quantity, request.CategoryId, image);
+        product.Update(request.Name.Trim(), request.Description?.Trim() ?? string.Empty, request.Price, request.Quantity, request.CategoryId, image!);
 
         _productRepository.Update(product);
         await _uow.SaveChangesAsync(cancellationToken);

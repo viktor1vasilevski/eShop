@@ -21,20 +21,20 @@ public class CustomerOrderService(IEfUnitOfWork _uow, IEfRepository<Order> _orde
         var (query, totalCount) = await _orderRepository.QueryAsync(
             queryBuilder: x => x.Where(a => a.UserId == userId),
             orderBy: x => x.OrderByDescending(x => x.Created),
-            includeBuilder: x => x.Include(oi => oi.OrderItems).ThenInclude(p => p.Product),
+            includeBuilder: x => x.Include(oi => oi.OrderItems!).ThenInclude(p => p.Product),
             selector: x => new OrderDetailsCustomerDto
             {
-                FirstName = x.User.FullName.FirstName,
-                LastName = x.User.FullName.LastName,
-                Username = x.User.Username.Value,
+                FirstName = x.User!.FullName.FirstName,
+                LastName = x.User!.FullName.LastName,
+                Username = x.User!.Username.Value,
                 TotalAmount = x.TotalAmount,
                 OrderCreatedOn = x.Created,
-                Items = x.OrderItems.Select(item => new OrderItemCustomerResponseDto
+                Items = x.OrderItems!.Select(item => new OrderItemCustomerResponseDto
                 {
                     ProductName = item.Product!.Name.Value,
                     Quantity = item.UnitQuantity.Value,
                     UnitPrice = item.UnitPrice.Value,
-                    Image = ImageDataUriBuilder.FromImage(item.Product.Image)
+                    Image = ImageDataUriBuilder.FromImage(item.Product.Image)!
                 }).ToList()
             });
 

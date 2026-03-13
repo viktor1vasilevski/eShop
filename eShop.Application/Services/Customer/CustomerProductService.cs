@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eShop.Application.Services.Customer;
 
-public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _productRepository,
+public class CustomerProductService(IEfRepository<Product> _productRepository,
     IEfRepository<Category> _categoryRepository, IEfRepository<Order> _orderRepository) : ICustomerProductService
 {
     public async Task<Result<List<ProductCustomerDto>>> GetProductsAsync(ProductCustomerRequest request, CancellationToken cancellationToken = default)
@@ -24,7 +24,7 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
                 Id = x.Id,
                 Name = x.Name.Value,
                 Price = x.UnitPrice.Value,
-                Image = ImageDataUriBuilder.FromImage(x.Image),
+                Image = ImageDataUriBuilder.FromImage(x.Image)!,
                 Category = x.Category.Name.Value
             },
             includeBuilder: q => q.Include(x => x.Category),
@@ -82,7 +82,7 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
         if (userId.HasValue)
         {
             canComment = await _orderRepository.ExistsAsync(
-                o => o.UserId == userId.Value && o.OrderItems.Any(oi => oi.ProductId == productId),
+                o => o.UserId == userId.Value && o.OrderItems!.Any(oi => oi.ProductId == productId),
                 cancellationToken);
         }
 
@@ -93,8 +93,8 @@ public class CustomerProductService(IEfUnitOfWork _uow, IEfRepository<Product> _
             Description = product.Description.Value,
             Price = product.UnitPrice.Value,
             UnitQuantity = product.UnitQuantity.Value,
-            Image = ImageDataUriBuilder.FromImage(product.Image),
-            Category = product.Category?.Name.Value,
+            Image = ImageDataUriBuilder.FromImage(product.Image)!,
+            Category = product.Category?.Name.Value!,
             CanComment = canComment
         });
     }

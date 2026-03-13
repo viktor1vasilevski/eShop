@@ -16,7 +16,7 @@ public class AdminDashboardServiceTests
 
     public AdminDashboardServiceTests()
     {
-        _sut = new AdminDashboardService(_uowMock.Object, _orderRepoMock.Object, _userRepoMock.Object);
+        _sut = new AdminDashboardService(_orderRepoMock.Object, _userRepoMock.Object);
     }
 
     [Fact]

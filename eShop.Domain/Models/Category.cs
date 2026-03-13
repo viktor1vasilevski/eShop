@@ -6,7 +6,7 @@ namespace eShop.Domain.Models;
 
 public class Category : AuditableBaseEntity
 {
-    public CategoryName Name { get; private set; }
+    public CategoryName Name { get; private set; } = null!;
     public Image Image { get; private set; } = null!;
     public bool IsDeleted { get; private set; }
 

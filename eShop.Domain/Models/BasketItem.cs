@@ -12,7 +12,7 @@ public class BasketItem : AuditableBaseEntity
     public Guid ProductId { get; private set; }
     public virtual Product? Product { get; private set; }
 
-    public UnitQuantity UnitQuantity { get; private set; }
+    public UnitQuantity UnitQuantity { get; private set; } = null!;
 
 
     private BasketItem() { }

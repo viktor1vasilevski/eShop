@@ -4,7 +4,7 @@ namespace eShop.Domain.ValueObjects;
 
 public sealed class ProductName : Primitives.ValueObject
 {
-    public string Value { get; }
+    public string Value { get; } = null!;
     private ProductName() { }
     private ProductName(string value)
     {
