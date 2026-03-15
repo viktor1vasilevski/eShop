@@ -1,5 +1,7 @@
 # eShop
 
+**Learning Project** — This project is built for learning purposes. Any developer is welcome to clone it, explore the code, experiment, and build on top of it.
+
 A full-featured e-commerce backend built with **.NET 10** and **Clean Architecture**. The solution exposes two separate REST APIs — one for admin management and one for customer-facing operations — orchestrated with **.NET Aspire**.
 
 ---
