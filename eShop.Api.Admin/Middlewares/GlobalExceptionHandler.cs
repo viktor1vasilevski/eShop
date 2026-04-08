@@ -19,25 +19,25 @@ public class GlobalExceptionHandler(
         switch (exception)
         {
             case DomainValidationException ex:
-                _logger.LogWarning(ex, "Domain validation failed: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Domain validation failed on {Method} {Path}", httpContext.Request.Method, httpContext.Request.Path);
                 statusCode = StatusCodes.Status400BadRequest;
                 message = ex.Message;
                 break;
 
             case JwtConfigurationException ex:
-                _logger.LogCritical(ex, "JWT configuration is missing or invalid");
+                _logger.LogCritical(ex, "JWT configuration is missing or invalid on {Method} {Path}", httpContext.Request.Method, httpContext.Request.Path);
                 statusCode = StatusCodes.Status500InternalServerError;
                 message = "Authentication service is not configured correctly.";
                 break;
 
             case ExternalDependencyException ex:
-                _logger.LogError(ex, "External dependency failure");
+                _logger.LogError(ex, "External dependency failure on {Method} {Path}: {ExternalMessage}", httpContext.Request.Method, httpContext.Request.Path, ex.Message);
                 statusCode = StatusCodes.Status503ServiceUnavailable;
                 message = "Service temporarily unavailable.";
                 break;
 
             default:
-                _logger.LogError(exception, "Unhandled exception");
+                _logger.LogError(exception, "Unhandled exception on {Method} {Path}", httpContext.Request.Method, httpContext.Request.Path);
                 statusCode = StatusCodes.Status500InternalServerError;
                 message = "An unexpected error occurred.";
                 break;

@@ -24,9 +24,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerWithAuth();
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(policy => policy.AddPolicy("MyPolicy", builder =>
 {
-    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    builder.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
 }));
 
 builder.Services.AddDbContext<AppDbContext>(options =>

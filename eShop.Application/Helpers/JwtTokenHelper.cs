@@ -24,9 +24,11 @@ public static class JwtTokenHelper
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
+        var expirationMinutes = int.Parse(configuration["JwtSettings:ExpirationMinutes"] ?? "60");
+
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddDays(22),
+            expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
             signingCredentials: creds
         );
 
